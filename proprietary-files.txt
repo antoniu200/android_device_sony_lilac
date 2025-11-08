@@ -18,6 +18,8 @@ lib64/libaptX_encoder.so|df1c89d7af1bb35808d5fe3496b04ba066c10cbc
 -app/CameraExtensionPermission-release/CameraExtensionPermission-release.apk
 -app/ImageProcessorPermission-release/ImageProcessorPermission-release.apk
 etc/default-permissions/com.sonyericsson.android.camera.xml|705f1fb1ab3734b84f8df0a8d7b37ef71f0c0e43
+etc/permissions/com.sonymobile.album.internal.xml
+etc/permissions/com.sonymobile.album.xml
 etc/permissions/com.sonymobile.camera.addon.api.xml|fa61a0d5420bfd009a6583f59f7ebc89f5612c78
 etc/permissions/com.sonymobile.imageprocessor.bypasscamera.api.xml|9e4fa7a11d5b9ce708194e6deeee5efac24cbe6b
 etc/permissions/privapp-permissions-com.sonyericsson.android.addoncamera.artfilter.xml|7c2870e7221688e6ad36c702517ce6f6ae3fba1c
@@ -27,12 +29,10 @@ etc/permissions/privapp-permissions-com.sonymobile.android.addoncamera.soundphot
 etc/permissions/privapp-permissions-com.sonymobile.moviecreator.xml|c81ec4f7e80c1780aa11ff12777350719a03d7c0
 -priv-app/ArtFilterCamera-xhdpi-release/ArtFilterCamera-xhdpi-release.apk
 -priv-app/CameraCommon/CameraCommon.apk
--priv-app/CameraPanorama-release/CameraPanorama-release.apk|211b4cf5222f52dc5fe70ec8ddce1a4d0ff5258b
+-priv-app/CameraPanorama-release/CameraPanorama-release.apk|9cee65fb9073b8f550b90a342987e6e259a34b8f
 -priv-app/SemcCameraUI-xxhdpi-release/SemcCameraUI-xxhdpi-release.apk|863b862703e208c8d39c5c84bc40f075577b3430
 -priv-app/SomcMovieCreator-release/SomcMovieCreator-release.apk
--priv-app/SoundPhotoCamera-xhdpi-release/SoundPhotoCamera-xhdpi-release.apk
-framework/com.sonymobile.album.internal.jar
-framework/com.sonymobile.album.jar
+-priv-app/SoundPhotoCamera-xhdpi-release/SoundPhotoCamera-xhdpi-release.apk|d03c27d0ec2ba0ed50831c971a1d05d51a468d95
 framework/com.sonymobile.camera.addon_impl.jar:framework/com.sonymobile.camera.addon.api.jar
 framework/com.sonymobile.imageprocessor.bypasscamera_impl.jar:framework/com.sonymobile.imageprocessor.bypasscamera.api.jar
 
@@ -127,9 +127,9 @@ system_ext/lib64/vendor.qti.latency@2.0.so|52058b376a37c99bfe67da8e83ab36a1e7297
 system_ext/lib64/vendor.qti.latency@2.1.so|18bffeadefcbbb5f3e1b512b0cee4cb39af27b72
 
 # CustomizationSelector
-etc/permissions/com.sonymobile.miscta.api.xml|76d5193656d3011a43c95d461c061b1e1e61174b
+etc/permissions/com.sonymobile.miscta.api.xml|76d5193656d3011a43c95d461c061b1e1e61174b # Patched to align with Android 12's naming requirements
 etc/public.libraries-sony.txt
-framework/com.sonymobile.miscta_impl.jar:framework/com.sonymobile.miscta.api.jar
+framework/com.sonymobile.miscta_impl.jar:framework/com.sonymobile.miscta.api.jar # Align with Android 12's naming requirements
 lib/libMiscTAApi.sony.so
 lib/libMiscTaWrapper.so
 lib64/libMiscTAApi.sony.so
