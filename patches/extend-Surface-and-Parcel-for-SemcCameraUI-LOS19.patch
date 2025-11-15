@@ -2,7 +2,7 @@
 From 21ae510a8d2d8240d729f66f82e467f45a792659 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Sat, 27 Sep 2025 01:39:22 +0300
-Subject: [PATCH] SemcCameraUI test
+Subject: [PATCH 1/3] SemcCameraUI test
 
 ---
  libs/binder/Parcel.cpp              | 10 ++++++++++
@@ -105,3 +105,61 @@ index e5403512a9d..cd92a4f392e 100644
       * that the Surface was created from. This handle can be used to create a
       * child surface without using the IGBP to identify the layer. This is used
       * for surfaces created by the BlastBufferQueue whose IGBP is created on the
+
+From 0eb09d313b9b58914889f892806ff3b3c3e7ceb9 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Sat, 15 Nov 2025 18:21:20 +0200
+Subject: [PATCH 2/3] Extend Surface for SemcCameraUI | Update Surface.h
+
+---
+ libs/gui/include/gui/Surface.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libs/gui/include/gui/Surface.h b/libs/gui/include/gui/Surface.h
+index cd92a4f392e..c0f76b9093a 100644
+--- a/libs/gui/include/gui/Surface.h
++++ b/libs/gui/include/gui/Surface.h
+@@ -85,7 +85,7 @@ class Surface
+      * controlled by the application. This flag is used at connect time.
+      */
+     explicit Surface(const sp<IGraphicBufferProducer>& bufferProducer,
+-            bool controlledByApp);
++            bool controlledByApp = false);
+      /*
+      * Optionally pass in the SurfaceControlHandle to store a weak reference to the layer
+      * that the Surface was created from. This handle can be used to create a
+@@ -93,8 +93,8 @@ class Surface
+      * for surfaces created by the BlastBufferQueue whose IGBP is created on the
+      * client and cannot be verified in SF.
+      */
+-    explicit Surface(const sp<IGraphicBufferProducer>& bufferProducer, bool controlledByApp = false,
+-                     const sp<IBinder>& surfaceControlHandle = nullptr);
++    explicit Surface(const sp<IGraphicBufferProducer>& bufferProducer, bool controlledByApp,
++                     const sp<IBinder>& surfaceControlHandle);
+ 
+     /* getIGraphicBufferProducer() returns the IGraphicBufferProducer this
+      * Surface was created with. Usually it's an error to use the
+
+From 7f2f4b037ab4086713396eec26867aadce457ccf Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Sat, 15 Nov 2025 18:29:46 +0200
+Subject: [PATCH 3/3] Extend Surface for SemcCameraUI | Reupload Parcel
+ extension
+
+---
+ libs/binder/libbinder.arm64.map | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libs/binder/libbinder.arm64.map b/libs/binder/libbinder.arm64.map
+index ebbdcba7609..cbc3bf9ac2f 100644
+--- a/libs/binder/libbinder.arm64.map
++++ b/libs/binder/libbinder.arm64.map
+@@ -869,7 +869,7 @@ LIBBINDER {
+     _ZNK7android6Parcel10ipcObjectsEv;
+     _ZNK7android6Parcel10readDoubleEPd;
+     _ZNK7android6Parcel10readDoubleEv;
+-    _ZNK7android6Parcel10readIntPtrEPi;
++    _ZNK7android6Parcel10readIntPtrEPl;
+     _ZNK7android6Parcel10readIntPtrEv;
+     _ZNK7android6Parcel10readObjectEb;
+     _ZNK7android6Parcel10readUint32EPj;
