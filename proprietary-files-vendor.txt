@@ -710,9 +710,6 @@ vendor/lib64/libbccQTI.so
 vendor/lib64/librs_adreno.so
 vendor/lib64/librs_adreno_sha1.so
 
-# FFU
-sbin/ffu:vendor/bin/ffu
-
 # FINGERPRINT
 vendor/bin/hw/fpc_fingerprint@2.1_HIDL-service
 vendor/etc/init/fpc_fingerprint@2.1_HIDL-service.rc
