@@ -127,9 +127,9 @@ system_ext/lib64/vendor.qti.latency@2.0.so|52058b376a37c99bfe67da8e83ab36a1e7297
 system_ext/lib64/vendor.qti.latency@2.1.so|18bffeadefcbbb5f3e1b512b0cee4cb39af27b72
 
 # CustomizationSelector
-etc/permissions/com.sonymobile.miscta.api.xml|76d5193656d3011a43c95d461c061b1e1e61174b # Patched to align with Android 12's naming requirements
+etc/permissions/com.sonymobile.miscta.api.xml|76d5193656d3011a43c95d461c061b1e1e61174b
 etc/public.libraries-sony.txt
-framework/com.sonymobile.miscta_impl.jar:framework/com.sonymobile.miscta.api.jar # Align with Android 12's naming requirements
+framework/com.sonymobile.miscta_impl.jar:framework/com.sonymobile.miscta.api.jar
 lib/libMiscTAApi.sony.so
 lib/libMiscTaWrapper.so
 lib64/libMiscTAApi.sony.so
