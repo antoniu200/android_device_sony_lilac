@@ -8,6 +8,13 @@ DEVICE_PATH := device/sony/lilac
 # Soong
 PRODUCT_SOONG_NAMESPACES += \
     $(DEVICE_PATH)
+    
+### BOOTANIMATION
+# vendor/lineage/config/common_full_phone.mk
+TARGET_SCREEN_HEIGHT := 1280
+TARGET_SCREEN_WIDTH := 720
+# vendor/lineage/bootanimation/Android.mk
+TARGET_BOOTANIMATION := $(DEVICE_PATH)/bootanimation/bootanimation.zip
 
 # Device uses high-density artwork where available
 PRODUCT_AAPT_CONFIG := normal

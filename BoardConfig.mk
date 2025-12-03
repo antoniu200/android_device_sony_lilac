@@ -25,7 +25,11 @@ PRODUCT_PLATFORM := yoshino
 TARGET_BOOTLOADER_BOARD_NAME := G8441
 
 ### KERNEL
+ifeq ($(TARGET_PRODUCT),lineage_lilac_dcm)
+TARGET_KERNEL_CONFIG := lineage-msm8998-yoshino-lilac_dcm_defconfig
+else
 TARGET_KERNEL_CONFIG := lineage-msm8998-yoshino-lilac_defconfig
+endif
 
 BOARD_KERNEL_CMDLINE += androidboot.hardware=lilac
 
