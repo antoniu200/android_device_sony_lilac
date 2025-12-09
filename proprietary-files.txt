@@ -540,7 +540,7 @@ system_ext/lib64/vendor.qti.ims.callinfo@1.0.so|9e7769b7dd467da8a31db31fcee694da
 system_ext/lib64/vendor.qti.ims.factory@1.0.so|1421a7d0390c9ecd71c60fac026ca3499dddd913
 system_ext/lib64/vendor.qti.ims.factory@1.1.so|c6c1813b2c6bb68c8c38a6b5ddf320b418bc0da9
 system_ext/lib64/vendor.qti.imsrtpservice@3.0.so|4cf9e97f526c6278c5e2136e00d1fb800fb941aa
-system_ext/priv-app/ims/ims.apk|bed959752f39386d6a7045f8cf96226a14e31dfd
+system_ext/priv-app/ims/ims.apk|2126515068063db5e7996cde5b7dadec50140d09
 
 # QTI_RADIO - from SLD_sprout - RKQ1.210607.001-00WW_3_710
 system_ext/lib64/vendor.qti.hardware.radio.am@1.0.so|bbcfa6105ab4e496bcb3a7c008b2c52dd918c687
