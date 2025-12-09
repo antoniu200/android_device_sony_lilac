@@ -210,6 +210,7 @@ vendor/lib/libbtnv.so
 vendor/lib64/libbtnv.so
 
 # CAMERA
+vendor/bin/hw/vendor.semc.hardware.light@1.0-service
 vendor/bin/hw/vendor.somc.hardware.camera.provider@1.0-service
 vendor/camera/CHI08BS0/color_ctrl.dat
 vendor/camera/CHI08BS0/dataflow.dat
@@ -333,6 +334,7 @@ vendor/camera/snapshot.dat
 vendor/camera/streaming.dat
 vendor/camera/supported.dat
 vendor/camera/version.dat
+vendor/etc/init/vendor.semc.hardware.light@1.0-service.rc
 vendor/etc/init/vendor.somc.hardware.camera.provider@1.0-service.rc
 vendor/etc/flashled_calc_parameters.cfg
 vendor/firmware/cpp_firmware_v1_10_0.fw
