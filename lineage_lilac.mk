@@ -20,6 +20,16 @@ PRODUCT_MANUFACTURER := Sony
 
 PRODUCT_GMS_CLIENTID_BASE := android-sony-mobile
 
+# Default to testkey
+PRODUCT_DEFAULT_DEV_CERTIFICATE := build/target/product/security/testkey
+
+# If a releasekey is present in the tree, prefer that
+releasekey_pk8 := build/target/product/security/releasekey.pk8
+
+ifeq ($(wildcard $(releasekey_pk8)), $(releasekey_pk8))
+    PRODUCT_DEFAULT_DEV_CERTIFICATE := build/target/product/security/releasekey
+endif
+
 ifneq ($(LINEAGE_DEV_CERTIFICATE),)
     PRODUCT_DEFAULT_DEV_CERTIFICATE := $(LINEAGE_DEV_CERTIFICATE)
 endif
