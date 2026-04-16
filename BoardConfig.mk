@@ -55,3 +55,6 @@ TARGET_SCREEN_DENSITY := 300
 # Add device-specific ones
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
+
+# releasetools.py
+TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
