@@ -22,6 +22,7 @@ DEVICE_PATH := device/sony/lilac
 PRODUCT_PLATFORM := yoshino
 
 ### ANDROID VERIFIED BOOT
+ifneq ($(wildcard build/target/product/security/avb.pem),)
 BOARD_AVB_ENABLE := true
 BOARD_AVB_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_KEY_PATH := build/target/product/security/avb.pem
@@ -29,6 +30,10 @@ BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_RECOVERY_KEY_PATH := build/target/product/security/avb.pem
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
+else
+BOARD_AVB_ENABLE := false
+BOARD_BUILD_DISABLED_VBMETAIMAGE := true
+endif
 
 ### BOOTLOADER
 TARGET_BOOTLOADER_BOARD_NAME := G8441
