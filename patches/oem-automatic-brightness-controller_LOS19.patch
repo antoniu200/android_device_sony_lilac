@@ -1,0 +1,116 @@
+# PWD: frameworks/base
+From 449fead3135975f8d51be95fdcd37c58ce70c366 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 21 Aug 2026 18:45:25 +0300
+Subject: [PATCH] Backport Sony Proximity Brightness Filter
+
+Change-Id: Iefdaccf72a693efb08c1ed62fd14d4debe846d40
+---
+ .../AutomaticBrightnessController.java        | 51 ++++++++++++++++++-
+ 1 file changed, 49 insertions(+), 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/display/AutomaticBrightnessController.java b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+index 9922d939ad68e..f02d8a4f80990 100644
+--- a/services/core/java/com/android/server/display/AutomaticBrightnessController.java
++++ b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+@@ -72,10 +72,10 @@ class AutomaticBrightnessController {
+ 
+     // Length of the ambient light horizon used to calculate the long term estimate of ambient
+     // light.
+-    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
++    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 1000;
+ 
+     // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+-    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
++    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 1000;
+ 
+     // Callbacks for requesting updates to the display's power state
+     private final Callbacks mCallbacks;
+@@ -85,6 +85,19 @@ class AutomaticBrightnessController {
+ 
+     // The light sensor, or null if not available or needed.
+     private final Sensor mLightSensor;
++    
++    // Maximum distance, in centimeters, below which the proximity sensor is considered covered.
++    private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
++    
++    // The proximity sensor, or null if not available or needed.
++    private final Sensor mProximitySensor;
++    
++    // Maximum distance, in centimeters, below which the proximity sensor is considered covered.
++    // Limited by TYPICAL_PROXIMITY_THRESHOLD or the sensor's maximum range, whichever is smaller.
++    private final float mProximityThreshold;
++    
++    // True if sensor is currently considered covered.
++    private boolean mIsNear;
+ 
+     // The mapper to translate ambient lux to screen brightness in the range [0, 1.0].
+     private final BrightnessMappingStrategy mBrightnessMapper;
+@@ -246,6 +259,16 @@ class AutomaticBrightnessController {
+         mContext = context;
+         mCallbacks = callbacks;
+         mSensorManager = sensorManager;
++        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
++        
++        if (mProximitySensor != null) {
++            mProximityThreshold = Math.min(
++                    mProximitySensor.getMaximumRange(),
++                    TYPICAL_PROXIMITY_THRESHOLD);
++        } else {
++            mProximityThreshold = TYPICAL_PROXIMITY_THRESHOLD;
++        }
++        
+         mBrightnessMapper = mapper;
+         mScreenBrightnessRangeMinimum = brightnessMin;
+         mScreenBrightnessRangeMaximum = brightnessMax;
+@@ -506,6 +529,8 @@ private boolean setLightSensorEnabled(boolean enable) {
+                 registerForegroundAppUpdater();
+                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
+                         mCurrentLightSensorRate * 1000, mHandler);
++                mSensorManager.registerListener(mProximitySensorListener, mProximitySensor,
++                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+                 return true;
+             }
+         } else if (mLightSensorEnabled) {
+@@ -518,6 +543,9 @@ private boolean setLightSensorEnabled(boolean enable) {
+             mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
+             unregisterForegroundAppUpdater();
+             mSensorManager.unregisterListener(mLightSensorListener);
++            
++            mIsNear = false;
++            mSensorManager.unregisterListener(mProximitySensorListener);
+         }
+         return false;
+     }
+@@ -962,11 +990,30 @@ public void handleMessage(Message msg) {
+             }
+         }
+     }
++    
++    private final SensorEventListener mProximitySensorListener = new SensorEventListener() {
++        @Override
++        public void onSensorChanged(SensorEvent event) {
++            if (mLightSensorEnabled) {
++                final float distance = event.values[0];
++                mIsNear = distance >= 0.0f && distance < mProximityThreshold;
++            }
++        }
++
++        @Override
++        public void onAccuracyChanged(Sensor sensor, int accuracy) {
++            // Not used.
++        }
++    };
+ 
+     private final SensorEventListener mLightSensorListener = new SensorEventListener() {
+         @Override
+         public void onSensorChanged(SensorEvent event) {
+             if (mLightSensorEnabled) {
++                if (mAmbientLuxValid && mIsNear) {
++                    return;
++                }
++            
+                 final long time = SystemClock.uptimeMillis();
+                 final float lux = event.values[0];
+                 handleLightSensorEvent(time, lux);
+;
