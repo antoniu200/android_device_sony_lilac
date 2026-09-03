@@ -13,19 +13,6 @@ diff --git a/services/core/java/com/android/server/display/AutomaticBrightnessCo
 index 9922d939ad68e..f02d8a4f80990 100644
 --- a/services/core/java/com/android/server/display/AutomaticBrightnessController.java
 +++ b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
-@@ -72,10 +72,10 @@ class AutomaticBrightnessController {
- 
-     // Length of the ambient light horizon used to calculate the long term estimate of ambient
-     // light.
--    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
-+    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 1000;
- 
-     // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
--    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
-+    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 1000;
- 
-     // Callbacks for requesting updates to the display's power state
-     private final Callbacks mCallbacks;
 @@ -85,6 +85,19 @@ class AutomaticBrightnessController {
  
      // The light sensor, or null if not available or needed.
