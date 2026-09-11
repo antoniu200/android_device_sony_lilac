@@ -88,8 +88,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.-->
         
         <!-- Downgrade when SMS over IMS is unavailable: org.codeaurora.ims -->
         <boolean name="codeaurora_allow_sms_over_ims_fallback_bool" value="true" />
-
-        <boolean name="carrier_volte_provisioning_required_bool" value="false" />
+        
+        <!-- Enable SomcHook for all carriers -->
+        <boolean name="s_enable_apn_switch" value="true">
     </carrier_config>
 
     <!--

@@ -1,0 +1,52 @@
+# PWD: frameworks/base
+From 90405590886769e38fa44785c55ba92166304d7d Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 11 Sep 2026 23:21:11 +0300
+Subject: [PATCH] Add SomcHook
+
+Change-Id: I011ad28a56140f33e33f80a759ecb40046208736
+---
+ .../java/android/telephony/CarrierConfigManager.java      | 8 ++++++++
+ .../java/com/android/internal/telephony/RILConstants.java | 2 ++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/telephony/java/android/telephony/CarrierConfigManager.java b/telephony/java/android/telephony/CarrierConfigManager.java
+index 1ca251d370ab9..b498d95240e95 100644
+--- a/telephony/java/android/telephony/CarrierConfigManager.java
++++ b/telephony/java/android/telephony/CarrierConfigManager.java
+@@ -633,6 +633,13 @@ public CarrierConfigManager(Context context) {
+      */
+     public static final String
+             KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
++            
++    /**
++     * Whether the Sony APN profile switch mechanism is enabled.
++     * @hide
++     */
++    public static final String
++            KEY_SOMC_ENABLE_APN_SWITCH_BOOL = "s_enable_apn_switch";
+ 
+     /**
+      * Flag specifying whether VoLTE should be available for carrier, independent of carrier
+@@ -5412,6 +5419,7 @@ private static PersistableBundle getDefaults() {
+         sDefaults.putBoolean(KEY_APN_EXPAND_BOOL, true);
+         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
+         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
++        sDefaults.putBoolean(KEY_SOMC_ENABLE_APN_SWITCH_BOOL, true);
+         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
+         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+         sDefaults.putInt(KEY_CARRIER_USSD_METHOD_INT, USSD_OVER_CS_PREFERRED);
+diff --git a/telephony/java/com/android/internal/telephony/RILConstants.java b/telephony/java/com/android/internal/telephony/RILConstants.java
+index fadc23b315d68..93877c822b111 100644
+--- a/telephony/java/com/android/internal/telephony/RILConstants.java
++++ b/telephony/java/com/android/internal/telephony/RILConstants.java
+@@ -530,6 +530,8 @@ call in class C */
+     int RIL_REQUEST_GET_SLICING_CONFIG = 224;
+     int RIL_REQUEST_ENABLE_VONR = 225;
+     int RIL_REQUEST_IS_VONR_ENABLED = 225;
++    
++    int RIL_REQUEST_SOMC_HOOK_RAW = 501;
+ 
+     /* Responses begin */
+     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
+

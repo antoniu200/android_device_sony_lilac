@@ -1,0 +1,2137 @@
+# PWD: frameworks/opt
+From 3c7d2a768ca9501cbea73bfbdd84099af6d0d60d Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 11 Sep 2026 23:25:45 +0300
+Subject: [PATCH] Add SomcHook
+
+Change-Id: Ic2151f04dd5737de2f5451380e93489215153da8
+---
+ .../internal/telephony/CommandsInterface.java |   2 +
+ .../com/android/internal/telephony/Phone.java |   4 +
+ .../com/android/internal/telephony/RIL.java   |  87 +++
+ .../telephony/SomcHookIndication.java         |  18 +
+ .../internal/telephony/SomcHookResponse.java  |  32 +
+ .../dataconnection/DcNetworkAgent.java        |   5 +
+ .../telephony/dataconnection/DcTracker.java   | 185 +++++-
+ .../somc/hardware/radio/V1_0/ISomcHook.java   | 548 ++++++++++++++++++
+ .../radio/V1_0/ISomcHookIndication.java       | 516 +++++++++++++++++
+ .../radio/V1_0/ISomcHookResponse.java         | 517 +++++++++++++++++
+ 10 files changed, 1900 insertions(+), 14 deletions(-)
+ create mode 100644 src/java/com/android/internal/telephony/SomcHookIndication.java
+ create mode 100644 src/java/com/android/internal/telephony/SomcHookResponse.java
+ create mode 100644 src/java/vendor/somc/hardware/radio/V1_0/ISomcHook.java
+ create mode 100644 src/java/vendor/somc/hardware/radio/V1_0/ISomcHookIndication.java
+ create mode 100644 src/java/vendor/somc/hardware/radio/V1_0/ISomcHookResponse.java
+
+diff --git a/src/java/com/android/internal/telephony/CommandsInterface.java b/src/java/com/android/internal/telephony/CommandsInterface.java
+index a69e47d1cc4..e918d80d33d 100644
+--- a/src/java/com/android/internal/telephony/CommandsInterface.java
++++ b/src/java/com/android/internal/telephony/CommandsInterface.java
+@@ -1660,6 +1660,8 @@ default void setLocationUpdates(boolean enable, Message response) {}
+ 
+     @UnsupportedAppUsage
+     void invokeOemRilRequestRaw(byte[] data, Message response);
++    
++    default void invokeSomcRilRequestRaw(byte[] data, Message response) {}
+ 
+     /**
+      * Sends carrier specific information to the vendor ril that can be used to
+diff --git a/src/java/com/android/internal/telephony/Phone.java b/src/java/com/android/internal/telephony/Phone.java
+index ea9c5bdf0b3..b6d91c4ee03 100644
+--- a/src/java/com/android/internal/telephony/Phone.java
++++ b/src/java/com/android/internal/telephony/Phone.java
+@@ -2664,6 +2664,10 @@ public void invokeOemRilRequestRaw(byte[] data, Message response) {
+     public void invokeOemRilRequestStrings(String[] strings, Message response) {
+         mCi.invokeOemRilRequestStrings(strings, response);
+     }
++    
++    public void invokeSomcRilRequestRaw(byte[] data, Message response) {
++        mCi.invokeSomcRilRequestRaw(data, response);
++    }
+ 
+     /**
+      * Read one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
+diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
+index 8429c49db5e..e5d1647f95f 100644
+--- a/src/java/com/android/internal/telephony/RIL.java
++++ b/src/java/com/android/internal/telephony/RIL.java
+@@ -133,6 +133,8 @@
+ import com.android.internal.telephony.util.TelephonyUtils;
+ import com.android.telephony.Rlog;
+ 
++import vendor.somc.hardware.radio.V1_0.ISomcHook;
++
+ import java.io.ByteArrayInputStream;
+ import java.io.DataInputStream;
+ import java.io.FileDescriptor;
+@@ -280,6 +282,11 @@ public class RIL extends BaseCommands implements CommandsInterface {
+     boolean mIsCellularSupported;
+     RadioResponse mRadioResponse;
+     RadioIndication mRadioIndication;
++    
++    SomcHookResponse mSomcHookResponse;
++    SomcHookIndication mSomcHookIndication;
++    volatile ISomcHook mSomcHookProxy = null;
++    
+     volatile IRadio mRadioProxy = null;
+     final AtomicLong mRadioProxyCookie = new AtomicLong(0);
+     final RadioProxyDeathRecipient mRadioProxyDeathRecipient;
+@@ -301,6 +308,10 @@ public class RIL extends BaseCommands implements CommandsInterface {
+     //***** Constants
+ 
+     static final String[] HIDL_SERVICE_NAME = {"slot1", "slot2", "slot3"};
++    
++    static final String[] SOMC_HOOK_SERVICE_NAME = {
++            "somchook", "somchook2", "somchook3"
++    };
+ 
+     static final int IRADIO_GET_SERVICE_DELAY_MILLIS = 4 * 1000;
+ 
+@@ -443,6 +454,7 @@ public void serviceDied(long cookie) {
+ 
+     private synchronized void resetProxyAndRequestList() {
+         mRadioProxy = null;
++        mSomcHookProxy = null;
+ 
+         // increment the cookie so that death notification can be ignored
+         mRadioProxyCookie.incrementAndGet();
+@@ -454,6 +466,7 @@ private synchronized void resetProxyAndRequestList() {
+         clearRequestList(RADIO_NOT_AVAILABLE, false);
+ 
+         getRadioProxy(null);
++        getSomcHookProxy(null);
+     }
+ 
+     /** Set a radio HAL fallback compatibility override. */
+@@ -474,6 +487,46 @@ public void setCompatVersion(int rilRequest, @NonNull HalVersion halVersion) {
+     public @Nullable HalVersion getCompatVersion(int rilRequest) {
+         return mCompatOverrides.getOrDefault(rilRequest, null);
+     }
++    
++    private ISomcHook getSomcHookProxy(Message result) {
++        if (!mIsCellularSupported) {
++            return null;
++        }
++
++        if (mSomcHookProxy != null) {
++            return mSomcHookProxy;
++        }
++
++        try {
++            mSomcHookProxy =
++                    ISomcHook.getService(SOMC_HOOK_SERVICE_NAME[mPhoneId]);
++
++            if (mSomcHookProxy != null) {
++                mSomcHookProxy.setResponseFunctions(
++                        mSomcHookResponse, mSomcHookIndication);
++            } else {
++                riljLoge("getSomcHookProxy: mSomcHookProxy == null");
++            }
++        } catch (RemoteException | RuntimeException e) {
++            mSomcHookProxy = null;
++
++            if (result != null) {
++                AsyncResult.forMessage(result, null,
++                        CommandException.fromRilErrno(RADIO_NOT_AVAILABLE));
++                result.sendToTarget();
++            }
++
++            mRilHandler.sendMessageDelayed(
++                    mRilHandler.obtainMessage(
++                            EVENT_RADIO_PROXY_DEAD,
++                            mRadioProxyCookie.get()),
++                    IRADIO_GET_SERVICE_DELAY_MILLIS);
++
++            riljLoge("getSomcHookProxy", e);
++        }
++
++        return mSomcHookProxy;
++    }
+ 
+     /** Returns a {@link IRadio} instance or null if the service is not available. */
+     @VisibleForTesting
+@@ -631,6 +684,10 @@ public RIL(Context context, int allowedNetworkTypes,
+ 
+         mRadioResponse = new RadioResponse(this);
+         mRadioIndication = new RadioIndication(this);
++        
++        mSomcHookResponse = new SomcHookResponse(this);
++        mSomcHookIndication = new SomcHookIndication(this);
++        
+         mRilHandler = new RilHandler();
+         mRadioProxyDeathRecipient = new RadioProxyDeathRecipient();
+ 
+@@ -654,6 +711,7 @@ public RIL(Context context, int allowedNetworkTypes,
+         // set radio callback; needed to set RadioIndication callback (should be done after
+         // wakelock stuff is initialized above as callbacks are received on separate binder threads)
+         getRadioProxy(null);
++        getSomcHookProxy(null);
+ 
+         if (RILJ_LOGD) {
+             riljLog("Radio HAL version: " + mRadioVersion);
+@@ -3013,6 +3071,33 @@ public void getDataCallList(Message result) {
+         }
+     }
+ 
++    @Override
++    public void invokeSomcRilRequestRaw(byte[] data, Message response) {
++        ISomcHook somcHookProxy = getSomcHookProxy(response);
++
++        if (somcHookProxy != null) {
++            RILRequest rr = obtainRequest(
++                    RIL_REQUEST_SOMC_HOOK_RAW,
++                    response,
++                    mRILDefaultWorkSource);
++
++            if (RILJ_LOGD) {
++                riljLog(rr.serialString() + "> "
++                        + requestToString(rr.mRequest)
++                        + "[" + IccUtils.bytesToHexString(data) + "]");
++            }
++
++            try {
++                somcHookProxy.sendSomcRequestRaw(
++                        rr.mSerial,
++                        primitiveArrayToArrayList(data));
++            } catch (RemoteException | RuntimeException e) {
++                handleRadioProxyExceptionForRR(
++                        rr, "invokeSomcRilRequestRaw", e);
++            }
++        }
++    }
++    
+     // TODO(b/171260715) Remove when HAL definition is removed
+     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+     @Override
+@@ -7051,6 +7136,8 @@ static String requestToString(int request) {
+                 return "UPDATE_SIM_PHONEBOOK_RECORD";
+             case RIL_REQUEST_GET_SIM_PHONEBOOK_CAPACITY:
+                 return "GET_SIM_PHONEBOOK_CAPACITY";
++            case RIL_REQUEST_SOMC_HOOK_RAW:
++                return "SOMC_HOOK_RAW";
+             default: return "<unknown request>";
+         }
+     }
+diff --git a/src/java/com/android/internal/telephony/SomcHookIndication.java b/src/java/com/android/internal/telephony/SomcHookIndication.java
+new file mode 100644
+index 00000000000..c3daabd6440
+--- /dev/null
++++ b/src/java/com/android/internal/telephony/SomcHookIndication.java
+@@ -0,0 +1,18 @@
++package com.android.internal.telephony;
++
++import java.util.ArrayList;
++
++import vendor.somc.hardware.radio.V1_0.ISomcHookIndication;
++
++public class SomcHookIndication extends ISomcHookIndication.Stub {
++    RIL mRil;
++
++    public SomcHookIndication(RIL ril) {
++        mRil = ril;
++    }
++
++    @Override
++    public void somcHookRaw(int indicationType, ArrayList<Byte> data) {
++        mRil.processIndication(indicationType);
++    }
++}
+diff --git a/src/java/com/android/internal/telephony/SomcHookResponse.java b/src/java/com/android/internal/telephony/SomcHookResponse.java
+new file mode 100644
+index 00000000000..b38b8ed85f4
+--- /dev/null
++++ b/src/java/com/android/internal/telephony/SomcHookResponse.java
+@@ -0,0 +1,32 @@
++package com.android.internal.telephony;
++
++import android.hardware.radio.V1_0.RadioResponseInfo;
++
++import java.util.ArrayList;
++
++import vendor.somc.hardware.radio.V1_0.ISomcHookResponse;
++
++public class SomcHookResponse extends ISomcHookResponse.Stub {
++    RIL mRil;
++
++    public SomcHookResponse(RIL ril) {
++        mRil = ril;
++    }
++
++    @Override
++    public void sendSomcRequestRawResponse(
++            RadioResponseInfo responseInfo, ArrayList<Byte> data) {
++        RILRequest rr = mRil.processResponse(responseInfo);
++
++        if (rr != null) {
++            byte[] ret = null;
++
++            if (responseInfo.error == 0) {
++                ret = RIL.arrayListToPrimitiveArray(data);
++                RadioResponse.sendMessageResponse(rr.mResult, ret);
++            }
++
++            mRil.processResponseDone(rr, responseInfo, ret);
++        }
++    }
++}
+diff --git a/src/java/com/android/internal/telephony/dataconnection/DcNetworkAgent.java b/src/java/com/android/internal/telephony/dataconnection/DcNetworkAgent.java
+index 3490fb74300..0e0e96ebb5d 100644
+--- a/src/java/com/android/internal/telephony/dataconnection/DcNetworkAgent.java
++++ b/src/java/com/android/internal/telephony/dataconnection/DcNetworkAgent.java
+@@ -226,6 +226,11 @@ public synchronized void onNetworkUnwanted() {
+             return;
+         }
+ 
++        DcTracker dct = mPhone.getDcTracker(mTransportType);
++        if (dct != null) {
++            dct.updateApnProfileForSinglePdn();
++        }
++
+         logd("onNetworkUnwanted called. Now tear down the data connection "
+                 + mDataConnection.getName());
+         mDataConnection.tearDownAll(Phone.REASON_RELEASED_BY_CONNECTIVITY_SERVICE,
+diff --git a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
+index 21b8c4f108a..a4759ded066 100644
+--- a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
++++ b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
+@@ -133,6 +133,8 @@
+ import java.io.PrintWriter;
+ import java.lang.annotation.Retention;
+ import java.lang.annotation.RetentionPolicy;
++import java.nio.ByteBuffer;
++import java.nio.ByteOrder;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collection;
+@@ -157,6 +159,7 @@ public class DcTracker extends Handler {
+     private static final boolean VDBG_STALL = false; // STOPSHIP if true
+     private static final boolean RADIO_TESTS = false;
+     private static final String NOTIFICATION_TAG = DcTracker.class.getSimpleName();
++    private static final int QCRIL_EVT_SOMC_PROFILE_CHANGE = 0x90011;
+ 
+     @IntDef(value = {
+             REQUEST_TYPE_NORMAL,
+@@ -2205,20 +2208,30 @@ private boolean setupData(ApnContext apnContext, int radioTech,
+                     return false;
+                 }
+ 
+-                // Should not start cleanUp if the setupData is for IMS APN
+-                // or retry of same APN(State==RETRYING).
+-                if (!apnContext.getApnType().equals(ApnSetting.TYPE_IMS_STRING)
+-                        && (apnContext.getState() != DctConstants.State.RETRYING)) {
+-                    // Only lower priority calls left.  Disconnect them all in this single PDP case
+-                    // so that we can bring up the requested higher priority call (once we receive
+-                    // response for deactivate request for the calls we are about to disconnect
+-                    if (cleanUpAllConnectionsInternal(true, Phone.REASON_SINGLE_PDN_ARBITRATION)) {
+-                        // If any call actually requested to be disconnected, means we can't
+-                        // bring up this connection yet as we need to wait for those data calls
+-                        // to be disconnected.
+-                        if (DBG) log("setupData: Some calls are disconnecting first."
+-                                + " Wait and retry");
+-                        return false;
++                
++                if (apnContext.getState() != DctConstants.State.RETRYING) {
++                    // SomcHook: prepare the incoming APN before single-PDN arbitration.
++                    for (ApnContext apnCtx : mApnContexts.values()) {
++                        if (!apnCtx.isDisconnected()) {
++                            updateApnProfile(apnContext.getNextApnSetting());
++                            break;
++                        }
++                    }                
++                
++                    // Should not start cleanUp if the setupData is for IMS APN
++                    // or retry of same APN(State==RETRYING).
++                    if (!apnContext.getApnType().equals(ApnSetting.TYPE_IMS_STRING)) {                        
++                        // Only lower priority calls left.  Disconnect them all in this single PDP case
++                        // so that we can bring up the requested higher priority call (once we receive
++                        // response for deactivate request for the calls we are about to disconnect
++                        if (cleanUpAllConnectionsInternal(true, Phone.REASON_SINGLE_PDN_ARBITRATION)) {
++                            // If any call actually requested to be disconnected, means we can't
++                            // bring up this connection yet as we need to wait for those data calls
++                            // to be disconnected.
++                            if (DBG) log("setupData: Some calls are disconnecting first."
++                                    + " Wait and retry");
++                            return false;
++                        }
+                     }
+                 }
+ 
+@@ -2246,6 +2259,10 @@ private boolean setupData(ApnContext apnContext, int radioTech,
+         apnContext.setDataConnection(dataConnection);
+         apnContext.setApnSetting(apnSetting);
+         apnContext.setState(DctConstants.State.CONNECTING);
++        
++        if (isRequireUpdateApnProfile(apnContext)) {
++            updateApnProfile(apnSetting);
++        }
+ 
+         Message msg = obtainMessage();
+         msg.what = DctConstants.EVENT_DATA_SETUP_COMPLETE;
+@@ -2344,6 +2361,7 @@ private void onApnChanged() {
+         createAllApnList();
+         setDataProfilesAsNeeded();
+         setInitialAttachApn();
++        updateApnProfile();
+         cleanUpConnectionsOnUpdatedApns(isAnyDataConnected(), Phone.REASON_APN_CHANGED);
+ 
+         // FIXME: See bug 17426028 maybe no conditional is needed.
+@@ -2535,6 +2553,7 @@ private void onCarrierConfigChanged() {
+             createAllApnList();
+             setDataProfilesAsNeeded();
+             setInitialAttachApn();
++            updateApnProfile();
+             sortApnContextByPriority();
+             cleanUpConnectionsOnUpdatedApns(true, Phone.REASON_CARRIER_CHANGE);
+             setupDataOnAllConnectableApns(Phone.REASON_CARRIER_CHANGE, RetryFailures.ALWAYS);
+@@ -2873,6 +2892,9 @@ private void onDisableApn(@ApnType int apnType,
+ 
+         apnContext.setEnabled(false);
+         if (cleanup) {
++            if (isOnlySingleDcAllowed(getDataRat())) {
++                updateApnProfile();
++            }
+             cleanUpConnectionInternal(true, releaseType, apnContext);
+         }
+ 
+@@ -5532,6 +5554,141 @@ public static DataProfile createDataProfile(ApnSetting apn, int profileId,
+                 .build();
+     }
+ 
++    private static class ProfileItemInfo {
++        final int bufferSize;
++        String item;
++
++        ProfileItemInfo(int bufferSize) {
++            this.bufferSize = bufferSize;
++        }
++    }
++
++    private ApnSetting getFirstWaitingApn(String apnType) {
++        ArrayList<ApnSetting> waitingApns = buildWaitingApns(apnType, getDataRat());
++        if (waitingApns.isEmpty()) {
++            return null;
++        }
++        return waitingApns.get(0);
++    }
++
++    protected void updateApnProfile() {
++        if (mTransportType != AccessNetworkConstants.TRANSPORT_TYPE_WWAN) {
++            return;
++        }
++
++        updateApnProfile(getFirstWaitingApn(ApnSetting.TYPE_DEFAULT_STRING));
++    }
++
++    private void updateApnProfile(ApnSetting apnSetting) {
++        if (mTransportType != AccessNetworkConstants.TRANSPORT_TYPE_WWAN) {
++            return;
++        }
++        
++        if (!mPhone.getIccRecordsLoaded()) {
++            log("updateApnProfile, Record is not yet loaded.");
++            return;
++        }
++
++        if (!isOnlySingleDcAllowed(getDataRat())
++                && apnSetting != null
++                && !apnSetting.canHandleType(ApnSetting.TYPE_DEFAULT)) {
++            log("can not handle default");
++            return;
++        }
++
++        ProfileItemInfo protocol = new ProfileItemInfo(6);
++        ProfileItemInfo roamingProtocol = new ProfileItemInfo(6);
++        ProfileItemInfo apn = new ProfileItemInfo(100);
++        ProfileItemInfo authType = new ProfileItemInfo(1);
++        ProfileItemInfo user = new ProfileItemInfo(128);
++        ProfileItemInfo password = new ProfileItemInfo(128);
++
++        ProfileItemInfo[] infoArray = {
++                protocol,
++                roamingProtocol,
++                apn,
++                authType,
++                user,
++                password
++        };
++
++        boolean isEnableApnSwitch = getCarrierConfig().getBoolean(
++                CarrierConfigManager.KEY_SOMC_ENABLE_APN_SWITCH_BOOL);
++
++        if (isEnableApnSwitch && apnSetting != null) {
++            apn.item = apnSetting.getApnName();
++            protocol.item = ApnSetting.getProtocolStringFromInt(
++                    apnSetting.getProtocol());
++            roamingProtocol.item = ApnSetting.getProtocolStringFromInt(
++                    apnSetting.getRoamingProtocol());
++            authType.item = Integer.toString(apnSetting.getAuthType());
++            user.item = apnSetting.getUser();
++            password.item = apnSetting.getPassword();
++        }
++
++        log("updateApnProfile, apnSetting: " + apnSetting);
++
++        int dataLength = 0;
++        for (ProfileItemInfo info : infoArray) {
++            dataLength += info.bufferSize;
++        }
++
++        byte[] data = new byte[dataLength];
++        Arrays.fill(data, (byte) 0);
++
++        int offset = 0;
++        for (ProfileItemInfo info : infoArray) {
++            int profileItemLength = info.item == null ? 0 : info.item.length();
++
++            if (profileItemLength > info.bufferSize) {
++                profileItemLength = info.bufferSize;
++            }
++
++            if (profileItemLength > 0) {
++                info.item.getBytes(0, profileItemLength, data, offset);
++            }
++
++            offset += info.bufferSize;
++        }
++
++        log("updateApnProfile, data length = " + dataLength);
++
++        byte[] request = new byte[4 + 4 + dataLength];
++        ByteBuffer reqBuffer = ByteBuffer.wrap(request);
++        reqBuffer.order(ByteOrder.nativeOrder());
++        reqBuffer.putInt(QCRIL_EVT_SOMC_PROFILE_CHANGE);
++        reqBuffer.putInt(dataLength);
++        reqBuffer.put(data);
++
++        mPhone.invokeSomcRilRequestRaw(request, null);
++    }
++    
++    protected void updateApnProfileForSinglePdn() {
++        if (isOnlySingleDcAllowed(getDataRat())) {
++            log("updateApnProfileForSinglePdn");
++            updateApnProfile();
++        }
++    }
++    
++    private boolean isRequireUpdateApnProfile(ApnContext apnContext) {
++        if (apnContext == null) {
++            log("isRequireUpdateApnProfile: true: apnContext is null");
++            return true;
++        }
++
++        for (ApnContext apnCtx : mApnContexts.values()) {
++            if (!apnCtx.getApnType().equalsIgnoreCase(apnContext.getApnType())
++                    && (apnCtx.getState() == DctConstants.State.CONNECTED
++                            || apnCtx.getState() == DctConstants.State.CONNECTING)) {
++                log("isRequireUpdateApnProfile: false: apnCtx=" + apnCtx);
++                return false;
++            }
++        }
++
++        log("isRequireUpdateApnProfile: true");
++        return true;
++    }
++
+     private void onDataServiceBindingChanged(boolean bound) {
+         if (!bound) {
+             if (mTransportType == AccessNetworkConstants.TRANSPORT_TYPE_WLAN) {
+diff --git a/src/java/vendor/somc/hardware/radio/V1_0/ISomcHook.java b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHook.java
+new file mode 100644
+index 00000000000..a91d44fa19e
+--- /dev/null
++++ b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHook.java
+@@ -0,0 +1,548 @@
++package vendor.somc.hardware.radio.V1_0;
++
++import android.hidl.base.V1_0.DebugInfo;
++import android.hidl.base.V1_0.IBase;
++import android.os.HidlSupport;
++import android.os.HwBinder;
++import android.os.HwBlob;
++import android.os.HwParcel;
++import android.os.IHwBinder;
++import android.os.IHwInterface;
++import android.os.NativeHandle;
++import android.os.RemoteException;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Iterator;
++import java.util.Objects;
++
++public interface ISomcHook extends IBase {
++    public static final String kInterfaceName = "vendor.somc.hardware.radio@1.0::ISomcHook";
++
++    @Override // android.hidl.base.V1_0.IBase
++    IHwBinder asBinder();
++
++    @Override // android.hidl.base.V1_0.IBase
++    DebugInfo getDebugInfo() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<byte[]> getHashChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<String> interfaceChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    String interfaceDescriptor() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void notifySyspropsChanged() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void ping() throws RemoteException;
++
++    void sendSomcRequestRaw(int i, ArrayList<Byte> arrayList) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void setHALInstrumentation() throws RemoteException;
++
++    void setResponseFunctions(ISomcHookResponse iSomcHookResponse, ISomcHookIndication iSomcHookIndication) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException;
++
++    static ISomcHook asInterface(IHwBinder binder) {
++        if (binder == null) {
++            return null;
++        }
++        IHwInterface iface = binder.queryLocalInterface(kInterfaceName);
++        if (iface != null && (iface instanceof ISomcHook)) {
++            return (ISomcHook) iface;
++        }
++        ISomcHook proxy = new Proxy(binder);
++        try {
++            Iterator<String> it = proxy.interfaceChain().iterator();
++            while (it.hasNext()) {
++                String descriptor = it.next();
++                if (descriptor.equals(kInterfaceName)) {
++                    return proxy;
++                }
++            }
++        } catch (RemoteException e) {
++        }
++        return null;
++    }
++
++    static ISomcHook castFrom(IHwInterface iface) {
++        if (iface == null) {
++            return null;
++        }
++        return asInterface(iface.asBinder());
++    }
++
++    static ISomcHook getService(String serviceName, boolean retry) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName, retry));
++    }
++
++    static ISomcHook getService(boolean retry) throws RemoteException {
++        return getService("default", retry);
++    }
++
++    static ISomcHook getService(String serviceName) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName));
++    }
++
++    static ISomcHook getService() throws RemoteException {
++        return getService("default");
++    }
++
++    public static final class Proxy implements ISomcHook {
++        private IHwBinder mRemote;
++
++        public Proxy(IHwBinder remote) {
++            this.mRemote = (IHwBinder) Objects.requireNonNull(remote);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this.mRemote;
++        }
++
++        public String toString() {
++            try {
++                return interfaceDescriptor() + "@Proxy";
++            } catch (RemoteException e) {
++                return "[class or subclass of vendor.somc.hardware.radio@1.0::ISomcHook]@Proxy";
++            }
++        }
++
++        public final boolean equals(Object other) {
++            return HidlSupport.interfacesEqual(this, other);
++        }
++
++        public final int hashCode() {
++            return asBinder().hashCode();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook
++        public void setResponseFunctions(ISomcHookResponse somcHookResponse, ISomcHookIndication somcHookIndication) throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(ISomcHook.kInterfaceName);
++            _hidl_request.writeStrongBinder(somcHookResponse == null ? null : somcHookResponse.asBinder());
++            _hidl_request.writeStrongBinder(somcHookIndication != null ? somcHookIndication.asBinder() : null);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(1, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook
++        public void sendSomcRequestRaw(int serial, ArrayList<Byte> data) throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(ISomcHook.kInterfaceName);
++            _hidl_request.writeInt32(serial);
++            _hidl_request.writeInt8Vector(data);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(2, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public ArrayList<String> interfaceChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256067662, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<String> _hidl_out_descriptors = _hidl_reply.readStringVector();
++                return _hidl_out_descriptors;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++        
++        @Override
++        public void debug(NativeHandle fd, ArrayList<String> options)
++                throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            _hidl_request.writeNativeHandle(fd);
++            _hidl_request.writeStringVector(options);
++
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                mRemote.transact(256131655, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public String interfaceDescriptor() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256136003, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                String _hidl_out_descriptor = _hidl_reply.readString();
++                return _hidl_out_descriptor;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public ArrayList<byte[]> getHashChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                int _hidl_index_0 = 0;
++                this.mRemote.transact(256398152, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<byte[]> _hidl_out_hashchain = new ArrayList<>();
++                HwBlob _hidl_blob = _hidl_reply.readBuffer(16L);
++                int _hidl_vec_size = _hidl_blob.getInt32(8L);
++                HwBlob childBlob = _hidl_reply.readEmbeddedBuffer(_hidl_vec_size * 32, _hidl_blob.handle(), 0L, true);
++                _hidl_out_hashchain.clear();
++                while (true) {
++                    int _hidl_index_02 = _hidl_index_0;
++                    if (_hidl_index_02 >= _hidl_vec_size) {
++                        return _hidl_out_hashchain;
++                    }
++                    byte[] _hidl_vec_element = new byte[32];
++                    long _hidl_array_offset_1 = _hidl_index_02 * 32;
++                    childBlob.copyToInt8Array(_hidl_array_offset_1, _hidl_vec_element, 32);
++                    _hidl_out_hashchain.add(_hidl_vec_element);
++                    _hidl_index_0 = _hidl_index_02 + 1;
++                }
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public void setHALInstrumentation() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256462420, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) throws RemoteException {
++            return this.mRemote.linkToDeath(recipient, cookie);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public void ping() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256921159, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public DebugInfo getDebugInfo() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257049926, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                DebugInfo _hidl_out_info = new DebugInfo();
++                _hidl_out_info.readFromParcel(_hidl_reply);
++                return _hidl_out_info;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public void notifySyspropsChanged() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257120595, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) throws RemoteException {
++            return this.mRemote.unlinkToDeath(recipient);
++        }
++    }
++
++    public static abstract class Stub extends HwBinder implements ISomcHook {
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final ArrayList<String> interfaceChain() {
++            return new ArrayList<>(Arrays.asList(ISomcHook.kInterfaceName, IBase.kInterfaceName));
++        }
++        
++        @Override
++        public final void debug(NativeHandle fd, ArrayList<String> options) {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final String interfaceDescriptor() {
++            return ISomcHook.kInterfaceName;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final ArrayList<byte[]> getHashChain() {
++            return new ArrayList<>(Arrays.asList(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, new byte[]{-67, -38, -74, 24, 77, 122, 52, 109, -90, -96, 125, -64, -126, -116, -15, -102, 105, 111, 76, -86, 54, 17, -59, 31, 46, 20, 86, 90, 20, -76, 15, -39}));
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final void setHALInstrumentation() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
++            return true;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final void ping() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final DebugInfo getDebugInfo() {
++            DebugInfo info = new DebugInfo();
++            info.pid = HidlSupport.getPidIfSharable();
++            info.ptr = 0L;
++            info.arch = 0;
++            return info;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final void notifySyspropsChanged() {
++            HwBinder.enableInstrumentation();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHook, android.hidl.base.V1_0.IBase
++        public final boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
++            return true;
++        }
++
++        public IHwInterface queryLocalInterface(String descriptor) {
++            if (ISomcHook.kInterfaceName.equals(descriptor)) {
++                return this;
++            }
++            return null;
++        }
++
++        public void registerAsService(String serviceName) throws RemoteException {
++            registerService(serviceName);
++        }
++
++        public String toString() {
++            return interfaceDescriptor() + "@Stub";
++        }
++
++        public void onTransact(int _hidl_code, HwParcel _hidl_request, HwParcel _hidl_reply, int _hidl_flags) throws RemoteException {
++            boolean _hidl_is_oneway;
++            int _hidl_index_0 = 0;
++            switch (_hidl_code) {
++                case 1:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(ISomcHook.kInterfaceName);
++                        ISomcHookResponse somcHookResponse = ISomcHookResponse.asInterface(_hidl_request.readStrongBinder());
++                        ISomcHookIndication somcHookIndication = ISomcHookIndication.asInterface(_hidl_request.readStrongBinder());
++                        setResponseFunctions(somcHookResponse, somcHookIndication);
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 2:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(ISomcHook.kInterfaceName);
++                        int serial = _hidl_request.readInt32();
++                        ArrayList<Byte> data = _hidl_request.readInt8Vector();
++                        sendSomcRequestRaw(serial, data);
++                        break;
++                    }
++                case 256067662:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<String> _hidl_out_descriptors = interfaceChain();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeStringVector(_hidl_out_descriptors);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256131655:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        NativeHandle fd = _hidl_request.readNativeHandle();
++                        ArrayList<String> options = _hidl_request.readStringVector();
++                        debug(fd, options);
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256136003:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        String _hidl_out_descriptor = interfaceDescriptor();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeString(_hidl_out_descriptor);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256398152:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<byte[]> _hidl_out_hashchain = getHashChain();
++                        _hidl_reply.writeStatus(0);
++                        HwBlob _hidl_blob = new HwBlob(16);
++                        int _hidl_vec_size = _hidl_out_hashchain.size();
++                        _hidl_blob.putInt32(8L, _hidl_vec_size);
++                        _hidl_blob.putBool(12L, false);
++                        HwBlob childBlob = new HwBlob(_hidl_vec_size * 32);
++                        while (_hidl_index_0 < _hidl_vec_size) {
++                            long _hidl_array_offset_1 = _hidl_index_0 * 32;
++                            childBlob.putInt8Array(_hidl_array_offset_1, _hidl_out_hashchain.get(_hidl_index_0));
++                            _hidl_index_0++;
++                        }
++                        _hidl_blob.putBlob(0L, childBlob);
++                        _hidl_reply.writeBuffer(_hidl_blob);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256462420:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        setHALInstrumentation();
++                        break;
++                    }
++                case 256660548:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++                case 256921159:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ping();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257049926:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        DebugInfo _hidl_out_info = getDebugInfo();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_out_info.writeToParcel(_hidl_reply);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257120595:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        notifySyspropsChanged();
++                        break;
++                    }
++                case 257250372:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++            }
++        }
++    }
++}
+diff --git a/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookIndication.java b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookIndication.java
+new file mode 100644
+index 00000000000..177956cc85b
+--- /dev/null
++++ b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookIndication.java
+@@ -0,0 +1,516 @@
++package vendor.somc.hardware.radio.V1_0;
++
++import android.hidl.base.V1_0.DebugInfo;
++import android.hidl.base.V1_0.IBase;
++import android.os.HidlSupport;
++import android.os.HwBinder;
++import android.os.HwBlob;
++import android.os.HwParcel;
++import android.os.IHwBinder;
++import android.os.IHwInterface;
++import android.os.NativeHandle;
++import android.os.RemoteException;
++import com.android.internal.telephony.uicc.AnswerToReset;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Iterator;
++import java.util.Objects;
++
++public interface ISomcHookIndication extends IBase {
++    public static final String kInterfaceName = "vendor.somc.hardware.radio@1.0::ISomcHookIndication";
++
++    @Override // android.hidl.base.V1_0.IBase
++    IHwBinder asBinder();
++
++    @Override // android.hidl.base.V1_0.IBase
++    DebugInfo getDebugInfo() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<byte[]> getHashChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<String> interfaceChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    String interfaceDescriptor() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void notifySyspropsChanged() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void ping() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void setHALInstrumentation() throws RemoteException;
++
++    void somcHookRaw(int i, ArrayList<Byte> arrayList) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException;
++
++    static ISomcHookIndication asInterface(IHwBinder binder) {
++        if (binder == null) {
++            return null;
++        }
++        IHwInterface iface = binder.queryLocalInterface(kInterfaceName);
++        if (iface != null && (iface instanceof ISomcHookIndication)) {
++            return (ISomcHookIndication) iface;
++        }
++        ISomcHookIndication proxy = new Proxy(binder);
++        try {
++            Iterator<String> it = proxy.interfaceChain().iterator();
++            while (it.hasNext()) {
++                String descriptor = it.next();
++                if (descriptor.equals(kInterfaceName)) {
++                    return proxy;
++                }
++            }
++        } catch (RemoteException e) {
++        }
++        return null;
++    }
++
++    static ISomcHookIndication castFrom(IHwInterface iface) {
++        if (iface == null) {
++            return null;
++        }
++        return asInterface(iface.asBinder());
++    }
++
++    static ISomcHookIndication getService(String serviceName, boolean retry) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName, retry));
++    }
++
++    static ISomcHookIndication getService(boolean retry) throws RemoteException {
++        return getService("default", retry);
++    }
++
++    static ISomcHookIndication getService(String serviceName) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName));
++    }
++
++    static ISomcHookIndication getService() throws RemoteException {
++        return getService("default");
++    }
++
++    public static final class Proxy implements ISomcHookIndication {
++        private IHwBinder mRemote;
++
++        public Proxy(IHwBinder remote) {
++            this.mRemote = (IHwBinder) Objects.requireNonNull(remote);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this.mRemote;
++        }
++
++        public String toString() {
++            try {
++                return interfaceDescriptor() + "@Proxy";
++            } catch (RemoteException e) {
++                return "[class or subclass of vendor.somc.hardware.radio@1.0::ISomcHookIndication]@Proxy";
++            }
++        }
++
++        public final boolean equals(Object other) {
++            return HidlSupport.interfacesEqual(this, other);
++        }
++
++        public final int hashCode() {
++            return asBinder().hashCode();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication
++        public void somcHookRaw(int type, ArrayList<Byte> data) throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(ISomcHookIndication.kInterfaceName);
++            _hidl_request.writeInt32(type);
++            _hidl_request.writeInt8Vector(data);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(1, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public ArrayList<String> interfaceChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256067662, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<String> _hidl_out_descriptors = _hidl_reply.readStringVector();
++                return _hidl_out_descriptors;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++        
++        @Override
++        public void debug(NativeHandle fd, ArrayList<String> options)
++                throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            _hidl_request.writeNativeHandle(fd);
++            _hidl_request.writeStringVector(options);
++
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                mRemote.transact(256131655, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public String interfaceDescriptor() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256136003, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                String _hidl_out_descriptor = _hidl_reply.readString();
++                return _hidl_out_descriptor;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public ArrayList<byte[]> getHashChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                int _hidl_index_0 = 0;
++                this.mRemote.transact(256398152, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<byte[]> _hidl_out_hashchain = new ArrayList<>();
++                HwBlob _hidl_blob = _hidl_reply.readBuffer(16L);
++                int _hidl_vec_size = _hidl_blob.getInt32(8L);
++                HwBlob childBlob = _hidl_reply.readEmbeddedBuffer(_hidl_vec_size * 32, _hidl_blob.handle(), 0L, true);
++                _hidl_out_hashchain.clear();
++                while (true) {
++                    int _hidl_index_02 = _hidl_index_0;
++                    if (_hidl_index_02 >= _hidl_vec_size) {
++                        return _hidl_out_hashchain;
++                    }
++                    byte[] _hidl_vec_element = new byte[32];
++                    long _hidl_array_offset_1 = _hidl_index_02 * 32;
++                    childBlob.copyToInt8Array(_hidl_array_offset_1, _hidl_vec_element, 32);
++                    _hidl_out_hashchain.add(_hidl_vec_element);
++                    _hidl_index_0 = _hidl_index_02 + 1;
++                }
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public void setHALInstrumentation() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256462420, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) throws RemoteException {
++            return this.mRemote.linkToDeath(recipient, cookie);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public void ping() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256921159, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public DebugInfo getDebugInfo() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257049926, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                DebugInfo _hidl_out_info = new DebugInfo();
++                _hidl_out_info.readFromParcel(_hidl_reply);
++                return _hidl_out_info;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public void notifySyspropsChanged() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257120595, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) throws RemoteException {
++            return this.mRemote.unlinkToDeath(recipient);
++        }
++    }
++
++    public static abstract class Stub extends HwBinder implements ISomcHookIndication {
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final ArrayList<String> interfaceChain() {
++            return new ArrayList<>(Arrays.asList(ISomcHookIndication.kInterfaceName, IBase.kInterfaceName));
++        }
++        
++        @Override
++        public final void debug(NativeHandle fd, ArrayList<String> options) {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final String interfaceDescriptor() {
++            return ISomcHookIndication.kInterfaceName;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final ArrayList<byte[]> getHashChain() {
++            return new ArrayList<>(Arrays.asList(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, new byte[]{-67, -38, -74, 24, 77, 122, 52, 109, -90, -96, 125, -64, -126, -116, -15, -102, 105, 111, 76, -86, 54, 17, -59, 31, 46, 20, 86, 90, 20, -76, 15, -39}));
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final void setHALInstrumentation() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
++            return true;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final void ping() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final DebugInfo getDebugInfo() {
++            DebugInfo info = new DebugInfo();
++            info.pid = HidlSupport.getPidIfSharable();
++            info.ptr = 0L;
++            info.arch = 0;
++            return info;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final void notifySyspropsChanged() {
++            HwBinder.enableInstrumentation();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookIndication, android.hidl.base.V1_0.IBase
++        public final boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
++            return true;
++        }
++
++        public IHwInterface queryLocalInterface(String descriptor) {
++            if (ISomcHookIndication.kInterfaceName.equals(descriptor)) {
++                return this;
++            }
++            return null;
++        }
++
++        public void registerAsService(String serviceName) throws RemoteException {
++            registerService(serviceName);
++        }
++
++        public String toString() {
++            return interfaceDescriptor() + "@Stub";
++        }
++
++        public void onTransact(int _hidl_code, HwParcel _hidl_request, HwParcel _hidl_reply, int _hidl_flags) throws RemoteException {
++            boolean _hidl_is_oneway;
++            int _hidl_index_0 = 0;
++            switch (_hidl_code) {
++                case 1:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(ISomcHookIndication.kInterfaceName);
++                        int type = _hidl_request.readInt32();
++                        ArrayList<Byte> data = _hidl_request.readInt8Vector();
++                        somcHookRaw(type, data);
++                        break;
++                    }
++                case 256067662:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<String> _hidl_out_descriptors = interfaceChain();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeStringVector(_hidl_out_descriptors);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256131655:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        NativeHandle fd = _hidl_request.readNativeHandle();
++                        ArrayList<String> options = _hidl_request.readStringVector();
++                        debug(fd, options);
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256136003:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        String _hidl_out_descriptor = interfaceDescriptor();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeString(_hidl_out_descriptor);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256398152:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<byte[]> _hidl_out_hashchain = getHashChain();
++                        _hidl_reply.writeStatus(0);
++                        HwBlob _hidl_blob = new HwBlob(16);
++                        int _hidl_vec_size = _hidl_out_hashchain.size();
++                        _hidl_blob.putInt32(8L, _hidl_vec_size);
++                        _hidl_blob.putBool(12L, false);
++                        HwBlob childBlob = new HwBlob(_hidl_vec_size * 32);
++                        while (_hidl_index_0 < _hidl_vec_size) {
++                            long _hidl_array_offset_1 = _hidl_index_0 * 32;
++                            childBlob.putInt8Array(_hidl_array_offset_1, _hidl_out_hashchain.get(_hidl_index_0));
++                            _hidl_index_0++;
++                        }
++                        _hidl_blob.putBlob(0L, childBlob);
++                        _hidl_reply.writeBuffer(_hidl_blob);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256462420:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        setHALInstrumentation();
++                        break;
++                    }
++                case 256660548:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++                case 256921159:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ping();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257049926:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        DebugInfo _hidl_out_info = getDebugInfo();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_out_info.writeToParcel(_hidl_reply);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257120595:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        notifySyspropsChanged();
++                        break;
++                    }
++                case 257250372:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++            }
++        }
++    }
++}
+diff --git a/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookResponse.java b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookResponse.java
+new file mode 100644
+index 00000000000..1d4339757bc
+--- /dev/null
++++ b/src/java/vendor/somc/hardware/radio/V1_0/ISomcHookResponse.java
+@@ -0,0 +1,517 @@
++package vendor.somc.hardware.radio.V1_0;
++
++import android.hardware.radio.V1_0.RadioResponseInfo;
++import android.hidl.base.V1_0.DebugInfo;
++import android.hidl.base.V1_0.IBase;
++import android.os.HidlSupport;
++import android.os.HwBinder;
++import android.os.HwBlob;
++import android.os.HwParcel;
++import android.os.IHwBinder;
++import android.os.IHwInterface;
++import android.os.NativeHandle;
++import android.os.RemoteException;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Iterator;
++import java.util.Objects;
++
++public interface ISomcHookResponse extends IBase {
++    public static final String kInterfaceName = "vendor.somc.hardware.radio@1.0::ISomcHookResponse";
++
++    @Override // android.hidl.base.V1_0.IBase
++    IHwBinder asBinder();
++
++    @Override // android.hidl.base.V1_0.IBase
++    DebugInfo getDebugInfo() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<byte[]> getHashChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    ArrayList<String> interfaceChain() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    String interfaceDescriptor() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void notifySyspropsChanged() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void ping() throws RemoteException;
++
++    void sendSomcRequestRawResponse(RadioResponseInfo radioResponseInfo, ArrayList<Byte> arrayList) throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    void setHALInstrumentation() throws RemoteException;
++
++    @Override // android.hidl.base.V1_0.IBase
++    boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException;
++
++    static ISomcHookResponse asInterface(IHwBinder binder) {
++        if (binder == null) {
++            return null;
++        }
++        IHwInterface iface = binder.queryLocalInterface(kInterfaceName);
++        if (iface != null && (iface instanceof ISomcHookResponse)) {
++            return (ISomcHookResponse) iface;
++        }
++        ISomcHookResponse proxy = new Proxy(binder);
++        try {
++            Iterator<String> it = proxy.interfaceChain().iterator();
++            while (it.hasNext()) {
++                String descriptor = it.next();
++                if (descriptor.equals(kInterfaceName)) {
++                    return proxy;
++                }
++            }
++        } catch (RemoteException e) {
++        }
++        return null;
++    }
++
++    static ISomcHookResponse castFrom(IHwInterface iface) {
++        if (iface == null) {
++            return null;
++        }
++        return asInterface(iface.asBinder());
++    }
++
++    static ISomcHookResponse getService(String serviceName, boolean retry) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName, retry));
++    }
++
++    static ISomcHookResponse getService(boolean retry) throws RemoteException {
++        return getService("default", retry);
++    }
++
++    static ISomcHookResponse getService(String serviceName) throws RemoteException {
++        return asInterface(HwBinder.getService(kInterfaceName, serviceName));
++    }
++
++    static ISomcHookResponse getService() throws RemoteException {
++        return getService("default");
++    }
++
++    public static final class Proxy implements ISomcHookResponse {
++        private IHwBinder mRemote;
++
++        public Proxy(IHwBinder remote) {
++            this.mRemote = (IHwBinder) Objects.requireNonNull(remote);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this.mRemote;
++        }
++
++        public String toString() {
++            try {
++                return interfaceDescriptor() + "@Proxy";
++            } catch (RemoteException e) {
++                return "[class or subclass of vendor.somc.hardware.radio@1.0::ISomcHookResponse]@Proxy";
++            }
++        }
++
++        public final boolean equals(Object other) {
++            return HidlSupport.interfacesEqual(this, other);
++        }
++
++        public final int hashCode() {
++            return asBinder().hashCode();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse
++        public void sendSomcRequestRawResponse(RadioResponseInfo info, ArrayList<Byte> data) throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(ISomcHookResponse.kInterfaceName);
++            info.writeToParcel(_hidl_request);
++            _hidl_request.writeInt8Vector(data);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(1, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public ArrayList<String> interfaceChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256067662, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<String> _hidl_out_descriptors = _hidl_reply.readStringVector();
++                return _hidl_out_descriptors;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++        
++        @Override
++        public void debug(NativeHandle fd, ArrayList<String> options)
++                throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            _hidl_request.writeNativeHandle(fd);
++            _hidl_request.writeStringVector(options);
++
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256131655, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public String interfaceDescriptor() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256136003, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                String _hidl_out_descriptor = _hidl_reply.readString();
++                return _hidl_out_descriptor;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public ArrayList<byte[]> getHashChain() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                int _hidl_index_0 = 0;
++                this.mRemote.transact(256398152, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                ArrayList<byte[]> _hidl_out_hashchain = new ArrayList<>();
++                HwBlob _hidl_blob = _hidl_reply.readBuffer(16L);
++                int _hidl_vec_size = _hidl_blob.getInt32(8L);
++                HwBlob childBlob = _hidl_reply.readEmbeddedBuffer(_hidl_vec_size * 32, _hidl_blob.handle(), 0L, true);
++                _hidl_out_hashchain.clear();
++                while (true) {
++                    int _hidl_index_02 = _hidl_index_0;
++                    if (_hidl_index_02 >= _hidl_vec_size) {
++                        return _hidl_out_hashchain;
++                    }
++                    byte[] _hidl_vec_element = new byte[32];
++                    long _hidl_array_offset_1 = _hidl_index_02 * 32;
++                    childBlob.copyToInt8Array(_hidl_array_offset_1, _hidl_vec_element, 32);
++                    _hidl_out_hashchain.add(_hidl_vec_element);
++                    _hidl_index_0 = _hidl_index_02 + 1;
++                }
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public void setHALInstrumentation() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256462420, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) throws RemoteException {
++            return this.mRemote.linkToDeath(recipient, cookie);
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public void ping() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(256921159, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public DebugInfo getDebugInfo() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257049926, _hidl_request, _hidl_reply, 0);
++                _hidl_reply.verifySuccess();
++                _hidl_request.releaseTemporaryStorage();
++                DebugInfo _hidl_out_info = new DebugInfo();
++                _hidl_out_info.readFromParcel(_hidl_reply);
++                return _hidl_out_info;
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public void notifySyspropsChanged() throws RemoteException {
++            HwParcel _hidl_request = new HwParcel();
++            _hidl_request.writeInterfaceToken(IBase.kInterfaceName);
++            HwParcel _hidl_reply = new HwParcel();
++            try {
++                this.mRemote.transact(257120595, _hidl_request, _hidl_reply, 1);
++                _hidl_request.releaseTemporaryStorage();
++            } finally {
++                _hidl_reply.release();
++            }
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) throws RemoteException {
++            return this.mRemote.unlinkToDeath(recipient);
++        }
++    }
++
++    public static abstract class Stub extends HwBinder implements ISomcHookResponse {
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public IHwBinder asBinder() {
++            return this;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final ArrayList<String> interfaceChain() {
++            return new ArrayList<>(Arrays.asList(ISomcHookResponse.kInterfaceName, IBase.kInterfaceName));
++        }
++        
++        @Override
++        public final void debug(NativeHandle fd, ArrayList<String> options) {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final String interfaceDescriptor() {
++            return ISomcHookResponse.kInterfaceName;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final ArrayList<byte[]> getHashChain() {
++            return new ArrayList<>(Arrays.asList(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, new byte[]{-67, -38, -74, 24, 77, 122, 52, 109, -90, -96, 125, -64, -126, -116, -15, -102, 105, 111, 76, -86, 54, 17, -59, 31, 46, 20, 86, 90, 20, -76, 15, -39}));
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final void setHALInstrumentation() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final boolean linkToDeath(IHwBinder.DeathRecipient recipient, long cookie) {
++            return true;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final void ping() {
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final DebugInfo getDebugInfo() {
++            DebugInfo info = new DebugInfo();
++            info.pid = HidlSupport.getPidIfSharable();
++            info.ptr = 0L;
++            info.arch = 0;
++            return info;
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final void notifySyspropsChanged() {
++            HwBinder.enableInstrumentation();
++        }
++
++        @Override // vendor.somc.hardware.radio.V1_0.ISomcHookResponse, android.hidl.base.V1_0.IBase
++        public final boolean unlinkToDeath(IHwBinder.DeathRecipient recipient) {
++            return true;
++        }
++
++        public IHwInterface queryLocalInterface(String descriptor) {
++            if (ISomcHookResponse.kInterfaceName.equals(descriptor)) {
++                return this;
++            }
++            return null;
++        }
++
++        public void registerAsService(String serviceName) throws RemoteException {
++            registerService(serviceName);
++        }
++
++        public String toString() {
++            return interfaceDescriptor() + "@Stub";
++        }
++
++        public void onTransact(int _hidl_code, HwParcel _hidl_request, HwParcel _hidl_reply, int _hidl_flags) throws RemoteException {
++            boolean _hidl_is_oneway;
++            int _hidl_index_0 = 0;
++            switch (_hidl_code) {
++                case 1:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(ISomcHookResponse.kInterfaceName);
++                        RadioResponseInfo info = new RadioResponseInfo();
++                        info.readFromParcel(_hidl_request);
++                        ArrayList<Byte> data = _hidl_request.readInt8Vector();
++                        sendSomcRequestRawResponse(info, data);
++                        break;
++                    }
++                case 256067662:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<String> _hidl_out_descriptors = interfaceChain();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeStringVector(_hidl_out_descriptors);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256131655:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        NativeHandle fd = _hidl_request.readNativeHandle();
++                        ArrayList<String> options = _hidl_request.readStringVector();
++                        debug(fd, options);
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256136003:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        String _hidl_out_descriptor = interfaceDescriptor();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.writeString(_hidl_out_descriptor);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256398152:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ArrayList<byte[]> _hidl_out_hashchain = getHashChain();
++                        _hidl_reply.writeStatus(0);
++                        HwBlob _hidl_blob = new HwBlob(16);
++                        int _hidl_vec_size = _hidl_out_hashchain.size();
++                        _hidl_blob.putInt32(8L, _hidl_vec_size);
++                        _hidl_blob.putBool(12L, false);
++                        HwBlob childBlob = new HwBlob(_hidl_vec_size * 32);
++                        while (_hidl_index_0 < _hidl_vec_size) {
++                            long _hidl_array_offset_1 = _hidl_index_0 * 32;
++                            childBlob.putInt8Array(_hidl_array_offset_1, _hidl_out_hashchain.get(_hidl_index_0));
++                            _hidl_index_0++;
++                        }
++                        _hidl_blob.putBlob(0L, childBlob);
++                        _hidl_reply.writeBuffer(_hidl_blob);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 256462420:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        setHALInstrumentation();
++                        break;
++                    }
++                case 256660548:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++                case 256921159:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        ping();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257049926:
++                    _hidl_is_oneway = (_hidl_flags & 1) != 0;
++                    if (_hidl_is_oneway) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        DebugInfo _hidl_out_info = getDebugInfo();
++                        _hidl_reply.writeStatus(0);
++                        _hidl_out_info.writeToParcel(_hidl_reply);
++                        _hidl_reply.send();
++                        break;
++                    }
++                case 257120595:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 1) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    } else {
++                        _hidl_request.enforceInterface(IBase.kInterfaceName);
++                        notifySyspropsChanged();
++                        break;
++                    }
++                case 257250372:
++                    _hidl_index_0 = (_hidl_flags & 1) != 0 ? 1 : 0;
++                    if (_hidl_index_0 != 0) {
++                        _hidl_reply.writeStatus(Integer.MIN_VALUE);
++                        _hidl_reply.send();
++                        break;
++                    }
++                    break;
++            }
++        }
++    }
++}
+
