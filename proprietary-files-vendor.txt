@@ -1096,10 +1096,10 @@ vendor/lib64/libqmi_csi.so
 vendor/lib64/libqmi_encdec.so
 vendor/lib64/libqrtr.so
 vendor/lib64/libqsocket.so
-vendor/lib64/libril.so
+vendor/lib64/libril.so|0be4c810681f05e52f5095137656c8ad52eae7c3
 vendor/lib64/libril-qc-hal-qmi.so
 vendor/lib64/libril-qc-ltedirectdisc.so
-vendor/lib64/libril-qc-qmi-1.so
+vendor/lib64/libril-qc-qmi-1.so|625a7662c51d25ca48f5a006159126cedf4de761
 vendor/lib64/libril-qc-radioconfig.so
 vendor/lib64/librilqmiservices.so
 vendor/lib64/libsettings.so
