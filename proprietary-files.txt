@@ -113,7 +113,7 @@ lib64/vendor.qti.hardware.qdutils_disp@1.0.so
 
 # DPM
 bin/dpmd
-etc/customization/settings/defaults/dpm.conf:etc/dpm.conf
+etc/customization/settings/defaults/dpm.conf:etc/dpm/dpm.conf
 etc/init/dpmd.rc
 etc/permissions/com.qti.dpmframework.xml|7f97524342b341bdfc2a11f60ebd2d0c22c4380d
 etc/permissions/dpmapi.xml
