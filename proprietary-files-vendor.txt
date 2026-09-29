@@ -1053,10 +1053,8 @@ vendor/lib/libqmi_csi.so
 vendor/lib/libqmi_encdec.so
 vendor/lib/libqrtr.so
 vendor/lib/libqsocket.so
-vendor/lib/libril.so
 vendor/lib/libril-qc-hal-qmi.so
 vendor/lib/libril-qc-ltedirectdisc.so
-vendor/lib/libril-qc-qmi-1.so
 vendor/lib/libril-qc-radioconfig.so
 vendor/lib/librilqmiservices.so
 vendor/lib/libsettings.so

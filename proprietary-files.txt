@@ -113,7 +113,8 @@ lib64/vendor.qti.hardware.qdutils_disp@1.0.so
 
 # DPM
 bin/dpmd
-etc/customization/settings/defaults/dpm.conf:etc/dpm/dpm.conf
+# File from 47.2.A.11.228, pinned to correct location, due to a symlink in the stock ROM poisoning the extractor script
+etc/dpm/dpm.conf|4e6b425f21737d48750d1fce8441080968c0a0e1
 etc/init/dpmd.rc
 etc/permissions/com.qti.dpmframework.xml|7f97524342b341bdfc2a11f60ebd2d0c22c4380d
 etc/permissions/dpmapi.xml
@@ -455,7 +456,7 @@ lib64/vendor.qti.hardware.qteeconnector@1.0.so
 lib64/vendor.qti.esepowermanager@1.0.so
 
 # QTI_IMS
--system/app/uceShimService/uceShimService.apk:product/priv-app/uceShimService/uceShimService.apk
+product/priv-app/uceShimService/uceShimService.apk|185b3533c0d5681c14aa14c6ee1ffda0076e850e
 # APK patched to include all needed classes and to allow SMS over IMS fallback
 product/priv-app/ims/ims.apk|2abecc756673170f3f7340a19c94187c9c3fb95b
 etc/permissions/com.qualcomm.qti.imscmservice-V2.0-java.xml:product/etc/permissions/com.qualcomm.qti.imscmservice-V2.0-java.xml
