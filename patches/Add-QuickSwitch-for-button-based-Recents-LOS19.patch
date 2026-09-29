@@ -1,0 +1,483 @@
+# PWD: packages/apps/LineageParts
+From 3534321dfea541f5bbd59e12606f218d79f5aabb Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 21:36:08 +0300
+Subject: [PATCH] Add QuickSwitch for button-based Recents
+
+Change-Id: I55acbf8fa3741e4866b85e05d301e5480c0104ca
+---
+ .../android/quickstep/AbsSwipeUpHandler.java  | 73 +++++++++++---
+ .../quickstep/LauncherActivityInterface.java  | 72 +++++++++++++-
+ .../quickstep/OverviewCommandHelper.java      | 98 ++++++++++++++++++-
+ .../quickstep/TaskAnimationManager.java       | 43 +++++++-
+ 4 files changed, 267 insertions(+), 19 deletions(-)
+
+diff --git a/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java b/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
+index f2bcaa78f52..c08c646cc9a 100644
+--- a/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
++++ b/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
+@@ -137,6 +137,10 @@ public abstract class AbsSwipeUpHandler<T extends StatefulActivity<S>,
+         extends SwipeUpAnimationLogic implements OnApplyWindowInsetsListener,
+         RecentsAnimationCallbacks.RecentsAnimationListener {
+     private static final String TAG = "AbsSwipeUpHandler";
++    enum AnimationInterruptionMode {
++        NEW_GESTURE_HANDLER,
++        RECENTS_BUTTON_QUICK_SWITCH
++    }
+ 
+     private static final String[] STATE_NAMES = DEBUG_STATES ? new String[17] : null;
+ 
+@@ -261,6 +265,7 @@ private static int getFlagForIndex(int index, String name) {
+     // Used to control launcher components throughout the swipe gesture.
+     private AnimatorControllerWithResistance mLauncherTransitionController;
+     private boolean mHasEndedLauncherTransition;
++    private boolean mQuickSwitchPreempted;
+ 
+     private AnimationFactory mAnimationFactory = (t) -> { };
+ 
+@@ -1516,7 +1521,7 @@ public void onConsumerAboutToBeSwitched() {
+         if (mGestureState.isRecentsAnimationRunning() && mGestureState.getEndTarget() != null
+                 && !mGestureState.getEndTarget().isLauncher) {
+             // Continued quick switch.
+-            cancelCurrentAnimation();
++            interruptCurrentAnimation(AnimationInterruptionMode.NEW_GESTURE_HANDLER);
+         } else {
+             mStateCallback.setStateOnUiThread(STATE_FINISH_WITH_NO_END);
+             reset();
+@@ -1576,18 +1581,53 @@ private void reset() {
+     }
+ 
+     /**
+-     * Cancels any running animation so that the active target can be overriden by a new swipe
+-     * handler (in case of quick switch).
++     * Interrupts the current animation according to the component that is taking over.
++     *
++     * A new gesture handler takes ownership of the remote app animation, so this handler must stop
++     * driving mCurrentShift and release its gesture callbacks. A second Recents-button toggle is
++     * different: the current handler must keep driving the running app toward Overview while only
++     * the Launcher/Overview side is frozen at its current visual progress.
++     *
++     * @return false only when a Recents-button quick-switch interruption cannot be applied to the
++     *         current transition.
+      */
+-    private void cancelCurrentAnimation() {
+-        mCanceled = true;
+-        mCurrentShift.cancelAnimation();
++    @UiThread
++    boolean interruptCurrentAnimation(AnimationInterruptionMode mode) {
++        if (mode == AnimationInterruptionMode.NEW_GESTURE_HANDLER) {
++            mCanceled = true;
++            mCurrentShift.cancelAnimation();
++
++            // Cleanup when switching handlers.
++            mInputConsumerProxy.unregisterCallback();
++            mActivityInitListener.unregister();
++            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(
++                    mActivityRestartListener);
++            mTaskSnapshot = null;
++            return true;
++        }
+ 
+-        // Cleanup when switching handlers
+-        mInputConsumerProxy.unregisterCallback();
+-        mActivityInitListener.unregister();
+-        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mActivityRestartListener);
+-        mTaskSnapshot = null;
++        if (mHasEndedLauncherTransition || mLauncherTransitionController == null
++                || mGestureState.getEndTarget() != RECENTS) {
++            return false;
++        }
++
++        // End only Launcher's playback controller. Keep mCurrentShift running so the original app
++        // leash continues toward Overview. Suppress the normal end action because it would commit
++        // StateManager to an endpoint and reapply state handlers, destroying the frozen geometry.
++        mHasEndedLauncherTransition = true;
++        mQuickSwitchPreempted = true;
++        AnimatorPlaybackController controller =
++                mLauncherTransitionController.getNormalController();
++        controller.setEndAction(null);
++        controller.dispatchSetInterpolator(
++                t -> Utilities.boundToRange(mCurrentShift.value, 0, 1));
++        controller.getAnimationPlayer().end();
++        mLauncherTransitionController = null;
++
++        if (mRecentsView != null) {
++            mRecentsView.abortScrollerAnimation();
++        }
++        return true;
+     }
+ 
+     private void invalidateHandler() {
+@@ -1924,6 +1964,17 @@ public void onRecentsAnimationFinished(RecentsAnimationController controller) {
+         if (mRecentsView != null) {
+             mRecentsView.setRecentsAnimationTargets(null, null);
+         }
++
++        // If the side-task launch finishes the Recents animation before the old settle animation
++        // can invalidate this preempted handler, its settle-success callback exits early because
++        // mRecentsAnimationController is already null. Explicitly invalidate in that race so no
++        // input/listener state is left behind.
++        if (mQuickSwitchPreempted) {
++            mQuickSwitchPreempted = false;
++            if (!mStateCallback.hasStates(STATE_HANDLER_INVALIDATED)) {
++                reset();
++            }
++        }
+     }
+ 
+     @Override
+diff --git a/quickstep/src/com/android/quickstep/LauncherActivityInterface.java b/quickstep/src/com/android/quickstep/LauncherActivityInterface.java
+index 719c2ae78ca..7006d1b46e1 100644
+--- a/quickstep/src/com/android/quickstep/LauncherActivityInterface.java
++++ b/quickstep/src/com/android/quickstep/LauncherActivityInterface.java
+@@ -26,6 +26,7 @@
+ 
+ import android.animation.Animator;
+ import android.animation.AnimatorSet;
++import android.animation.ValueAnimator;
+ import android.content.Context;
+ import android.graphics.Rect;
+ import android.view.MotionEvent;
+@@ -38,9 +39,11 @@
+ import com.android.launcher3.Launcher;
+ import com.android.launcher3.LauncherInitListener;
+ import com.android.launcher3.LauncherState;
++import com.android.launcher3.anim.AnimatorPlaybackController;
+ import com.android.launcher3.anim.PendingAnimation;
+ import com.android.launcher3.statehandlers.DepthController;
+ import com.android.launcher3.statehandlers.DepthController.ClampedDepthProperty;
++import com.android.launcher3.states.StateAnimationConfig;
+ import com.android.launcher3.statemanager.StateManager;
+ import com.android.launcher3.taskbar.LauncherTaskbarUIController;
+ import com.android.launcher3.touch.PagedOrientationHandler;
+@@ -64,6 +67,9 @@ public final class LauncherActivityInterface extends
+ 
+     public static final LauncherActivityInterface INSTANCE = new LauncherActivityInterface();
+ 
++    @Nullable
++    private AnimatorPlaybackController mHomeToOverviewController;
++
+     private LauncherActivityInterface() {
+         super(true, OVERVIEW, BACKGROUND_APP);
+     }
+@@ -218,10 +224,70 @@ public boolean switchToRecentsIfVisible(Runnable onCompleteCallback) {
+             }
+         }
+ 
++        StateManager<LauncherState> stateManager = launcher.getStateManager();
++        boolean shouldAnimate = stateManager.shouldAnimateStateChange();
+         closeOverlay();
+-        launcher.getStateManager().goToState(OVERVIEW,
+-                launcher.getStateManager().shouldAnimateStateChange(),
+-                onCompleteCallback == null ? null : forEndCallback(onCompleteCallback));
++
++        // The Recents-button transition from Home needs to remain interruptible so that a second
++        // Recents press can launch a task from the exact in-flight Overview geometry. Use the same
++        // state handlers and atomic-animation preparation as StateManager.goToState(), but drive
++        // them through a playback controller which LauncherActivityInterface can stop in place.
++        boolean useControlledHomeTransition = shouldAnimate
++                && ValueAnimator.areAnimatorsEnabled()
++                && stateManager.getState() == NORMAL
++                && !stateManager.isInTransition();
++        if (useControlledHomeTransition) {
++            StateAnimationConfig config = new StateAnimationConfig();
++            config.duration = OVERVIEW.getTransitionDuration(launcher);
++            stateManager.prepareForAtomicAnimation(NORMAL, OVERVIEW, config);
++
++            AnimatorPlaybackController controller =
++                    stateManager.createAnimationToNewWorkspace(OVERVIEW, config);
++            mHomeToOverviewController = controller;
++            controller.getTarget().addListener(forEndCallback(() -> {
++                if (mHomeToOverviewController == controller) {
++                    mHomeToOverviewController = null;
++                }
++                if (onCompleteCallback != null) {
++                    onCompleteCallback.run();
++                }
++            }));
++
++            controller.dispatchOnStart();
++            controller.start();
++        } else {
++            stateManager.goToState(OVERVIEW, shouldAnimate,
++                    onCompleteCallback == null ? null : forEndCallback(onCompleteCallback));
++        }
++        return true;
++    }
++
++    @UiThread
++    boolean isHomeToOverviewTransitionActive() {
++        Launcher launcher = getCreatedActivity();
++        return mHomeToOverviewController != null
++                && launcher != null
++                && launcher.getStateManager().isInTransition()
++                && launcher.getStateManager().getState() == OVERVIEW;
++    }
++
++    /**
++     * Ends the controlled Home-to-Overview transition without advancing its visual properties.
++     * The target animation's end listeners still run, so StateManager commits stable OVERVIEW and
++     * clears ownership before the replacement Recents-button command launches its task.
++     */
++    @UiThread
++    boolean interruptHomeToOverviewTransition() {
++        AnimatorPlaybackController controller = mHomeToOverviewController;
++        if (controller == null) {
++            return false;
++        }
++
++        // Cancelling only the playback player leaves all child properties at their exact current
++        // values. Dispatching the target end listeners then commits the logical OVERVIEW state and
++        // clears StateManager's animation ownership without forcing those properties to fraction 1.
++        controller.getAnimationPlayer().cancel();
++        controller.dispatchOnEnd();
+         return true;
+     }
+ 
+diff --git a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+index 17baa3ad91f..df3a9a7a1ee 100644
+--- a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
++++ b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+@@ -97,6 +97,10 @@ private void executeNext() {
+ 
+     @UiThread
+     private void addCommand(CommandInfo cmd) {
++        if (tryPreemptOverviewTransition(cmd)) {
++            return;
++        }
++
+         boolean wasEmpty = mPendingCommands.isEmpty();
+         mPendingCommands.add(cmd);
+         if (wasEmpty) {
+@@ -104,6 +108,74 @@ private void addCommand(CommandInfo cmd) {
+         }
+     }
+ 
++    /**
++     * Replaces an in-flight Recents-button toggle with a second toggle, without waiting for the
++     * first app-to-Overview transition to settle. The original swipe handler keeps ownership of
++     * the running app animation, while Launcher/Overview is frozen at its current visual progress.
++     *
++     * The replacement command carries the already-created RecentsView because StateManager still
++     * considers Launcher to be in its background-app state at this point. executeCommand() can then
++     * follow its normal TYPE_TOGGLE path without pretending that Overview has fully settled.
++     */
++    @UiThread
++    private boolean tryPreemptOverviewTransition(CommandInfo cmd) {
++        if (cmd.type != TYPE_TOGGLE || mPendingCommands.size() != 1) {
++            return false;
++        }
++
++        CommandInfo activeCommand = mPendingCommands.get(0);
++        if (activeCommand.type != TYPE_TOGGLE) {
++            return false;
++        }
++
++        BaseActivityInterface<?, ?> activityInterface =
++                mOverviewComponentObserver.getActivityInterface();
++        StatefulActivity<?> activity = activityInterface.getCreatedActivity();
++        if (activeCommand.mActiveHandler == null) {
++            if (activityInterface instanceof LauncherActivityInterface) {
++                LauncherActivityInterface launcherActivityInterface =
++                        (LauncherActivityInterface) activityInterface;
++                if (launcherActivityInterface.isHomeToOverviewTransitionActive()) {
++                    RecentsView recents = activity == null ? null : activity.getOverviewPanel();
++                    if (recents == null) {
++                        return false;
++                    }
++
++                    // Replace the queue head before ending the first command's state animation.
++                    // Its existing completion callback can then run normally, but its
++                    // scheduleNextTask() call sees that it no longer owns the queue head.
++                    mPendingCommands.set(0, cmd);
++                    if (!launcherActivityInterface.interruptHomeToOverviewTransition()) {
++                        mPendingCommands.set(0, activeCommand);
++                        return false;
++                    }
++
++                    executeNext();
++                    return true;
++                }
++            }
++            return false;
++        }
++
++        if (!mTaskAnimationManager.isRecentsAnimationRunning()) {
++            return false;
++        }
++
++        RecentsView recents = activity == null ? null : activity.getOverviewPanel();
++        if (recents == null || !activeCommand.mActiveHandler.interruptCurrentAnimation(
++                AbsSwipeUpHandler.AnimationInterruptionMode.RECENTS_BUTTON_QUICK_SWITCH)) {
++            return false;
++        }
++
++        // Replace the queue head rather than enqueueing behind it. The old handler intentionally
++        // remains alive to finish the running-app animation. Its eventual scheduleNextTask() call
++        // is harmless because the old command is no longer the queue head.
++        cmd.mPreemptedRecentsView = recents;
++        mPendingCommands.set(0, cmd);
++        executeNext();
++        return true;
++    }
++
+     /**
+      * Adds a command to be executed next, after all pending tasks are completed
+      */
+@@ -153,7 +225,12 @@ private boolean launchTask(RecentsView recents, @Nullable TaskView taskView, Com
+     private <T extends StatefulActivity<?>> boolean executeCommand(CommandInfo cmd) {
+         BaseActivityInterface<?, T> activityInterface =
+                 mOverviewComponentObserver.getActivityInterface();
+-        RecentsView recents = activityInterface.getVisibleRecentsView();
++        boolean usingPreemptedRecents = cmd.mPreemptedRecentsView != null;
++        RecentsView recents = cmd.mPreemptedRecentsView;
++        cmd.mPreemptedRecentsView = null;
++        if (recents == null) {
++            recents = activityInterface.getVisibleRecentsView();
++        }
+         if (recents == null) {
+             if (cmd.type == TYPE_HIDE) {
+                 // already hidden
+@@ -176,8 +253,19 @@ private <T extends StatefulActivity<?>> boolean executeCommand(CommandInfo cmd)
+                             : null;
+                     return launchTask(recents, tv, cmd);
+                 }
+-                case TYPE_TOGGLE:
+-                    return launchTask(recents, getNextTask(recents), cmd);
++                case TYPE_TOGGLE: {
++                    TaskView nextTask = getNextTask(recents);
++                    int quickSwitchTaskId = -1;
++                    if (usingPreemptedRecents && nextTask != null && nextTask.getTask() != null) {
++                        quickSwitchTaskId = nextTask.getTask().key.id;
++                        mTaskAnimationManager.setPendingQuickSwitchTaskId(quickSwitchTaskId);
++                    }
++                    boolean canExecuteNext = launchTask(recents, nextTask, cmd);
++                    if (canExecuteNext && quickSwitchTaskId != -1) {
++                        mTaskAnimationManager.clearPendingQuickSwitchTaskId(quickSwitchTaskId);
++                    }
++                    return canExecuteNext;
++                }
+                 case TYPE_HOME:
+                     recents.startHome();
+                     LauncherSplitScreenListener.INSTANCE.getNoCreate().notifySwipingToHome();
+@@ -201,6 +289,7 @@ private <T extends StatefulActivity<?>> boolean executeCommand(CommandInfo cmd)
+         gestureState.setHandlingAtomicEvent(true);
+         AbsSwipeUpHandler interactionHandler = mService.getSwipeUpHandlerFactory()
+                 .newHandler(gestureState, cmd.createTime);
++        cmd.mActiveHandler = interactionHandler;
+         interactionHandler.setGestureEndCallback(
+                 () -> onTransitionComplete(cmd, interactionHandler));
+         interactionHandler.initWhenReady();
+@@ -249,6 +338,7 @@ public void onRecentsAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnail
+ 
+     private void onTransitionComplete(CommandInfo cmd, AbsSwipeUpHandler handler) {
+         cmd.removeListener(handler);
++        cmd.mActiveHandler = null;
+         Trace.endAsyncSection(TRANSITION_NAME, 0);
+ 
+         if (cmd.type == TYPE_SHOW_NEXT_FOCUS) {
+@@ -284,6 +374,8 @@ private static class CommandInfo {
+         public final long createTime = SystemClock.elapsedRealtime();
+         public final int type;
+         RecentsAnimationCallbacks mActiveCallbacks;
++        AbsSwipeUpHandler<?, ?, ?> mActiveHandler;
++        RecentsView mPreemptedRecentsView;
+ 
+         CommandInfo(int type) {
+             this.type = type;
+diff --git a/quickstep/src/com/android/quickstep/TaskAnimationManager.java b/quickstep/src/com/android/quickstep/TaskAnimationManager.java
+index 82c7c081539..08f3069d8df 100644
+--- a/quickstep/src/com/android/quickstep/TaskAnimationManager.java
++++ b/quickstep/src/com/android/quickstep/TaskAnimationManager.java
+@@ -48,6 +48,7 @@
+ import java.util.HashMap;
+ 
+ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAnimationListener {
++    private static final int INVALID_TASK_ID = -1;
+     public static final boolean ENABLE_SHELL_TRANSITIONS =
+             SystemProperties.getBoolean("persist.debug.shell_transit", false);
+ 
+@@ -58,6 +59,7 @@ public class TaskAnimationManager implements RecentsAnimationCallbacks.RecentsAn
+     private GestureState mLastGestureState;
+     private RemoteAnimationTargetCompat mLastAppearedTaskTarget;
+     private Runnable mLiveTileCleanUpHandler;
++    private int mPendingQuickSwitchTaskId = INVALID_TASK_ID;
+     private Context mCtx;
+ 
+     private final TaskStackChangeListener mLiveTileRestartListener = new TaskStackChangeListener() {
+@@ -152,6 +154,8 @@ public void onRecentsAnimationFinished(RecentsAnimationController controller) {
+             @Override
+             public void onTasksAppeared(RemoteAnimationTargetCompat[] appearedTaskTargets) {
+                 RemoteAnimationTargetCompat appearedTaskTarget = appearedTaskTargets[0];
++                RemoteAnimationTargetCompat pendingQuickSwitchTarget =
++                        findPendingQuickSwitchTarget(appearedTaskTargets);
+                 BaseActivityInterface activityInterface = mLastGestureState.getActivityInterface();
+                 // Convert appTargets to type RemoteAnimationTarget for all apps except Home app
+                 RemoteAnimationTarget[] nonHomeApps = Arrays.stream(appearedTaskTargets)
+@@ -164,15 +168,23 @@ public void onTasksAppeared(RemoteAnimationTargetCompat[] appearedTaskTargets) {
+                         SystemUiProxy.INSTANCE.getNoCreate()
+                                 .onGoingToRecentsLegacy(false, nonHomeApps);
+ 
+-                if (ENABLE_QUICKSTEP_LIVE_TILE.get() && activityInterface.isInLiveTileMode()
++                boolean isQuickSwitchAppearance = pendingQuickSwitchTarget != null;
++                if (ENABLE_QUICKSTEP_LIVE_TILE.get()
++                        && (activityInterface.isInLiveTileMode() || isQuickSwitchAppearance)
+                         && activityInterface.getCreatedActivity() != null) {
+                     RecentsView recentsView =
+                             activityInterface.getCreatedActivity().getOverviewPanel();
+                     if (recentsView != null) {
+-                        recentsView.launchSideTaskInLiveTileMode(appearedTaskTarget.taskId,
++                        RemoteAnimationTargetCompat taskToLaunch = isQuickSwitchAppearance
++                                ? pendingQuickSwitchTarget
++                                : appearedTaskTarget;
++                        recentsView.launchSideTaskInLiveTileMode(taskToLaunch.taskId,
+                                 appearedTaskTargets,
+                                 new RemoteAnimationTargetCompat[0] /* wallpaper */,
+                                 RemoteAnimationTargetCompat.wrap(nonAppTargets) /* nonApps */);
++                        if (isQuickSwitchAppearance) {
++                            clearPendingQuickSwitchTaskId(taskToLaunch.taskId);
++                        }
+                         return;
+                     }
+                 }
+@@ -220,6 +232,32 @@ public RecentsAnimationCallbacks continueRecentsAnimation(GestureState gestureSt
+         return mCallbacks;
+     }
+ 
++    @UiThread
++    public void setPendingQuickSwitchTaskId(int taskId) {
++        mPendingQuickSwitchTaskId = taskId;
++    }
++
++    @UiThread
++    public void clearPendingQuickSwitchTaskId(int taskId) {
++        if (mPendingQuickSwitchTaskId == taskId) {
++            mPendingQuickSwitchTaskId = INVALID_TASK_ID;
++        }
++    }
++
++    @Nullable
++    private RemoteAnimationTargetCompat findPendingQuickSwitchTarget(
++            RemoteAnimationTargetCompat[] targets) {
++        if (mPendingQuickSwitchTaskId == INVALID_TASK_ID) {
++            return null;
++        }
++        for (RemoteAnimationTargetCompat target : targets) {
++            if (target.taskId == mPendingQuickSwitchTaskId) {
++                return target;
++            }
++        }
++        return null;
++    }
++
+     public void endLiveTile() {
+         if (mLastGestureState == null) {
+             return;
+@@ -281,6 +319,7 @@ public boolean isRecentsAnimationRunning() {
+      * Cleans up the recents animation entirely.
+      */
+     private void cleanUpRecentsAnimation() {
++        mPendingQuickSwitchTaskId = INVALID_TASK_ID;
+         if (mLiveTileCleanUpHandler != null) {
+             mLiveTileCleanUpHandler.run();
+             mLiveTileCleanUpHandler = null;
