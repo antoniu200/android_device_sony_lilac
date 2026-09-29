@@ -132,7 +132,6 @@ vendor/etc/acdbdata/Sony/Sony_yoshino_Hdmi_cal.acdb
 vendor/etc/acdbdata/Sony/Sony_yoshino_Headset_cal.acdb
 vendor/etc/acdbdata/Sony/Sony_yoshino_Speaker_cal.acdb
 vendor/etc/acdbdata/Sony/workspaceFile_Sony_yoshino.qwsp
-vendor/lib/hw/audio.primary.msm8998.so
 vendor/lib/soundfx/libasphere.so
 vendor/lib/soundfx/libqcbassboost.so
 vendor/lib/soundfx/libqcreverb.so
@@ -168,8 +167,8 @@ vendor/etc/default_volume_tables.xml
 vendor/etc/graphite_ipc_platform_info.xml
 vendor/etc/listen_platform_info.xml
 vendor/etc/mixer_paths.xml
-# From G8441_Customized DE_47.2.A.11.228-R3C, increase headset volume
-vendor/etc/mixer_paths_tasha.xml|bb660d3ced04bb223d95408c5fb602f0d39b8323
+# From G8441_Customized DE_47.2.A.11.228-R3C, increase headset volume, allow separate RX and TX on stereo call recording
+vendor/etc/mixer_paths_tasha.xml|8508b0c187594a3f9921c6466c089e3ac228ee94
 vendor/etc/sound_trigger_mixer_paths.xml
 vendor/etc/sound_trigger_platform_info.xml
 vendor/etc/usb_audio_policy_configuration.xml
