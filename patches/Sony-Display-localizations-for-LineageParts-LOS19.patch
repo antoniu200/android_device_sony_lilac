@@ -1,0 +1,2344 @@
+From 90637e6c74f20e991b22908dce3bc4d1ac44173a Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 21:26:54 +0300
+Subject: [PATCH] Update localization to match new screen features
+
+Change-Id: Id146eab216e73a77be22a60226f0ab993b464a8c
+---
+ res/values-af/strings.xml      |  7 +++----
+ res/values-ar/strings.xml      | 14 ++++++++++----
+ res/values-ast-rES/strings.xml |  1 +
+ res/values-az/strings.xml      | 14 ++++++++++----
+ res/values-be/strings.xml      | 14 ++++++++++----
+ res/values-bg/strings.xml      | 14 ++++++++++----
+ res/values-bn/strings.xml      | 10 ++++++++++
+ res/values-bs/strings.xml      | 10 ++++++++++
+ res/values-ca/strings.xml      | 14 ++++++++++----
+ res/values-cs/strings.xml      | 14 ++++++++++----
+ res/values-cy/strings.xml      |  7 +++----
+ res/values-da/strings.xml      | 14 ++++++++++----
+ res/values-de/strings.xml      | 14 ++++++++++----
+ res/values-el/strings.xml      | 14 ++++++++++----
+ res/values-en-rAU/strings.xml  |  7 +++----
+ res/values-en-rCA/strings.xml  | 13 +++++++++----
+ res/values-en-rGB/strings.xml  |  7 +++----
+ res/values-en-rIN/strings.xml  |  7 +++----
+ res/values-es-rMX/strings.xml  |  1 +
+ res/values-es-rUS/strings.xml  |  7 +++----
+ res/values-es/strings.xml      | 14 ++++++++++----
+ res/values-et/strings.xml      | 14 ++++++++++----
+ res/values-eu/strings.xml      | 14 ++++++++++----
+ res/values-fa/strings.xml      | 14 ++++++++++----
+ res/values-fi/strings.xml      | 14 ++++++++++----
+ res/values-fr/strings.xml      | 14 ++++++++++----
+ res/values-fur-rIT/strings.xml |  7 +++----
+ res/values-fy-rNL/strings.xml  |  7 +++----
+ res/values-ga-rIE/strings.xml  |  7 +++----
+ res/values-gd/strings.xml      |  7 +++----
+ res/values-gl/strings.xml      | 14 ++++++++++----
+ res/values-hr/strings.xml      | 14 ++++++++++----
+ res/values-hu/strings.xml      | 14 ++++++++++----
+ res/values-in/strings.xml      | 14 ++++++++++----
+ res/values-is/strings.xml      | 14 ++++++++++----
+ res/values-it/strings.xml      | 14 ++++++++++----
+ res/values-iw/strings.xml      | 14 ++++++++++----
+ res/values-ja/strings.xml      | 14 ++++++++++----
+ res/values-ka/strings.xml      | 14 ++++++++++----
+ res/values-kab-rDZ/strings.xml |  3 ++-
+ res/values-kn/strings.xml      | 14 ++++++++++----
+ res/values-ko/strings.xml      | 14 ++++++++++----
+ res/values-mk/strings.xml      | 14 ++++++++++----
+ res/values-nb/strings.xml      | 14 ++++++++++----
+ res/values-nl/strings.xml      | 14 ++++++++++----
+ res/values-pl/strings.xml      | 14 ++++++++++----
+ res/values-pt-rBR/strings.xml  | 14 ++++++++++----
+ res/values-pt-rPT/strings.xml  | 14 ++++++++++----
+ res/values-ro/strings.xml      | 16 +++++++++++-----
+ res/values-ru/strings.xml      | 14 ++++++++++----
+ res/values-sc-rIT/strings.xml  |  1 +
+ res/values-si/strings.xml      |  1 +
+ res/values-sk/strings.xml      | 14 ++++++++++----
+ res/values-sl/strings.xml      | 14 ++++++++++----
+ res/values-sq/strings.xml      | 14 ++++++++++----
+ res/values-sr/strings.xml      | 14 ++++++++++----
+ res/values-sv/strings.xml      | 14 ++++++++++----
+ res/values-ta/strings.xml      | 10 ++++++++++
+ res/values-th/strings.xml      | 14 ++++++++++----
+ res/values-tr/strings.xml      | 14 ++++++++++----
+ res/values-uk/strings.xml      | 14 ++++++++++----
+ res/values-vi/strings.xml      | 14 ++++++++++----
+ res/values-zh-rCN/strings.xml  | 14 ++++++++++----
+ res/values-zh-rTW/strings.xml  | 14 ++++++++++----
+ res/values/strings.xml         | 14 ++++++++++----
+ 65 files changed, 536 insertions(+), 230 deletions(-)
+
+diff --git a/res/values-af/strings.xml b/res/values-af/strings.xml
+index a6991d7dd..289aee962 100644
+--- a/res/values-af/strings.xml
++++ b/res/values-af/strings.xml
+@@ -77,7 +77,7 @@
+     <string name="led_notification_title">Ligte instellings</string>
+     <string name="led_notification_text">LED liggie is deur instellings geaktiveer</string>
+     <string name="live_display_summary">Optimaliseer jou skerm gebaseer op die tyd van die dag en die omringende omstandighede om leesbaarheid te verbeter en oogspanning te verminder</string>
+-    <string name="live_display_mode">Skerm modus</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Kleurtemperatuur</string>
+     <string name="live_display_color_temperature_summary">Dag: <xliff:g id="day_temperature">%1$d</xliff:g>K  Nag: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -89,7 +89,7 @@
+     <string name="live_display_low_power_summary">Verstel skerm vir laagste kragverbruik sonder verswakking</string>
+     <string name="live_display_enhance_color_title">Verbeter kleure</string>
+     <string name="live_display_enhance_color_summary">Verbeter kleur impak van vlees toon, natuurskoon en ander beelde</string>
+-    <string name="live_display_color_profile_title">Kleur profiel</string>
++
+     <string name="live_display_color_profile_standard_title">Standaard</string>
+     <string name="live_display_color_profile_standard_summary">Akkurate kleure en helder wit</string>
+     <string name="live_display_color_profile_natural_title">Natuurlik</string>
+@@ -112,8 +112,7 @@
+     <string name="live_display_color_profile_srgb_summary">Kleure akkuraat tot die sRGB kleurruimte</string>
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_color_profile_dci_p3_summary">Kleure akkuraat tot die DCI-P3 kleur spektrum</string>
+-    <string name="color_calibration_title">Kleur kalibrasie</string>
+-    <string name="color_calibration_summary">Kalibreer skermkleure</string>
++
+     <string name="color_red_title">Rooi</string>
+     <string name="color_green_title">Groen</string>
+     <string name="color_blue_title">Blou</string>
+diff --git a/res/values-ar/strings.xml b/res/values-ar/strings.xml
+index 9903baec2..a0eae3aad 100644
+--- a/res/values-ar/strings.xml
++++ b/res/values-ar/strings.xml
+@@ -83,7 +83,7 @@
+     <string name="led_notification_title">إعدادات الإضاءة</string>
+     <string name="led_notification_text">إضاءة الـ LED مفعلة من الإعدادات</string>
+     <string name="live_display_summary">تحسين الشاشة استناداً إلى الوقت من اليوم والظروف المحيطة لتحسين قابلية القراءة وتقليل إجهاد العين</string>
+-    <string name="live_display_mode">نمط العرض</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">درجة حرارة اللون</string>
+     <string name="live_display_color_temperature_summary">النهار: <xliff:g id="day_temperature">%1$d</xliff:g>K  الليل: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -97,7 +97,13 @@
+     <string name="live_display_low_power_summary">ضبط العرض لاستهلاك أقل للطاقة دون تشويش ما يُعرض</string>
+     <string name="live_display_enhance_color_title">تحسين الألوان</string>
+     <string name="live_display_enhance_color_summary">تحسين حيوية درجات ألوان البشرة والمشاهد الطبيعية وغيرها من الصور</string>
+-    <string name="live_display_color_profile_title">الملف التعريفي للون</string>
++    <string name="live_display_color_profile_title">نطاق الألوان والحدة</string>
++    <string name="live_display_color_profile_sony_professional_title">الوضع الاحترافي</string>
++    <string name="live_display_color_profile_sony_professional_summary">استخدام نطاق الألوان sRGB حتى تبدو الألوان بشكلها الأصلي</string>
++    <string name="live_display_color_profile_sony_standard_title">الوضع القياسي</string>
++    <string name="live_display_color_profile_sony_standard_summary">استخدام نطاق الألوان TRILUMINOS™ Display for mobile حتى تبدو تأثيرات اللون زاهية وساطعة</string>
++    <string name="live_display_color_profile_sony_vivid_title">وضع \"زاهية للغاية\"</string>
++    <string name="live_display_color_profile_sony_vivid_summary">استخدام نطاق ألوان زاهيًا بشكل أكبر حتى تبدو تأثيرات الألوان أكثر سطوعًا</string>
+     <string name="live_display_color_profile_standard_title">قياسي</string>
+     <string name="live_display_color_profile_standard_summary">ألوان دقيقة وبياض ناصع</string>
+     <string name="live_display_color_profile_natural_title">طبيعي</string>
+@@ -122,8 +128,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">الألوان مضبوطة لألوان فضاء DCI-P3</string>
+     <string name="live_display_reading_mode_title">وضع القراءة</string>
+     <string name="live_display_reading_mode_summary">وضع التدرج الرمادي للقراءة على المدى الطويل</string>
+-    <string name="color_calibration_title">معايرة الألوان</string>
+-    <string name="color_calibration_summary">معايرة الألوان الظاهرة على الشاشة</string>
++    <string name="color_calibration_title">توازن الأبيض</string>
++    <string name="color_calibration_summary">اضبط توازن الأبيض على شاشتك</string>
+     <string name="color_red_title">أحمر</string>
+     <string name="color_green_title">أخضر</string>
+     <string name="color_blue_title">أزرق</string>
+diff --git a/res/values-ast-rES/strings.xml b/res/values-ast-rES/strings.xml
+index 9b99f67c1..7ec99a636 100644
+--- a/res/values-ast-rES/strings.xml
++++ b/res/values-ast-rES/strings.xml
+@@ -279,4 +279,5 @@
+     <string name="sms_security_check_limit_summary">Les aplicaciones puen unviar %s mensaxes nun minutu enantes de riquir la confirmación</string>
+     <string name="sms_security_check_limit_summary_none">Les aplicaciones nun tienen permisu pa unviar nengún mensaxe ensin la confirmación</string>
+     <string name="sms_security_check_limit_always_confirm">Confirmar siempre</string>
++    <string name="live_display_mode">Assertive Display®</string>
+ </resources>
+diff --git a/res/values-az/strings.xml b/res/values-az/strings.xml
+index b7b169be9..7374afadd 100644
+--- a/res/values-az/strings.xml
++++ b/res/values-az/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED işıq, ayarlar tərəfindən fəallaşdırıldı</string>
+     <string name="notification_light_add_apps_empty_summary">Hər tətbiqə nəzarət əlavə etmək üçün, \'%1$s\' aktivləşdirib \"Əlavə et\"ə basın</string>
+     <string name="live_display_summary">Oxunaqlılığı artırmaq və göz yorğunluğu azaltmaq üçün ekranınızı günün saatına və mühit şərtlərinə görə optimallaşdırın</string>
+-    <string name="live_display_mode">Görüntü rejimi</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Rəng hərarəti</string>
+     <string name="live_display_color_temperature_summary">Gündüz: <xliff:g id="day_temperature">%1$d</xliff:g>K  Gecə: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ekranda xarablaşma olmadan ekranı ən aşağı enerji istehlakı üçün nizamlayın</string>
+     <string name="live_display_enhance_color_title">Rəngləri artır</string>
+     <string name="live_display_enhance_color_summary">Dəri tonu, səhnə və digər təsvirlərin rəng titrəməsini təkmilləşdirər</string>
+-    <string name="live_display_color_profile_title">Rəng profili</string>
++    <string name="live_display_color_profile_title">Rəng qamması və kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Peşəkar rejim</string>
++    <string name="live_display_color_profile_sony_professional_summary">Orijinal rəng görüntüsü üçün sRGB rəng qammasından istifadə edin</string>
++    <string name="live_display_color_profile_sony_standard_title">Standart rejim</string>
++    <string name="live_display_color_profile_sony_standard_summary">Parlaq və canlı rəng effektləri üçünTRILUMINOS™ Display for mobile displeyinin parlaq rəng qammasından istifadə edin</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super-canlı rejim</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Parlaq rəng effektləri üçün daha canlı rəng qammasından istifadə edin</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Dəqiq rənglər və parlaq ağlar</string>
+     <string name="live_display_color_profile_natural_title">Tәbii</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Rənglər, DCI-P3 rəng aralığına görə dəqiqdir</string>
+     <string name="live_display_reading_mode_title">Oxuma rejimi</string>
+     <string name="live_display_reading_mode_summary">Uzun müddətli oxuma üçün boz çalarlı rejim</string>
+-    <string name="color_calibration_title">Rəng kalibrasiyası</string>
+-    <string name="color_calibration_summary">Ekran rənglərini kalibrlə</string>
++    <string name="color_calibration_title">Ağ balansı</string>
++    <string name="color_calibration_summary">Displeyində ağ balansı tənzimlə</string>
+     <string name="color_red_title">Qırmızı</string>
+     <string name="color_green_title">Yaşıl</string>
+     <string name="color_blue_title">Mavi</string>
+diff --git a/res/values-be/strings.xml b/res/values-be/strings.xml
+index a0c9a3d51..cd673d3c1 100644
+--- a/res/values-be/strings.xml
++++ b/res/values-be/strings.xml
+@@ -63,7 +63,7 @@
+     <string name="led_notification_text">Святлодыёд уключаны ў наладах</string>
+     <string name="notification_light_add_apps_empty_summary">Каб дадаць кіраванне праграмамі, актывуйце \'%1$s\' і націсніце \'Дадаць \'</string>
+     <string name="live_display_summary">Аптымізацыя экрана ў залежнасці ад часу сутак і ўмоў асвятлення для паляпшэння чытальнасці тэксту і зніжэння стамляльнасці вачэй</string>
+-    <string name="live_display_mode">Рэжым паказу</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_summary">Дзень: <xliff:g id="day_temperature">%1$d </xliff:g>K Ноч: <xliff:g id="night_temperature">%2$d </xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>К</string>
+     <string name="live_display_day">Дзень</string>
+@@ -72,7 +72,13 @@
+     <string name="live_display_outdoor_mode_summary">Павялічыць яркасць і насычанасць аўтаматычна пры яркім сонечным святле</string>
+     <string name="live_display_low_power_title">Зменшыць спажыванне энергіі</string>
+     <string name="live_display_enhance_color_summary">Палепшыць сакавітасць адценняў скуры, краявідаў і іншых відарысаў</string>
+-    <string name="live_display_color_profile_title">Профіль колеру</string>
++    <string name="live_display_color_profile_title">Колер. гама і кантраснасць</string>
++    <string name="live_display_color_profile_sony_professional_title">Прафесіянальны рэжым</string>
++    <string name="live_display_color_profile_sony_professional_summary">Выкарыстоўвайце колеравую гаму sRGB для перадачы арыгінальных колераў</string>
++    <string name="live_display_color_profile_sony_standard_title">Стандартны рэжым</string>
++    <string name="live_display_color_profile_sony_standard_summary">Выкарыстоўвайце шырокую колеравую гаму TRILUMINOS™ Display for mobile для перадачы яскравых і жывых колераў</string>
++    <string name="live_display_color_profile_sony_vivid_title">Супер-яркі рэжым</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Выкарыстоўвайце яшчэ ярчэйшую колеравую гаму для перадачы яскравых колераў</string>
+     <string name="live_display_color_profile_standard_title">Стандартны</string>
+     <string name="live_display_color_profile_standard_summary">Дакладная перадача колераў і яркія белыя тоны</string>
+     <string name="live_display_color_profile_natural_title">Прыродны</string>
+@@ -95,8 +101,8 @@
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_color_profile_dci_p3_summary">Колеры набліжаныя да каляровай прасторы DCI-P3 </string>
+     <string name="live_display_reading_mode_title">Рэжым чытання</string>
+-    <string name="color_calibration_title">Каліброўка колеру</string>
+-    <string name="color_calibration_summary">Каліброўка колераў на экране</string>
++    <string name="color_calibration_title">Баланс белага</string>
++    <string name="color_calibration_summary">Наладзьце баланс белага на вашым дысплэі</string>
+     <string name="color_red_title">Чырвоны</string>
+     <string name="color_green_title">Зялёны</string>
+     <string name="color_blue_title">Сіні</string>
+diff --git a/res/values-bg/strings.xml b/res/values-bg/strings.xml
+index 95db1b2ad..b5e0aec02 100644
+--- a/res/values-bg/strings.xml
++++ b/res/values-bg/strings.xml
+@@ -86,7 +86,7 @@
+     <string name="led_notification_text">LED светлини, разрешени в настройките</string>
+     <string name="notification_light_add_apps_empty_summary">За да добавите отделен контрол за приложение, активирайте \'%1$s\' и натиснете \'добави\' в лентата на менюто</string>
+     <string name="live_display_summary">Оптимизира настройките на дисплея, въз основа на времето от деня и условията на околната среда за да се подобри четливостта и да намали умората на очите</string>
+-    <string name="live_display_mode">Режим на екрана</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Температура на цвета</string>
+     <string name="live_display_color_temperature_summary">Ден: <xliff:g id="day_temperature">%1$d </xliff:g> K нощ: <xliff:g id="night_temperature">%2$d </xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d </xliff:g> K</string>
+@@ -100,7 +100,13 @@
+     <string name="live_display_low_power_summary">Настройка на дисплея за ниска консумация на енергия без влошаване</string>
+     <string name="live_display_enhance_color_title">Подобряване на цветовете</string>
+     <string name="live_display_enhance_color_summary">Подобри цвета на скина, декора и други изображения</string>
+-    <string name="live_display_color_profile_title">Цветови профил</string>
++    <string name="live_display_color_profile_title">Цветова гама и контраст</string>
++    <string name="live_display_color_profile_sony_professional_title">Професионален режим</string>
++    <string name="live_display_color_profile_sony_professional_summary">Използване на цветова гама sRGB за постигане на естествен вид на цветовете</string>
++    <string name="live_display_color_profile_sony_standard_title">Стандартен режим</string>
++    <string name="live_display_color_profile_sony_standard_summary">Използване на ярката цветова гама на TRILUMINOS™ Display for mobile за постигане на ярки, реалистични цветови ефекти</string>
++    <string name="live_display_color_profile_sony_vivid_title">Режим \"супер ярки\"</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Използване на още по-реалистична цветова гама за постигане на ярки цветови ефекти</string>
+     <string name="live_display_color_profile_standard_title">Стандартен</string>
+     <string name="live_display_color_profile_standard_summary">Точни цветове и ярки бели</string>
+     <string name="live_display_color_profile_natural_title">Естествен</string>
+@@ -125,8 +131,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Цветове, съответстващи за DCI-P3 цветово пространство</string>
+     <string name="live_display_reading_mode_title">Режим на четене</string>
+     <string name="live_display_reading_mode_summary">Сивото режим за продължително четене</string>
+-    <string name="color_calibration_title">Калибриране на цвета</string>
+-    <string name="color_calibration_summary">Калибриране на цветовете на екрана</string>
++    <string name="color_calibration_title">Баланс на белия цвят</string>
++    <string name="color_calibration_summary">Настройте баланса на белия цвят на вашия дисплей.</string>
+     <string name="color_red_title">Червен</string>
+     <string name="color_green_title">Зелен</string>
+     <string name="color_blue_title">Син</string>
+diff --git a/res/values-bn/strings.xml b/res/values-bn/strings.xml
+index 222bc68e4..8407bb2cb 100644
+--- a/res/values-bn/strings.xml
++++ b/res/values-bn/strings.xml
+@@ -38,4 +38,14 @@
+     <string name="long_screen_settings_no_apps">কোনো অ্যাপ নেই</string>
+     <string name="charging_sounds_enable_title">চার্জিং সাউন্ড চালু করো</string>
+     <string name="touchscreen_gesture_single_tap_title">একবার টিপ</string>
++    <string name="live_display_mode">Assertive Display®</string>
++    <string name="live_display_color_profile_title">রঙের গ্যামাট এবং কনট্র্যাস্ট</string>
++    <string name="live_display_color_profile_sony_professional_title">পেশাদার মোড</string>
++    <string name="live_display_color_profile_sony_professional_summary">প্রামাণিক রঙের উপস্থিতির জন্য sRGB রঙের গ্যামাট ব্যবহার করুন</string>
++    <string name="live_display_color_profile_sony_standard_title">মানক মোড</string>
++    <string name="live_display_color_profile_sony_standard_summary">উজ্জ্বল, প্রাণবন্ত রঙের প্রভাবের উপস্থিতির জন্য TRILUMINOS™ Display for mobile-এর দুর্দান্ত রঙের গ্যামাট ব্যবহার করুন</string>
++    <string name="live_display_color_profile_sony_vivid_title">সুপার-ভিভিড মোড</string>
++    <string name="live_display_color_profile_sony_vivid_summary">উজ্জ্বল রঙের প্রভাবের উপস্থিতির জন্য একটি আরও প্রাণবন্ত রঙের গ্যামাট ব্যবহার করুন</string>
++    <string name="color_calibration_title">শ্বেত সমতা</string>
++    <string name="color_calibration_summary">আপনার ডিসপ্লেতে শ্বেত সমতা সুবিন্যস্ত করুন</string>
+ </resources>
+diff --git a/res/values-bs/strings.xml b/res/values-bs/strings.xml
+index 605ea70e7..131cb91e7 100644
+--- a/res/values-bs/strings.xml
++++ b/res/values-bs/strings.xml
+@@ -17,4 +17,14 @@
+ -->
+ <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+     <string name="trust_restrict_usb_title">Ograniči USB</string>
++    <string name="live_display_mode">Assertive Display®</string>
++    <string name="live_display_color_profile_title">Gama boja i kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionalni način rada</string>
++    <string name="live_display_color_profile_sony_professional_summary">Koristite gamu boja sRGB za autentični prikaz boja</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardni način rada</string>
++    <string name="live_display_color_profile_sony_standard_summary">Koristite blistavu gamu boja funkcije TRILUMINOS™ Display for mobile za prikaz jarkih i živopisnih efekata boje</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super-živopisni način rada</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Koristite još živopisniju gamu boja za prikaz jarkih efekata boje</string>
++    <string name="color_calibration_title">Balans bijelog</string>
++    <string name="color_calibration_summary">Prilagodite balans bijelog na vašem prikazu</string>
+ </resources>
+diff --git a/res/values-ca/strings.xml b/res/values-ca/strings.xml
+index 743bc552d..ac55eeb51 100644
+--- a/res/values-ca/strings.xml
++++ b/res/values-ca/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Llum LED habilitada per la configuració</string>
+     <string name="notification_light_add_apps_empty_summary">Per afegir un control per aplicació, activeu «%1$s» i premeu «Afegeix»</string>
+     <string name="live_display_summary">Optimitza la teva pantalla basant-se en l\'hora del dia i les condicions ambientals per millorar la llegibilitat i reduir la fatiga ocular</string>
+-    <string name="live_display_mode">Mode de pantalla</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura del color</string>
+     <string name="live_display_color_temperature_summary">Dia: <xliff:g id="day_temperature">%1$d</xliff:g>K  Nit: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ajusta la pantalla per un consum d\'energia més baix però sense degradació</string>
+     <string name="live_display_enhance_color_title">Millora els colors</string>
+     <string name="live_display_enhance_color_summary">Millora la vividesa del color dels tons de la pell, paisatges i altres imatges</string>
+-    <string name="live_display_color_profile_title">Perfil de color</string>
++    <string name="live_display_color_profile_title">Gamma de colors i contrasts</string>
++    <string name="live_display_color_profile_sony_professional_title">Mode Professional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Fa servir la gamma de colors sRGB per a oferir un color més autèntic</string>
++    <string name="live_display_color_profile_sony_standard_title">Mode Estàndard</string>
++    <string name="live_display_color_profile_sony_standard_summary">Fa servir la gamma de colors brillants de TRILUMINOS™ Display for mobile per aconseguir un aspecte brillant i viu</string>
++    <string name="live_display_color_profile_sony_vivid_title">Mode súper viu</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Fa servir una gamma de colors encara més viva per aconseguir un aspecte brillant</string>
+     <string name="live_display_color_profile_standard_title">Estàndard</string>
+     <string name="live_display_color_profile_standard_summary">Colors precisos i blancs lluminosos</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colors fidels a l\'espai de colors DCI-P3</string>
+     <string name="live_display_reading_mode_title">Mode lectura</string>
+     <string name="live_display_reading_mode_summary">Mode d\'escala de grisos per a la lectura a llarg termini</string>
+-    <string name="color_calibration_title">Calibració de color</string>
+-    <string name="color_calibration_summary">Calibra els colors de la pantalla</string>
++    <string name="color_calibration_title">Balanç de blancs</string>
++    <string name="color_calibration_summary">Ajusteu el balanç de blancs a la pantalla</string>
+     <string name="color_red_title">Vermell</string>
+     <string name="color_green_title">Verd</string>
+     <string name="color_blue_title">Blau</string>
+diff --git a/res/values-cs/strings.xml b/res/values-cs/strings.xml
+index 2fa87e833..2c8f2cb2e 100644
+--- a/res/values-cs/strings.xml
++++ b/res/values-cs/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED světlo povoleno v nastavení</string>
+     <string name="notification_light_add_apps_empty_summary">Chcete‑li přidat ovládací prvek aplikace, aktivujte „%1$s“ a stiskněte tlačítko „Přidat“</string>
+     <string name="live_display_summary">Optimalizovat obrazovku podle denní doby a okolních podmínek pro lepší čitelnost a snížení namáhání očí</string>
+-    <string name="live_display_mode">Režim zobrazení</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Teplota barev</string>
+     <string name="live_display_color_temperature_summary">Den: <xliff:g id="day_temperature">%1$d</xliff:g>K  Noc: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Upravit zobrazení pro nejnižší spotřebu energie bez zhoršení čitelnosti</string>
+     <string name="live_display_enhance_color_title">Vylepšit barvy</string>
+     <string name="live_display_enhance_color_summary">Zlepšit živost barev pleťových odstínů, scenérie a dalších obrázků</string>
+-    <string name="live_display_color_profile_title">Barevný profil</string>
++    <string name="live_display_color_profile_title">Škála barev a kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionální režim</string>
++    <string name="live_display_color_profile_sony_professional_summary">Použijte škálu barev sRGB pro autentické barvy</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardní režim</string>
++    <string name="live_display_color_profile_sony_standard_summary">Použijte škálu třpytivých barev TRILUMINOS™ Display for mobile pro jasné, živé barevné efekty</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super živý režim</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Použijte škálu ještě živějších barev pro jasné barevné efekty</string>
+     <string name="live_display_color_profile_standard_title">Standardní</string>
+     <string name="live_display_color_profile_standard_summary">Přesné barvy a jasná bílá</string>
+     <string name="live_display_color_profile_natural_title">Přirozený</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Barvy s přesností na barevný prostor DCI-P3</string>
+     <string name="live_display_reading_mode_title">Režim čtení</string>
+     <string name="live_display_reading_mode_summary">Režim stupňů šedi pro dlouhodobé čtení</string>
+-    <string name="color_calibration_title">Kalibrace barev</string>
+-    <string name="color_calibration_summary">Kalibrovat barvy obrazovky</string>
++    <string name="color_calibration_title">Vyvážení bílé</string>
++    <string name="color_calibration_summary">Přizpůsobte vyvážení bílé barvy na displeji</string>
+     <string name="color_red_title">Červená</string>
+     <string name="color_green_title">Zelená</string>
+     <string name="color_blue_title">Modrá</string>
+diff --git a/res/values-cy/strings.xml b/res/values-cy/strings.xml
+index df4ba2706..ba74322a0 100644
+--- a/res/values-cy/strings.xml
++++ b/res/values-cy/strings.xml
+@@ -96,7 +96,7 @@
+     <string name="led_notification_text">Golau LED wedi\'i alluogi gan osodiadau</string>
+     <string name="notification_light_add_apps_empty_summary">I ychwanegu rheolaeth ap, rho \'%1$s\' ar waith a phwyso \'Ychwanegu\'</string>
+     <string name="live_display_summary">Addasa dy sgrin i\'r gorau yn dibynnu ar yr amser o\'r dydd ac amgylchiadau amgylchynol fel ei bod yn haws darllen a bod llai o straen ar y llygaid.</string>
+-    <string name="live_display_mode">Modd dangosydd</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Tymheredd lliwiau</string>
+     <string name="live_display_color_temperature_summary">Dydd: <xliff:g id="day_temperature">%1$d</xliff:g>K  Nos: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -110,7 +110,7 @@
+     <string name="live_display_low_power_summary">Addasu\'r dangosydd i ddefnyddio\'r maint isaf o bŵer heb ddirywiad</string>
+     <string name="live_display_enhance_color_title">Gwella lliwiau</string>
+     <string name="live_display_enhance_color_summary">Gwella lliwiau croen, golygfeydd, a delweddau eraill</string>
+-    <string name="live_display_color_profile_title">Proffil lliwiau</string>
++
+     <string name="live_display_color_profile_standard_title">Safonol</string>
+     <string name="live_display_color_profile_standard_summary">Lliwiau cywir a gwyn llachar</string>
+     <string name="live_display_color_profile_natural_title">Naturiol</string>
+@@ -135,8 +135,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Lliwiau yn gywir i\'r gofod lliw DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modd darllen</string>
+     <string name="live_display_reading_mode_summary">Modd graddfa lwyd ar gyfer darllen am gyfnodau hir</string>
+-    <string name="color_calibration_title">Graddnodiad lliw</string>
+-    <string name="color_calibration_summary">Graddnodi lliwiau ar y sgrin</string>
++
+     <string name="color_red_title">Coch</string>
+     <string name="color_green_title">Gwyrdd</string>
+     <string name="color_blue_title">Glas</string>
+diff --git a/res/values-da/strings.xml b/res/values-da/strings.xml
+index 757ee13e3..1e29d9739 100644
+--- a/res/values-da/strings.xml
++++ b/res/values-da/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED-lys aktiveret via indstillinger</string>
+     <string name="notification_light_add_apps_empty_summary">For at tilføje per app kontrol, aktiver \'%1$s\' og tryk \'Tilføj\'</string>
+     <string name="live_display_summary">Optimér din skærm, baseret på tid på dagen, og omkringværende forhold, for at forbedre læsbarhed og reducere øjen-anstrengelse</string>
+-    <string name="live_display_mode">Visningstilstand</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Farvetemperatur</string>
+     <string name="live_display_color_temperature_summary">Dag: <xliff:g id="day_temperature">%1$d</xliff:g>K Nat: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Justér skærmen til laveste strømforbrug uden forringelse</string>
+     <string name="live_display_enhance_color_title">Forbedr farver</string>
+     <string name="live_display_enhance_color_summary">Forbedr farven for hudfarve, landskab og andre billeder</string>
+-    <string name="live_display_color_profile_title">Farveprofil</string>
++    <string name="live_display_color_profile_title">Farveskala og kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professionel tilstand</string>
++    <string name="live_display_color_profile_sony_professional_summary">Brug sRGB-farveskalaen for at få autentiske farver</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardtilstand</string>
++    <string name="live_display_color_profile_sony_standard_summary">Brug den fantastiske farveskala for TRILUMINOS™ Display for mobile for at få lyse, levende farveeffekter</string>
++    <string name="live_display_color_profile_sony_vivid_title">Superlevende tilstand</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Brug en endnu mere levende farveskala for at få lyse farveeffekter</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Præcise farver og lys hvidnuancer</string>
+     <string name="live_display_color_profile_natural_title">Naturlig</string>
+@@ -137,8 +143,8 @@
+     <string name="live_display_color_profile_srgb_summary">Farver, som matcher sRGB-farverummet</string>
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_reading_mode_title">Læsetilstand</string>
+-    <string name="color_calibration_title">Farvekalibrering</string>
+-    <string name="color_calibration_summary">Kalibrér skærmfarver</string>
++    <string name="color_calibration_title">Hvidbalance</string>
++    <string name="color_calibration_summary">Juster displayets hvidbalance</string>
+     <string name="color_red_title">Rød</string>
+     <string name="color_green_title">Grøn</string>
+     <string name="color_blue_title">Blå</string>
+diff --git a/res/values-de/strings.xml b/res/values-de/strings.xml
+index a572f2d11..d62d35ba1 100644
+--- a/res/values-de/strings.xml
++++ b/res/values-de/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Benachrichtigungs-LED durch Einstellungen aktiviert</string>
+     <string name="notification_light_add_apps_empty_summary">Um App-spezifische Einstellungen hinzuzufügen, „%1$s“ aktivieren und „Hinzufügen“ antippen</string>
+     <string name="live_display_summary">Optimiert deinen Bildschirm basierend auf der Tageszeit und den Umgebungsbedingungen, um die Lesbarkeit zu verbessern und die Ermüdung der Augen zu mildern</string>
+-    <string name="live_display_mode">Bildschirmmodus</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Farbtemperatur</string>
+     <string name="live_display_color_temperature_summary">Tag: <xliff:g id="day_temperature">%1$d</xliff:g> K Nacht: <xliff:g id="night_temperature">%2$d</xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Anpassen der Anzeige für den geringsten Akkuverbrauch ohne Beeinträchtigungen</string>
+     <string name="live_display_enhance_color_title">Farben verbessern</string>
+     <string name="live_display_enhance_color_summary">Verbessert die Farben von Hauttönen, Landschaften und von anderen Bildern</string>
+-    <string name="live_display_color_profile_title">Farbprofil</string>
++    <string name="live_display_color_profile_title">Farbskala und Kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professioneller Modus</string>
++    <string name="live_display_color_profile_sony_professional_summary">Verwenden Sie die sRGB-Farbskala für ein authentisches Farbbild</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardmodus</string>
++    <string name="live_display_color_profile_sony_standard_summary">Verwenden Sie die brillante Farbskala von TRILUMINOS™ Display for mobile für leuchtende und lebendige Farbeffekte</string>
++    <string name="live_display_color_profile_sony_vivid_title">Superlebendiger Modus</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Verwenden Sie eine noch lebendigere Farbskala leuchtende Farbeffekte</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Genaue Farbdarstellung und helle Weißtöne</string>
+     <string name="live_display_color_profile_natural_title">Natürlich</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Farben passend zum DCI-P3-Farbraum</string>
+     <string name="live_display_reading_mode_title">Lesemodus</string>
+     <string name="live_display_reading_mode_summary">Graustufen-Modus zum Langzeit-Lesen</string>
+-    <string name="color_calibration_title">Farbkalibrierung</string>
+-    <string name="color_calibration_summary">Displayfarben kalibrieren</string>
++    <string name="color_calibration_title">Weißabgleich</string>
++    <string name="color_calibration_summary">Weißabgleich auf Bildschirm einstellen</string>
+     <string name="color_red_title">Rot</string>
+     <string name="color_green_title">Grün</string>
+     <string name="color_blue_title">Blau</string>
+diff --git a/res/values-el/strings.xml b/res/values-el/strings.xml
+index db52634d2..189766b81 100644
+--- a/res/values-el/strings.xml
++++ b/res/values-el/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Το LED ενεργοποιήθηκε από τις ρυθμίσεις</string>
+     <string name="notification_light_add_apps_empty_summary">Για να προσθέσετε έλεγχο ανά εφαρμογή, ενεργοποιήστε το \'%1$s\' και πατήστε \'Προσθήκη\'</string>
+     <string name="live_display_summary">Βελτιστοποίηση της οθόνης σας με βάση την ώρα της ημέρας και τις συνθήκες περιβάλλοντος για βελτίωση της αναγνωσιμότητας και μείωση της καταπόνησης των ματιών</string>
+-    <string name="live_display_mode">Λειτουργία οθόνης</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Θερμοκρασία χρώματος</string>
+     <string name="live_display_color_temperature_summary">Ημέρα: <xliff:g id="day_temperature">%1$d</xliff:g>K  Νύχτα: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Προσαρμογή της οθόνης για χαμηλότερη κατανάλωση ισχύος χωρίς υποβάθμιση των χρωμάτων</string>
+     <string name="live_display_enhance_color_title">Βελτίωση χρωμάτων</string>
+     <string name="live_display_enhance_color_summary">Βελτίωση έντασης χρωμάτων επιδερμίδας, τοπίων, καθώς και άλλων εικόνων</string>
+-    <string name="live_display_color_profile_title">Προφίλ χρωμάτων</string>
++    <string name="live_display_color_profile_title">Γκάμα χρωμάτ. και αντίθεση</string>
++    <string name="live_display_color_profile_sony_professional_title">Επαγγελματική λειτουργία</string>
++    <string name="live_display_color_profile_sony_professional_summary">Χρησιμοποιήστε τη γκάμα χρωμάτων sRGB για την αυθεντική εμφάνιση των χρωμάτων</string>
++    <string name="live_display_color_profile_sony_standard_title">Τυπική λειτουργία</string>
++    <string name="live_display_color_profile_sony_standard_summary">Χρησιμοποιήστε τη γκάμα φωτεινών χρωμάτων του TRILUMINOS™ Display for mobile για εμφάνιση φωτεινών, ζωντανών χρωματικών εφέ</string>
++    <string name="live_display_color_profile_sony_vivid_title">Πολύ ζωντανή λειτουργία</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Χρησιμοποιήστε μια ακόμα πιο ζωντανή γκάμα χρωμάτων για εμφάνιση φωτεινών χρωματικών εφέ</string>
+     <string name="live_display_color_profile_standard_title">Κανονικό</string>
+     <string name="live_display_color_profile_standard_summary">Ακριβή χρώματα και φωτεινά λευκά</string>
+     <string name="live_display_color_profile_natural_title">Φυσικό</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Απόδοση χρωμάτων με ακρίβεια στον χρωματικό χώρο DCI-P3</string>
+     <string name="live_display_reading_mode_title">Λειτουργία ανάγνωσης</string>
+     <string name="live_display_reading_mode_summary">Λειτουργία κλίμακας του γκρι για πολύωρη ανάγνωση</string>
+-    <string name="color_calibration_title">Βελτίωση χρωμάτων</string>
+-    <string name="color_calibration_summary">Βελτίωση των χρωμάτων της οθόνης</string>
++    <string name="color_calibration_title">Ισορροπία λευκού</string>
++    <string name="color_calibration_summary">Προσαρμόστε την ισορροπία λευκού στην οθόνη σας</string>
+     <string name="color_red_title">Κόκκινο</string>
+     <string name="color_green_title">Πράσινο</string>
+     <string name="color_blue_title">Μπλε</string>
+diff --git a/res/values-en-rAU/strings.xml b/res/values-en-rAU/strings.xml
+index 69fcaa3eb..9f9ac4dfd 100644
+--- a/res/values-en-rAU/strings.xml
++++ b/res/values-en-rAU/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED light enabled by settings</string>
+     <string name="notification_light_add_apps_empty_summary">To add per app control, activate \'%1$s\' and press \'Add\'</string>
+     <string name="live_display_summary">Optimise your screen based on time of day and ambient conditions to improve readability and reduce eyestrain</string>
+-    <string name="live_display_mode">Display mode</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Colour temperature</string>
+     <string name="live_display_color_temperature_summary">Day: <xliff:g id="day_temperature">%1$d</xliff:g>K  Night: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,7 @@
+     <string name="live_display_low_power_summary">Adjust display for lowest power consumption without degradation</string>
+     <string name="live_display_enhance_color_title">Enhance colours</string>
+     <string name="live_display_enhance_color_summary">Improve colour vibrance of flesh tones, scenery, and other images</string>
+-    <string name="live_display_color_profile_title">Colour profile</string>
++
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Accurate colours and bright whites</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +139,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colours accurate to the DCI-P3 colour space</string>
+     <string name="live_display_reading_mode_title">Reading mode</string>
+     <string name="live_display_reading_mode_summary">Grayscale mode for long-term reading</string>
+-    <string name="color_calibration_title">Colour calibration</string>
+-    <string name="color_calibration_summary">Calibrate on-screen colours</string>
++
+     <string name="color_red_title">Red</string>
+     <string name="color_green_title">Green</string>
+     <string name="color_blue_title">Blue</string>
+diff --git a/res/values-en-rCA/strings.xml b/res/values-en-rCA/strings.xml
+index 2f330afe5..109460955 100644
+--- a/res/values-en-rCA/strings.xml
++++ b/res/values-en-rCA/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED light enabled by settings</string>
+     <string name="notification_light_add_apps_empty_summary">To add per app control, activate \'%1$s\' and press \'Add\'</string>
+     <string name="live_display_summary">Optimize your screen based on time of day and ambient conditions to improve readability and reduce eyestrain</string>
+-    <string name="live_display_mode">Display mode</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Colour temperature</string>
+     <string name="live_display_color_temperature_summary">Day: <xliff:g id="day_temperature">%1$d</xliff:g>K  Night: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Adjust display for lowest power consumption without degradation</string>
+     <string name="live_display_enhance_color_title">Enhance colours</string>
+     <string name="live_display_enhance_color_summary">Improve colour vibrance of flesh tones, scenery, and other images</string>
+-    <string name="live_display_color_profile_title">Colour profile</string>
++    <string name="live_display_color_profile_title">Color gamut and contrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professional mode</string>
++    <string name="live_display_color_profile_sony_professional_summary">Use sRGB color gamut for the authentic color appearance</string>
++    <string name="live_display_color_profile_sony_standard_title">Standard mode</string>
++    <string name="live_display_color_profile_sony_standard_summary">Use the brilliant color gamut of TRILUMINOS™ Display for mobile for the appearance of bright, vivid color effects</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super-vivid mode</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Use an even more vivid color gamut for the appearance of bright color effects</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Accurate colours and bright whites</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colours accurate to the DCI-P3 colour space</string>
+     <string name="live_display_reading_mode_title">Reading mode</string>
+     <string name="live_display_reading_mode_summary">Grayscale mode for long-term reading</string>
+-    <string name="color_calibration_title">Colour calibration</string>
+-    <string name="color_calibration_summary">Calibrate on-screen colours</string>
++
+     <string name="color_red_title">Red</string>
+     <string name="color_green_title">Green</string>
+     <string name="color_blue_title">Blue</string>
+diff --git a/res/values-en-rGB/strings.xml b/res/values-en-rGB/strings.xml
+index 5e2258881..6b59e2822 100644
+--- a/res/values-en-rGB/strings.xml
++++ b/res/values-en-rGB/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED light enabled by settings</string>
+     <string name="notification_light_add_apps_empty_summary">To add per app control, activate \'%1$s\' and press \'Add\'</string>
+     <string name="live_display_summary">Optimise your screen based on time of day and ambient conditions to improve readability and reduce eyestrain</string>
+-    <string name="live_display_mode">Display mode</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Colour temperature</string>
+     <string name="live_display_color_temperature_summary">Day: <xliff:g id="day_temperature">%1$d</xliff:g>K  Night: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -114,7 +114,7 @@
+     <string name="live_display_low_power_summary">Adjust display for lowest power consumption without degradation</string>
+     <string name="live_display_enhance_color_title">Enhance colours</string>
+     <string name="live_display_enhance_color_summary">Improve colour vibrance of flesh tones, scenery, and other images</string>
+-    <string name="live_display_color_profile_title">Colour profile</string>
++
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Accurate colours and bright whites</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +139,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colours accurate to the DCI-P3 colour space</string>
+     <string name="live_display_reading_mode_title">Reading mode</string>
+     <string name="live_display_reading_mode_summary">Greyscale mode for long-term reading</string>
+-    <string name="color_calibration_title">Colour calibration</string>
+-    <string name="color_calibration_summary">Calibrate on-screen colours</string>
++
+     <string name="color_red_title">Red</string>
+     <string name="color_green_title">Green</string>
+     <string name="color_blue_title">Blue</string>
+diff --git a/res/values-en-rIN/strings.xml b/res/values-en-rIN/strings.xml
+index bb3dfc516..f06c65289 100644
+--- a/res/values-en-rIN/strings.xml
++++ b/res/values-en-rIN/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED light enabled by settings</string>
+     <string name="notification_light_add_apps_empty_summary">To add per app control, activate \'%1$s\' and press \'Add\'</string>
+     <string name="live_display_summary">Optimise your screen based on time of day and ambient conditions to improve readability and reduce eyestrain</string>
+-    <string name="live_display_mode">Display mode</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Colour temperature</string>
+     <string name="live_display_color_temperature_summary">Day: <xliff:g id="day_temperature">%1$d</xliff:g>K  Night: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,7 @@
+     <string name="live_display_low_power_summary">Adjust display for lowest power consumption without degradation</string>
+     <string name="live_display_enhance_color_title">Enhance colours</string>
+     <string name="live_display_enhance_color_summary">Improve colour vibrance of flesh tones, scenery, and other images</string>
+-    <string name="live_display_color_profile_title">Colour profile</string>
++
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Accurate colours and bright whites</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +139,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colours accurate to the DCI-P3 colour space</string>
+     <string name="live_display_reading_mode_title">Reading mode</string>
+     <string name="live_display_reading_mode_summary">Grayscale mode for long-term reading</string>
+-    <string name="color_calibration_title">Colour calibration</string>
+-    <string name="color_calibration_summary">Calibrate on-screen colours</string>
++
+     <string name="color_red_title">Red</string>
+     <string name="color_green_title">Green</string>
+     <string name="color_blue_title">Blue</string>
+diff --git a/res/values-es-rMX/strings.xml b/res/values-es-rMX/strings.xml
+index 8315d41a1..964a3fc5a 100644
+--- a/res/values-es-rMX/strings.xml
++++ b/res/values-es-rMX/strings.xml
+@@ -18,4 +18,5 @@
+ <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+     <string name="network_traffic_disabled_clock">Tráfico de red desactivado debido a la posición del reloj</string>
+     <string name="trust_restrict_usb_title">Restringir USB</string>
++    <string name="live_display_mode">Assertive Display®</string>
+ </resources>
+diff --git a/res/values-es-rUS/strings.xml b/res/values-es-rUS/strings.xml
+index 1195acf34..db078fa50 100644
+--- a/res/values-es-rUS/strings.xml
++++ b/res/values-es-rUS/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">Ajustes de la luz de notificación</string>
+     <string name="led_notification_text">Luz LED activada por los ajustes</string>
+     <string name="live_display_summary">Optimizar la pantalla según la hora del día y las condiciones ambientales para mejorar la legibilidad y reducir la fatiga visual</string>
+-    <string name="live_display_mode">Modo de visualización</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura de color</string>
+     <string name="live_display_color_temperature_summary">Día: <xliff:g id="day_temperature">%1$d</xliff:g>K Noche: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -94,7 +94,7 @@
+     <string name="live_display_low_power_summary">Ajustar la pantalla al mínimo consumo de energía sin degradación</string>
+     <string name="live_display_enhance_color_title">Mejorar colores</string>
+     <string name="live_display_enhance_color_summary">Mejorar la intensidad del color de tonos de piel, paisajes y otras imágenes</string>
+-    <string name="live_display_color_profile_title">Perfil de color</string>
++
+     <string name="live_display_color_profile_standard_title">Estándar</string>
+     <string name="live_display_color_profile_standard_summary">Colores precisos y blancos brillantes</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -119,8 +119,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colores fieles al espacio de color DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modo de lectura</string>
+     <string name="live_display_reading_mode_summary">Modo de escala de grises para lectura a largo plazo</string>
+-    <string name="color_calibration_title">Calibración de color</string>
+-    <string name="color_calibration_summary">Calibrar los colores de la pantalla</string>
++
+     <string name="color_red_title">Rojo</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Azul</string>
+diff --git a/res/values-es/strings.xml b/res/values-es/strings.xml
+index e0227e040..67d4b6316 100644
+--- a/res/values-es/strings.xml
++++ b/res/values-es/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Luz LED habilitada por la configuración</string>
+     <string name="notification_light_add_apps_empty_summary">Para controlar por aplicación, activa «%1$s» y pulsa \"Añadir\"</string>
+     <string name="live_display_summary">Optimiza la pantalla en función de la hora del día y las condiciones ambientales para mejorar la legibilidad y reducir la fatiga visual</string>
+-    <string name="live_display_mode">Modo de visualización</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura de color</string>
+     <string name="live_display_color_temperature_summary">Día: <xliff:g id="day_temperature">%1$d</xliff:g>K Noche: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ajustar la pantalla al mínimo consumo de batería sin degradación</string>
+     <string name="live_display_enhance_color_title">Mejorar colores</string>
+     <string name="live_display_enhance_color_summary">Mejorar la viveza del color de tonos de piel, paisajes y otras imágenes</string>
+-    <string name="live_display_color_profile_title">Perfil de color</string>
++    <string name="live_display_color_profile_title">Gama y contraste de colores</string>
++    <string name="live_display_color_profile_sony_professional_title">Modo Profesional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Usar la gama de colores sRGB para una apariencia de color auténtico</string>
++    <string name="live_display_color_profile_sony_standard_title">Modo estándar</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilizar la gama de colores brillantes de TRILUMINOS™ Display for mobile para una apariencia de brillo y efectos de colores vivos</string>
++    <string name="live_display_color_profile_sony_vivid_title">Modo súper vívido</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Usar una gama de colores todavía más vivos para la apariencia de efectos de colores brillantes</string>
+     <string name="live_display_color_profile_standard_title">Estándar</string>
+     <string name="live_display_color_profile_standard_summary">Colores precisos y blancos brillantes</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colores fieles al espacio de color DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modo lectura</string>
+     <string name="live_display_reading_mode_summary">Modo de escala de grises para una lectura prolongada</string>
+-    <string name="color_calibration_title">Calibración de color</string>
+-    <string name="color_calibration_summary">Calibrar los colores de la pantalla</string>
++    <string name="color_calibration_title">Balance de blancos</string>
++    <string name="color_calibration_summary">Ajuste el balance de blancos en la pantalla</string>
+     <string name="color_red_title">Rojo</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Azul</string>
+diff --git a/res/values-et/strings.xml b/res/values-et/strings.xml
+index 6e6aa5e15..4a5d9ceac 100644
+--- a/res/values-et/strings.xml
++++ b/res/values-et/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">Märgutule seaded</string>
+     <string name="led_notification_text">LED-tuli on seadetes lubatud</string>
+     <string name="live_display_summary">Optimeeri oma ekraani vastavalt kellaajale ja keskkonnavalgusele, parandamaks loetavust ja vähendamaks silmade pinget</string>
+-    <string name="live_display_mode">Ekraani režiim</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Värvitemperatuur</string>
+     <string name="live_display_color_temperature_summary">Päev: <xliff:g id="day_temperature">%1$d</xliff:g>K Öö: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -96,7 +96,13 @@
+     <string name="live_display_low_power_summary">Kohanda ekraani madalaimale energiatarbimisele ilma, et see ekraani kahjustaks</string>
+     <string name="live_display_enhance_color_title">Parenda värve</string>
+     <string name="live_display_enhance_color_summary">Parandage värvide erksust keha toonidel, maastikuvaadetel ja muudel piltidel</string>
+-    <string name="live_display_color_profile_title">Värviprofiil</string>
++    <string name="live_display_color_profile_title">Värvihaare ja kontrastsus</string>
++    <string name="live_display_color_profile_sony_professional_title">Profirežiim</string>
++    <string name="live_display_color_profile_sony_professional_summary">Autentsete värvide kuvamiseks kasutage sRGB-värvihaaret</string>
++    <string name="live_display_color_profile_sony_standard_title">Tavarežiim</string>
++    <string name="live_display_color_profile_sony_standard_summary">Kirgaste ja erksate värviefektide kuvamiseks kasutage säravat värvihaaret, mida pakub TRILUMINOS™ Display for mobile</string>
++    <string name="live_display_color_profile_sony_vivid_title">Ülielav režiim</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Kirgaste värviefektide kuvamiseks kasutage veelgi erksamat värvihaaret</string>
+     <string name="live_display_color_profile_standard_title">Klassikaline</string>
+     <string name="live_display_color_profile_standard_summary">Täpsed värvid ja eredad valged</string>
+     <string name="live_display_color_profile_natural_title">Naturaalne</string>
+@@ -121,8 +127,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Täpsed värvid DCI-P3 värviruumi järgi</string>
+     <string name="live_display_reading_mode_title">Lugemisrežiim</string>
+     <string name="live_display_reading_mode_summary">Hallskaala režiim pikaajaliseks lugemiseks</string>
+-    <string name="color_calibration_title">Värvide kalibreerimine</string>
+-    <string name="color_calibration_summary">Kalibreeri ekraani värvid</string>
++    <string name="color_calibration_title">Valge tasakaal</string>
++    <string name="color_calibration_summary">Ekraani valge tasakaalu kohandamine</string>
+     <string name="color_red_title">Punane</string>
+     <string name="color_green_title">Roheline</string>
+     <string name="color_blue_title">Sinine</string>
+diff --git a/res/values-eu/strings.xml b/res/values-eu/strings.xml
+index aa8e3d2a9..25a3d4d1c 100644
+--- a/res/values-eu/strings.xml
++++ b/res/values-eu/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="led_notification_title">Argien ezarpenak</string>
+     <string name="led_notification_text">LED argia ezarpenetan aktibatuta</string>
+     <string name="live_display_summary">Optimizatu zure pantaila eguneko orduaren eta inguruneko baldintzen arabera irakurgarritasuna hobetzeko eta begien nekea gutxiagotzeko</string>
+-    <string name="live_display_mode">Pantaila modua</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Kolore-tenperatura</string>
+     <string name="live_display_color_temperature_summary">Egunez: <xliff:g id="day_temperature">%1$d</xliff:g>K  Gauez: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -93,7 +93,13 @@
+     <string name="live_display_low_power_summary">Doitu pantaila bateria kontsumoa gutxiagotzeko kalitate galerarik gabe</string>
+     <string name="live_display_enhance_color_title">Hobetu koloreak</string>
+     <string name="live_display_enhance_color_summary">Hobetu kolore bizitasuna azal tonuetan, paisaietan eta bestelako irudietan</string>
+-    <string name="live_display_color_profile_title">Kolore profila</string>
++    <string name="live_display_color_profile_title">Kolore sorta eta kontrastea</string>
++    <string name="live_display_color_profile_sony_professional_title">Modu profesionala</string>
++    <string name="live_display_color_profile_sony_professional_summary">Erabili sRGB kolore sorta, koloreen benetako itxura lortzeko</string>
++    <string name="live_display_color_profile_sony_standard_title">Modu estandarra</string>
++    <string name="live_display_color_profile_sony_standard_summary">Erabili TRILUMINOS™ Display for mobile aplikazioak eskaintzen duen kolore distiratsuen sorta, efektu argi eta biziak lortzeko</string>
++    <string name="live_display_color_profile_sony_vivid_title">Bizi-bizi modua</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Erabili kolore sorta are biziagoa, efektu argiak lortzeko</string>
+     <string name="live_display_color_profile_standard_title">Estandarra</string>
+     <string name="live_display_color_profile_standard_summary">Kolore zehatzak eta zuri biziak</string>
+     <string name="live_display_color_profile_natural_title">Naturala</string>
+@@ -118,8 +124,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">DCI-P3 kolore espazioarekiko zehatzak diren koloreak</string>
+     <string name="live_display_reading_mode_title">Irakurketa modua</string>
+     <string name="live_display_reading_mode_summary">Irakurketa luzeetarako modua gris eskalan</string>
+-    <string name="color_calibration_title">Kolore kalibrazioa</string>
+-    <string name="color_calibration_summary">Kalibratu pantailako koloreak</string>
++    <string name="color_calibration_title">Zurien balantzea</string>
++    <string name="color_calibration_summary">Doitu pantailako zurien balantzea</string>
+     <string name="color_red_title">Gorria</string>
+     <string name="color_green_title">Berdea</string>
+     <string name="color_blue_title">Urdina</string>
+diff --git a/res/values-fa/strings.xml b/res/values-fa/strings.xml
+index 875446147..486660124 100644
+--- a/res/values-fa/strings.xml
++++ b/res/values-fa/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">چراغ اعلان توسط تنظیمات فعال شد</string>
+     <string name="notification_light_add_apps_empty_summary">برای اضافه کردن کنترل هر برنامه، \'%1$s\' را فعال کنید و \'اضافه کردن\' را فشار دهید</string>
+     <string name="live_display_summary">بهینه‌سازی صفحه‌نمایش بر اساس زمانِ روز و شرایط محیطی برای افزایش خوانایی و کاهش خستگی چشم</string>
+-    <string name="live_display_mode">حالت نمایش</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">دمای رنگ</string>
+     <string name="live_display_color_temperature_summary">روز:<xliff:g id="day_temperature">%1$Id</xliff:g>K شب:<xliff:g id="night_temperature">%2$Id</xliff:g>K</string>
+     <string name="live_display_color_temperature_label">‫<xliff:g id="degrees">%1$Id</xliff:g>کلوین</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">تنظیم صفحه برای مصرف کمترین نیرو بدون کاهش کارایی</string>
+     <string name="live_display_enhance_color_title">بهبود رنگ‌ها</string>
+     <string name="live_display_enhance_color_summary">بهبود طراوت رنگ پوست بدن، مناظر و تصاویر دیگر</string>
+-    <string name="live_display_color_profile_title">نمایهٔ رنگ</string>
++    <string name="live_display_color_profile_title">وسعت رنگ و کنتراست</string>
++    <string name="live_display_color_profile_sony_professional_title">حالت حرفه‌ای</string>
++    <string name="live_display_color_profile_sony_professional_summary">از وسعت رنگ sRGB برای ظاهر رنگ دقیق‌تر استفاده کنید</string>
++    <string name="live_display_color_profile_sony_standard_title">حالت استاندارد</string>
++    <string name="live_display_color_profile_sony_standard_summary">از وسعت رنگ شفاف TRILUMINOS™ Display for mobile برای ظاهر جلوه‌های رنگ‌های روشن و زنده استفاده کنید.</string>
++    <string name="live_display_color_profile_sony_vivid_title">حالت فوق شفاف</string>
++    <string name="live_display_color_profile_sony_vivid_summary">حتی از وسعت رنگ زنده‌تر برای ظاهر جلوه‌های رنگ روشن استفاده کنید</string>
+     <string name="live_display_color_profile_standard_title">استاندارد</string>
+     <string name="live_display_color_profile_standard_summary">رنگ‌های دقیق و سفید روشن</string>
+     <string name="live_display_color_profile_natural_title">طبیعی</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">رنگ‌های مطابق با فضای رنگ DCI-P3</string>
+     <string name="live_display_reading_mode_title">حالت مطالعه</string>
+     <string name="live_display_reading_mode_summary">حالت سیاه و سفید برای مطالعه طولانی</string>
+-    <string name="color_calibration_title">تنظیم رنگ</string>
+-    <string name="color_calibration_summary">تنظیم رنگ صفحه نمایش</string>
++    <string name="color_calibration_title">تنظیم نور سفید</string>
++    <string name="color_calibration_summary">تنظیم نور سفید صفحه نمایش</string>
+     <string name="color_red_title">قرمز</string>
+     <string name="color_green_title">سبز</string>
+     <string name="color_blue_title">آبی</string>
+diff --git a/res/values-fi/strings.xml b/res/values-fi/strings.xml
+index 500257147..a9938658d 100644
+--- a/res/values-fi/strings.xml
++++ b/res/values-fi/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">Valoasetukset</string>
+     <string name="led_notification_text">LED-valo otettu käyttöön asetuksissa</string>
+     <string name="live_display_summary">Optimoi näyttösi kellonajan ja ympäristöolosuhteiden perusteella parantaaksesi luettavuutta ja vähentääksesi silmien rasitusta</string>
+-    <string name="live_display_mode">Näyttötila</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Värilämpötila</string>
+     <string name="live_display_color_temperature_summary">Päivä: <xliff:g id="day_temperature">%1$d</xliff:g>K Yö: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -96,7 +96,13 @@
+     <string name="live_display_low_power_summary">Säädä näyttö alhaisimpaan virrankäyttötilaan ilman heikentymistä</string>
+     <string name="live_display_enhance_color_title">Korosta värejä</string>
+     <string name="live_display_enhance_color_summary">Paranna värisävyjä ihonväreissä, maisemakuvissa ja muissa kuvissa</string>
+-    <string name="live_display_color_profile_title">Väriprofiili</string>
++    <string name="live_display_color_profile_title">Väriasteikko ja kontrasti</string>
++    <string name="live_display_color_profile_sony_professional_title">Ammattilaistila</string>
++    <string name="live_display_color_profile_sony_professional_summary">Käytä sRGB-väriasteikkoa taataksesi aidot värit</string>
++    <string name="live_display_color_profile_sony_standard_title">Vakiotila</string>
++    <string name="live_display_color_profile_sony_standard_summary">Käytä kirkasta väriasteikkoa (TRILUMINOS™ Display for mobile), joka takaa kirkkaat ja elävät värit</string>
++    <string name="live_display_color_profile_sony_vivid_title">Erittäin eläväinen tila</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Luo väritehosteita kirkkaalla väriasteikolla</string>
+     <string name="live_display_color_profile_standard_title">Standardi</string>
+     <string name="live_display_color_profile_standard_summary">Tarkat värit ja kirkkaat valkoiset</string>
+     <string name="live_display_color_profile_natural_title">Luonnollinen</string>
+@@ -121,8 +127,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Värit tarkentuu DCI-P3-väritilaan</string>
+     <string name="live_display_reading_mode_title">Lukutila</string>
+     <string name="live_display_reading_mode_summary">Harmaasävytila pitkään lukemiseen</string>
+-    <string name="color_calibration_title">Värien kalibrointi</string>
+-    <string name="color_calibration_summary">Kalibroi näytön värit</string>
++    <string name="color_calibration_title">Valkotasapaino</string>
++    <string name="color_calibration_summary">Säädä valkotasapainoa näytössä</string>
+     <string name="color_red_title">Punainen</string>
+     <string name="color_green_title">Vihreä</string>
+     <string name="color_blue_title">Sininen</string>
+diff --git a/res/values-fr/strings.xml b/res/values-fr/strings.xml
+index c0ff39917..59dd105ca 100644
+--- a/res/values-fr/strings.xml
++++ b/res/values-fr/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED activée par les paramètres</string>
+     <string name="notification_light_add_apps_empty_summary">Pour ajouter le contrôle par application, activez \'%1$s\' et appuyez sur \'Ajouter\'</string>
+     <string name="live_display_summary">Optimiser votre écran en fonction de l\'heure et des conditions ambiantes pour améliorer la lisibilité et réduire la fatigue oculaire</string>
+-    <string name="live_display_mode">Mode d\'affichage</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Température de la couleur</string>
+     <string name="live_display_color_temperature_summary">Jour : <xliff:g id="day_temperature">%1$d</xliff:g>K  Nuit : <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Régler l\'affichage pour une plus faible consommation sans dégradation</string>
+     <string name="live_display_enhance_color_title">Améliorer les couleurs</string>
+     <string name="live_display_enhance_color_summary">Améliorer l\'éclat des couleurs des tons chair, des paysages et d\'autres images</string>
+-    <string name="live_display_color_profile_title">Profil de couleur</string>
++    <string name="live_display_color_profile_title">Gamme couleurs et contraste</string>
++    <string name="live_display_color_profile_sony_professional_title">Mode professionnel</string>
++    <string name="live_display_color_profile_sony_professional_summary">Utilise la gamme de couleurs sRGB pour ses couleurs authentiques</string>
++    <string name="live_display_color_profile_sony_standard_title">Mode standard</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilise la gamme de couleurs brillantes de TRILUMINOS™ Display for mobile pour l\'effet de ses couleurs vives et riches</string>
++    <string name="live_display_color_profile_sony_vivid_title">Mode très vif</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Utilise une gamme de couleurs encore plus vives pour l\'effet de ses couleurs éclatantes</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Couleurs précises et blancs éclatants</string>
+     <string name="live_display_color_profile_natural_title">Naturel</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Couleurs correspondant exactement à l’espace colorimétrique DCI-P3</string>
+     <string name="live_display_reading_mode_title">Mode Lecture</string>
+     <string name="live_display_reading_mode_summary">Affichage en niveaux de gris pour les périodes de lecture prolongées</string>
+-    <string name="color_calibration_title">Calibrage des couleurs</string>
+-    <string name="color_calibration_summary">Calibrer les couleurs de l\'écran</string>
++    <string name="color_calibration_title">Balance des blancs</string>
++    <string name="color_calibration_summary">Ajuster la balance des blancs sur votre écran</string>
+     <string name="color_red_title">Rouge</string>
+     <string name="color_green_title">Vert</string>
+     <string name="color_blue_title">Bleu</string>
+diff --git a/res/values-fur-rIT/strings.xml b/res/values-fur-rIT/strings.xml
+index 66a7c1fbb..d4ee787a7 100644
+--- a/res/values-fur-rIT/strings.xml
++++ b/res/values-fur-rIT/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Lûs a LED ativade da lis impostazions</string>
+     <string name="notification_light_add_apps_empty_summary">Par zontâ il control pes singulis aplicazions, ative \'%1$s\' e frache \'Zonte\'</string>
+     <string name="live_display_summary">Otimize il schermi in base ae ore dal dì e aes condizions ambientâls par miorâ la leture e diminuî il stracament dai voi</string>
+-    <string name="live_display_mode">Modalitât di visualizazion</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperadure colôr</string>
+     <string name="live_display_color_temperature_summary">Dì: <xliff:g id="day_temperature">%1$d</xliff:g>K  Gnot: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,7 @@
+     <string name="live_display_low_power_summary">Juste il schermi pal minim consum energjetic cence degradazion</string>
+     <string name="live_display_enhance_color_title">Miore i colôrs</string>
+     <string name="live_display_enhance_color_summary">Miore la vivece dal colôr pai tons de piel, paisaçs e altris imagjins</string>
+-    <string name="live_display_color_profile_title">Profîl di colôr</string>
++
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Colôrs curâts e blancs lusorôs</string>
+     <string name="live_display_color_profile_natural_title">Naturâl</string>
+@@ -139,8 +139,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colôrs precîs al spazi di colôr DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modalitât leture</string>
+     <string name="live_display_reading_mode_summary">Modalitât scjale di grîs pe leture sprolungjade</string>
+-    <string name="color_calibration_title">Calibradure colôr</string>
+-    <string name="color_calibration_summary">Calibre i colôrs dal schermi</string>
++
+     <string name="color_red_title">Ros</string>
+     <string name="color_green_title">Vert</string>
+     <string name="color_blue_title">Blu</string>
+diff --git a/res/values-fy-rNL/strings.xml b/res/values-fy-rNL/strings.xml
+index 5944289a2..decffc9ef 100644
+--- a/res/values-fy-rNL/strings.xml
++++ b/res/values-fy-rNL/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="led_notification_title">Ferljochtingsynstellingen</string>
+     <string name="led_notification_text">LED-ferljochting ynskeakele troch ynstellingen</string>
+     <string name="live_display_summary">Jo skerm optimalisearje oan de hân fan aktuele tiid en ljochtomstannichheden om de lêsberheid te ferbetterjen en eachwurgens te ferminderjen</string>
+-    <string name="live_display_mode">Werjeftemodus</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Kleurtemperatuer</string>
+     <string name="live_display_color_temperature_summary">Oerdei: <xliff:g id="day_temperature">%1$d</xliff:g> K, nachts: <xliff:g id="night_temperature">%2$d</xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -93,7 +93,7 @@
+     <string name="live_display_low_power_summary">Skerm oanpasse foar leechst mooglike enerzjyferbrûk sûnder kwaliteitsferlies</string>
+     <string name="live_display_enhance_color_title">Kleuren ferbetterje</string>
+     <string name="live_display_enhance_color_summary">Kleurlibbenens fan hûdtinten, lânskippen en oare ôfbyldingen ferbetterje</string>
+-    <string name="live_display_color_profile_title">Kleurprofyl</string>
++
+     <string name="live_display_color_profile_standard_title">Standert</string>
+     <string name="live_display_color_profile_standard_summary">Sekuere kleuren en heldere wytwearden</string>
+     <string name="live_display_color_profile_natural_title">Natuerlik</string>
+@@ -118,8 +118,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Kleuren binnen it DCI-P3-kleurepalet</string>
+     <string name="live_display_reading_mode_title">Lêsmodus</string>
+     <string name="live_display_reading_mode_summary">Griisskealmodus foar langduorjend lêze</string>
+-    <string name="color_calibration_title">Kleuren kalibrearje</string>
+-    <string name="color_calibration_summary">Skermkleur kalibrearje</string>
++
+     <string name="color_red_title">Read</string>
+     <string name="color_green_title">Grien</string>
+     <string name="color_blue_title">Blau</string>
+diff --git a/res/values-ga-rIE/strings.xml b/res/values-ga-rIE/strings.xml
+index 75e4b5df2..b334a502b 100644
+--- a/res/values-ga-rIE/strings.xml
++++ b/res/values-ga-rIE/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Solas LED cumasaithe ag socruithe</string>
+     <string name="notification_light_add_apps_empty_summary">Chun cur leis in aghaidh an rialaithe aipe, gníomhaigh \'%1$s\' agus brúigh \'Cuir\'</string>
+     <string name="live_display_summary">Optamaigh do scáileán bunaithe ar am den lá agus coinníollacha comhthimpeallacha chun inléiteacht a fheabhsú agus chun srian súl a laghdú</string>
+-    <string name="live_display_mode">Mód taispeána</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Teocht datha</string>
+     <string name="live_display_color_temperature_summary">Lá: <xliff:g id="day_temperature">%1$d</xliff:g>K Oíche: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,7 @@
+     <string name="live_display_low_power_summary">Coigeartaigh taispeáint don tomhaltas cumhachta is ísle gan díghrádú</string>
+     <string name="live_display_enhance_color_title">Feabhas a chur ar dathanna</string>
+     <string name="live_display_enhance_color_summary">Feabhas a chur ar bheocht datha toin feola, radharcra agus íomhánna eile</string>
+-    <string name="live_display_color_profile_title">Próifíl datha</string>
++
+     <string name="live_display_color_profile_standard_title">Caighdeán</string>
+     <string name="live_display_color_profile_standard_summary">Dathanna beacht agus bánna geala</string>
+     <string name="live_display_color_profile_natural_title">Nádúrtha</string>
+@@ -139,8 +139,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Dathanna cruinn don spás datha DCI-P3</string>
+     <string name="live_display_reading_mode_title">Mód léamh</string>
+     <string name="live_display_reading_mode_summary">Modh liathscála le haghaidh léamh fadtéarmach</string>
+-    <string name="color_calibration_title">Calabrú datha</string>
+-    <string name="color_calibration_summary">Calabraigh dathanna ar an scáileán</string>
++
+     <string name="color_red_title">Dearg</string>
+     <string name="color_green_title">Glas</string>
+     <string name="color_blue_title">Gorm</string>
+diff --git a/res/values-gd/strings.xml b/res/values-gd/strings.xml
+index 2d9b01917..9de93a892 100644
+--- a/res/values-gd/strings.xml
++++ b/res/values-gd/strings.xml
+@@ -85,7 +85,7 @@
+     <string name="led_notification_title">Roghainnean an t-solais</string>
+     <string name="led_notification_text">Tha solas LED an comas a-rèir nan roghainnean</string>
+     <string name="live_display_summary">Pisich an sgrìn agad a-rèir àm dhen latha is na h-àrainneachd ach am bi cùisean nas fhasa leughadh is nas lugha a sgithear sùla ort</string>
+-    <string name="live_display_mode">Modh an taisbeanaidh</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Teothachd an datha</string>
+     <string name="live_display_color_temperature_summary">Latha: <xliff:g id="day_temperature">%1$d</xliff:g>K  Oidhche: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -99,7 +99,7 @@
+     <string name="live_display_low_power_summary">Cuir gleus air an sgrìn airson caomhnadh cumhachd as motha gun chrìonadh</string>
+     <string name="live_display_enhance_color_title">Leasaich na dathan</string>
+     <string name="live_display_enhance_color_summary">Thoir piseach air beòthad dath craicinn, sheallaidhean is dealbhan eile</string>
+-    <string name="live_display_color_profile_title">Pròifil dhathan</string>
++
+     <string name="live_display_color_profile_standard_title">Stannardach</string>
+     <string name="live_display_color_profile_standard_summary">Dathan pongail is geal soilleir</string>
+     <string name="live_display_color_profile_natural_title">Nàdarra</string>
+@@ -124,8 +124,7 @@
+     <string name="live_display_color_profile_dci_p3_summary">Dathan pongail a-rèir dhathan DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modh leughaidh</string>
+     <string name="live_display_reading_mode_summary">Modh liath-sgèile a chùm leughaidh fhaide</string>
+-    <string name="color_calibration_title">Cailbhreachadh nan dathan</string>
+-    <string name="color_calibration_summary">Cailbhrich na dathan air an sgrìn</string>
++
+     <string name="color_red_title">Dearg</string>
+     <string name="color_green_title">Uaine</string>
+     <string name="color_blue_title">Gorm</string>
+diff --git a/res/values-gl/strings.xml b/res/values-gl/strings.xml
+index 36451ac07..35c5ba207 100644
+--- a/res/values-gl/strings.xml
++++ b/res/values-gl/strings.xml
+@@ -85,7 +85,7 @@
+     <string name="led_notification_title">Configuración de luz</string>
+     <string name="led_notification_text">Luz do LED activada pola configuración</string>
+     <string name="live_display_summary">Optimizar a súa pantalla baseandose na hora do día e as condicións ambientais para mellorar a lexibilidade e reducir o cansanzo visual</string>
+-    <string name="live_display_mode">Modo de visualización</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Cor de temperatura</string>
+     <string name="live_display_color_temperature_summary">Día: <xliff:g id="day_temperature">%1$d</xliff:g>K Noite:<xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -99,7 +99,13 @@
+     <string name="live_display_low_power_summary">Axusta a pantalla ata o mínimo consumo de nergía sen perda de calidade</string>
+     <string name="live_display_enhance_color_title">Mellorar cores</string>
+     <string name="live_display_enhance_color_summary">Mellora a viveza dos tons da pel, entorno e outras imaxes</string>
+-    <string name="live_display_color_profile_title">Pefil de cor</string>
++    <string name="live_display_color_profile_title">Gama de cores e contraste</string>
++    <string name="live_display_color_profile_sony_professional_title">Modo profesional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Utilizar a gama de cores do espazo sRGB para unha apariencia de cor auténtica</string>
++    <string name="live_display_color_profile_sony_standard_title">Modo estándar</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilice a brillante gama de cores TRILUMINOS™ Display for mobile para obter uns efectos de cor vivos e intensos</string>
++    <string name="live_display_color_profile_sony_vivid_title">Modo supervívido</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Utilice una gama de cores aínda máis viva para obter uns efectos de cor intensos</string>
+     <string name="live_display_color_profile_standard_title">Estándar</string>
+     <string name="live_display_color_profile_standard_summary">Cores precisas e brancos brillantes</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -124,8 +130,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Cores fieis ao espazo da cor DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modo de lectura</string>
+     <string name="live_display_reading_mode_summary">Modo escala de grises para lectura a largo prazo</string>
+-    <string name="color_calibration_title">Calibración da cor</string>
+-    <string name="color_calibration_summary">Calibrar as cores da pantalla</string>
++    <string name="color_calibration_title">Balance de brancos</string>
++    <string name="color_calibration_summary">Axusta o balance de brancos na súa pantalla</string>
+     <string name="color_red_title">Vermello</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Azul</string>
+diff --git a/res/values-hr/strings.xml b/res/values-hr/strings.xml
+index f48321eec..39d660442 100644
+--- a/res/values-hr/strings.xml
++++ b/res/values-hr/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">Postavke svjetla</string>
+     <string name="led_notification_text">LED svjetlo omogućeno postavkama</string>
+     <string name="live_display_summary">Prilagođuje zaslon prema vremenu dana i okolini za poboljšanje čitljivosti i smanjenje naprezanja očiju</string>
+-    <string name="live_display_mode">Način prikaza</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura boje</string>
+     <string name="live_display_color_temperature_summary">Dan: <xliff:g id="day_temperature">%1$d</xliff:g>K Noć: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -96,7 +96,13 @@
+     <string name="live_display_low_power_summary">Prilagodite prikaz za najnižu potrošnju energije bez degradacije</string>
+     <string name="live_display_enhance_color_title">Poboljšanje boje</string>
+     <string name="live_display_enhance_color_summary">Poboljšaj treperenje boja svijetlih tonova, scena ili ostalih slika</string>
+-    <string name="live_display_color_profile_title">Boja profila</string>
++    <string name="live_display_color_profile_title">Gama boja i kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionalni način</string>
++    <string name="live_display_color_profile_sony_professional_summary">Upotrijebite sRGB gamu boja za autentični prikaz boja</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardni način</string>
++    <string name="live_display_color_profile_sony_standard_summary">Upotrijebite sjajnu gamu boja TRILUMINOS™ Display for mobile za prikaz svijetlih, živopisnih efekata boja</string>
++    <string name="live_display_color_profile_sony_vivid_title">Iznimno živopisan način</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Upotrijebite još živopisniju gamu boja za prikaz svijetlih efekata boja</string>
+     <string name="live_display_color_profile_standard_title">Standardno</string>
+     <string name="live_display_color_profile_standard_summary">Točne boje i svjetla bijela</string>
+     <string name="live_display_color_profile_natural_title">Prirodno</string>
+@@ -119,8 +125,8 @@
+     <string name="live_display_color_profile_srgb_summary">Boje su točne prema sRGB prostoru boja</string>
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_color_profile_dci_p3_summary">Boje su točne prema DCI-P3 prostoru boja</string>
+-    <string name="color_calibration_title">Kalibracija boje</string>
+-    <string name="color_calibration_summary">Kalibriraj boje zaslona</string>
++    <string name="color_calibration_title">Balans bijele boje</string>
++    <string name="color_calibration_summary">Podesite balans bijele boje na zaslonu</string>
+     <string name="color_red_title">Crveno</string>
+     <string name="color_green_title">Zeleno</string>
+     <string name="color_blue_title">Plavo</string>
+diff --git a/res/values-hu/strings.xml b/res/values-hu/strings.xml
+index 72263adbd..e7ecbc1c9 100644
+--- a/res/values-hu/strings.xml
++++ b/res/values-hu/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED engedélyezve a beállítások által</string>
+     <string name="notification_light_add_apps_empty_summary">Alkalmazásonkénti vezérléshez aktiválja ezt: \"%1$s\", majd nyomja meg a \'Hozzáadás\'-t</string>
+     <string name="live_display_summary">Optimalizálja a képernyőt a napszaknak és a fényviszonyoknak megfelelően, javítva az olvashatóságot és csökkentve a szemek terhelését</string>
+-    <string name="live_display_mode">Képernyő mód</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Színhőmérséklet</string>
+     <string name="live_display_color_temperature_summary">Nappal:<xliff:g id="day_temperature">%1$d</xliff:g>K Éjszaka:<xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Kijelző beállítása a legkisebb energiafogyasztásra, minőségromlás nélkül</string>
+     <string name="live_display_enhance_color_title">Színek élénkítése</string>
+     <string name="live_display_enhance_color_summary">Bőrszín tónusainak, tájképek, és egyéb képek színdinamikájának javítása</string>
+-    <string name="live_display_color_profile_title">Színprofil</string>
++    <string name="live_display_color_profile_title">Színtartomány és kontraszt</string>
++    <string name="live_display_color_profile_sony_professional_title">Professzionális üzemmód</string>
++    <string name="live_display_color_profile_sony_professional_summary">sRGB színtartomány használata a valósághű színmegjelenítéshez</string>
++    <string name="live_display_color_profile_sony_standard_title">Szokásos üzemmód</string>
++    <string name="live_display_color_profile_sony_standard_summary">A TRILUMINOS™ Display for mobile pazar színtartományának használata élénk, ragyogó színhatások megjelenítéséhez</string>
++    <string name="live_display_color_profile_sony_vivid_title">Szuperélénk mód</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Élénkebb színtartomány használata a ragyogó színhatások megjelenítéséhez</string>
+     <string name="live_display_color_profile_standard_title">Általános</string>
+     <string name="live_display_color_profile_standard_summary">Pontos színek és fényes fehér</string>
+     <string name="live_display_color_profile_natural_title">Természetes</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Színek a DCI-P3 színtérhez igazítva</string>
+     <string name="live_display_reading_mode_title">Olvasómód</string>
+     <string name="live_display_reading_mode_summary">Szemkímélő (szürkeárnyalatos) mód a hosszabb olvasásokhoz</string>
+-    <string name="color_calibration_title">Színek kalibrálása</string>
+-    <string name="color_calibration_summary">Képernyőn megjelenő színek kalibrálása</string>
++    <string name="color_calibration_title">Fehéregyensúly</string>
++    <string name="color_calibration_summary">A fehéregyensúly beállítása a kijelzőn</string>
+     <string name="color_red_title">Vörös</string>
+     <string name="color_green_title">Zöld</string>
+     <string name="color_blue_title">Kék</string>
+diff --git a/res/values-in/strings.xml b/res/values-in/strings.xml
+index f6506bf4b..9a056e457 100644
+--- a/res/values-in/strings.xml
++++ b/res/values-in/strings.xml
+@@ -90,7 +90,7 @@
+     <string name="led_notification_title">Pengaturan lampu</string>
+     <string name="led_notification_text">Lampu LED diaktifkan oleh pengaturan</string>
+     <string name="live_display_summary">Optimalkan layar berdasarkan waktu dan kondisi ruangan untuk meningkatkan keterbacaan dan mengurangi kelelahan mata</string>
+-    <string name="live_display_mode">Mode tampilan</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Suhu pada warna</string>
+     <string name="live_display_color_temperature_summary">Pagi: <xliff:g id="day_temperature">%1$d</xliff:g>K;  Malam: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -104,7 +104,13 @@
+     <string name="live_display_low_power_summary">Menyesuaikan tampilan untuk konsumsi daya terendah tanpa degradasi</string>
+     <string name="live_display_enhance_color_title">Meningkatkan warna</string>
+     <string name="live_display_enhance_color_summary">Meningkatkan vibran warna dari corak terang, pemandangan dan gambar lain</string>
+-    <string name="live_display_color_profile_title">Profil warna</string>
++    <string name="live_display_color_profile_title">Julat warna dan kontras</string>
++    <string name="live_display_color_profile_sony_professional_title">Mode profesional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Gunakan julat warna sRGB untuk tampilkan warna autentik</string>
++    <string name="live_display_color_profile_sony_standard_title">Mode standar</string>
++    <string name="live_display_color_profile_sony_standard_summary">Gunakan julat warna brilian dari TRILUMINOS™ Display for mobile untuk tampilkan yang cerah, efek warna hidup</string>
++    <string name="live_display_color_profile_sony_vivid_title">Mode super hidup</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Gunakan gamut warna yang lebih hidup untuk tampilan efek warna cerah</string>
+     <string name="live_display_color_profile_standard_title">Standar</string>
+     <string name="live_display_color_profile_standard_summary">Warna yang tepat dan putih terang</string>
+     <string name="live_display_color_profile_natural_title">Alami</string>
+@@ -129,8 +135,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Warna akurat ke ruang warna DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modus membaca</string>
+     <string name="live_display_reading_mode_summary">Modus warna abu-abu untuk pembacaan jangka panjang</string>
+-    <string name="color_calibration_title">Kalibrasi warna</string>
+-    <string name="color_calibration_summary">Kalibrasi warna layar</string>
++    <string name="color_calibration_title">Keseimbangan putih</string>
++    <string name="color_calibration_summary">Sesuaikan Keseimbangan putih pada tampilan Anda</string>
+     <string name="color_red_title">Merah</string>
+     <string name="color_green_title">Hijau</string>
+     <string name="color_blue_title">Biru</string>
+diff --git a/res/values-is/strings.xml b/res/values-is/strings.xml
+index fbc3bd894..0d53f6d30 100644
+--- a/res/values-is/strings.xml
++++ b/res/values-is/strings.xml
+@@ -91,7 +91,7 @@
+     <string name="led_notification_text">LED-ljós virkjað í stillingum</string>
+     <string name="notification_light_add_apps_empty_summary">Til að virkja stýringu á hvert forrit, virkjaðu \'%1$s\' og ýttu á \'Bæta við\'</string>
+     <string name="live_display_summary">Bestaðu skjáinn þinn eftir tíma dags og umhverfisskilyrðum til að bæta læsileik og minnka álag á augun</string>
+-    <string name="live_display_mode">Birtingarhamur</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Hitastig litar</string>
+     <string name="live_display_color_temperature_summary">Dagur: <xliff:g id="day_temperature">%1$d</xliff:g>K  Nótt: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -105,7 +105,13 @@
+     <string name="live_display_low_power_summary">Aðlaga skjá fyrir minnstu orkunotkun án skerðingar afkasta</string>
+     <string name="live_display_enhance_color_title">Bæta liti</string>
+     <string name="live_display_enhance_color_summary">Bæta skærleika lita í húðtónum, landslagi og öðrum myndum</string>
+-    <string name="live_display_color_profile_title">Litasnið</string>
++    <string name="live_display_color_profile_title">Litaskali og birtuskil</string>
++    <string name="live_display_color_profile_sony_professional_title">Háttur fyrir fagmenn</string>
++    <string name="live_display_color_profile_sony_professional_summary">Notaðu sRGB litaskala til að sýna raunverulegt útlit</string>
++    <string name="live_display_color_profile_sony_standard_title">Staðalháttur</string>
++    <string name="live_display_color_profile_sony_standard_summary">Notaðu bjarta litaskalann í TRILUMINOS™ Display for mobile til að birta björt og sterk litaafbrigði.</string>
++    <string name="live_display_color_profile_sony_vivid_title">Ofurskýr stilling</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Notaður enn skærari litaskala til að birta sterk litbrigði</string>
+     <string name="live_display_color_profile_standard_title">Staðlað</string>
+     <string name="live_display_color_profile_standard_summary">Nákvæmir litir og bjartir hvítir</string>
+     <string name="live_display_color_profile_natural_title">Náttúra</string>
+@@ -130,8 +136,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Litir eru nákvæmir miðað við DCI-P3 litarýmd</string>
+     <string name="live_display_reading_mode_title">Leshamur</string>
+     <string name="live_display_reading_mode_summary">Grátónahamur fyrir lestur í lengri tíma</string>
+-    <string name="color_calibration_title">Litkvörðun</string>
+-    <string name="color_calibration_summary">Kvarða liti á skjá</string>
++    <string name="color_calibration_title">Hvítjöfnun (ljósgjafi)</string>
++    <string name="color_calibration_summary">Stilla hvítjöfnun (ljósgjafa) á skjánum þínum</string>
+     <string name="color_red_title">Rautt</string>
+     <string name="color_green_title">Grænt</string>
+     <string name="color_blue_title">Blátt</string>
+diff --git a/res/values-it/strings.xml b/res/values-it/strings.xml
+index 05a039937..d5ac85efe 100644
+--- a/res/values-it/strings.xml
++++ b/res/values-it/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED attivato dalle impostazioni</string>
+     <string name="notification_light_add_apps_empty_summary">Per aggiungere impostazioni per specifiche app, attiva \'%1$s\' e premi \'Aggiungi\'</string>
+     <string name="live_display_summary">Ottimizza lo schermo in base all\'ora del giorno e alle condizioni ambientali per migliorare la leggibilità e ridurre l\'affaticamento degli occhi</string>
+-    <string name="live_display_mode">Modalità display</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura colore</string>
+     <string name="live_display_color_temperature_summary">Giorno: <xliff:g id="day_temperature">%1$d</xliff:g>K  Notte: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Regola il display per un minore consumo energetico senza degradazione</string>
+     <string name="live_display_enhance_color_title">Migliora colori</string>
+     <string name="live_display_enhance_color_summary">Migliora la vividezza dei colori dei toni della pelle, dei paesaggi e di altre immagini</string>
+-    <string name="live_display_color_profile_title">Profilo colore</string>
++    <string name="live_display_color_profile_title">Gamma di colori e contrasto</string>
++    <string name="live_display_color_profile_sony_professional_title">Modalità professionale</string>
++    <string name="live_display_color_profile_sony_professional_summary">Utilizza la gamma sRGB per un aspetto realistico dei colori</string>
++    <string name="live_display_color_profile_sony_standard_title">Modalità standard</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilizza la gamma di colori accesi offerta da TRILUMINOS™ Display for mobile per visualizzare effetti di colore luminosi e intensi</string>
++    <string name="live_display_color_profile_sony_vivid_title">Modalità Super-vivid</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Utilizza una gamma di colori persino più intensi per gli effetti di colore accesi</string>
+     <string name="live_display_color_profile_standard_title">Predefinito</string>
+     <string name="live_display_color_profile_standard_summary">Colori accurati e bianchi luminosi</string>
+     <string name="live_display_color_profile_natural_title">Naturale</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colori accurati allo spazio di colore DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modalità lettura</string>
+     <string name="live_display_reading_mode_summary">Modalità scala di grigi per lettura a lungo termine</string>
+-    <string name="color_calibration_title">Calibrazione colore</string>
+-    <string name="color_calibration_summary">Calibra i colori dello schermo</string>
++    <string name="color_calibration_title">Bilanciamento del bianco</string>
++    <string name="color_calibration_summary">Regolare il bilanciamento del bianco del display</string>
+     <string name="color_red_title">Rosso</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Blu</string>
+diff --git a/res/values-iw/strings.xml b/res/values-iw/strings.xml
+index 422d20a46..8aabc7425 100644
+--- a/res/values-iw/strings.xml
++++ b/res/values-iw/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="led_notification_title">הגדרות נורית ההתראה</string>
+     <string name="led_notification_text">נורית LED מופעלת בהגדרות</string>
+     <string name="live_display_summary">התאם את מסך מכשירך בהתאם לשעה ולתנאי הסביבה על מנת לשפר את נוחות הקריאה ולהפחית את עייפות העין</string>
+-    <string name="live_display_mode">מצב תצוגה</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">טמפרטורת צבע</string>
+     <string name="live_display_color_temperature_summary">יום: <xliff:g id="day_temperature">%1$d</xliff:g>K לילה: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -93,7 +93,13 @@
+     <string name="live_display_low_power_summary">התאם את התצוגה עבור צריכת האנרגיה הנמוכה ביותר ללא פגיעה באיכות</string>
+     <string name="live_display_enhance_color_title">שפר צבעים</string>
+     <string name="live_display_enhance_color_summary">שפר את רווית הצבעים של גווני עור, נופים וסוגי תמונות נוספים</string>
+-    <string name="live_display_color_profile_title">פרופיל צבע</string>
++    <string name="live_display_color_profile_title">סולם צבעים וניגודיות</string>
++    <string name="live_display_color_profile_sony_professional_title">מצב מקצועי</string>
++    <string name="live_display_color_profile_sony_professional_summary">שימוש בסולם צבעים של sRGB למראה צבעים אותנטי</string>
++    <string name="live_display_color_profile_sony_standard_title">מצב רגיל</string>
++    <string name="live_display_color_profile_sony_standard_summary">שימוש בסולם צבעים בהירים של TRILUMINOS™ Display for mobile למראה של אפקטי צבע בהירים וחיים</string>
++    <string name="live_display_color_profile_sony_vivid_title">מצב חי במיוחד</string>
++    <string name="live_display_color_profile_sony_vivid_summary">שימוש בסולם צבעים חיים אפילו עוד יותר למראה של אפקטי צבע בהירים</string>
+     <string name="live_display_color_profile_standard_title">רגיל</string>
+     <string name="live_display_color_profile_standard_summary">צבעים מדויקים וגווני לבן בהירים</string>
+     <string name="live_display_color_profile_natural_title">טבעי</string>
+@@ -118,8 +124,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">דיוק צבעים למרחב הצבעים DCI-P3</string>
+     <string name="live_display_reading_mode_title">מצב קריאה</string>
+     <string name="live_display_reading_mode_summary">מסך בצבעי אפור לקריאה ארוכה</string>
+-    <string name="color_calibration_title">כיול צבע</string>
+-    <string name="color_calibration_summary">כיול צבעי מסך</string>
++    <string name="color_calibration_title">איזון לבן</string>
++    <string name="color_calibration_summary">כוונן את האיזון הלבן בתצוגה</string>
+     <string name="color_red_title">אדום</string>
+     <string name="color_green_title">ירוק</string>
+     <string name="color_blue_title">כחול</string>
+diff --git a/res/values-ja/strings.xml b/res/values-ja/strings.xml
+index 7ac51d703..f33f40732 100644
+--- a/res/values-ja/strings.xml
++++ b/res/values-ja/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">設定によってLEDライトが有効になっています</string>
+     <string name="notification_light_add_apps_empty_summary">アプリごとにコントロールするには、「%1$s」を有効にして「追加」を押してください。</string>
+     <string name="live_display_summary">画面を見やすく、目の疲れを軽減するために、時間と周囲の環境に合わせて画面を最適化する</string>
+-    <string name="live_display_mode">ディスプレイのモード</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">色温度</string>
+     <string name="live_display_color_temperature_summary">昼: <xliff:g id="day_temperature">%1$d</xliff:g>K  夜: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">性能を低下させずにディスプレイを最低の消費電力に調整する</string>
+     <string name="live_display_enhance_color_title">色を補正</string>
+     <string name="live_display_enhance_color_summary">肌の色、風景や他の画像の色の鮮やかさを補正する</string>
+-    <string name="live_display_color_profile_title">カラープロファイル</string>
++    <string name="live_display_color_profile_title">色域とコントラスト</string>
++    <string name="live_display_color_profile_sony_professional_title">プロフェッショナルモード</string>
++    <string name="live_display_color_profile_sony_professional_summary">sRGBの色域を使用します。オリジナルの色彩にこだわる人におすすめです。</string>
++    <string name="live_display_color_profile_sony_standard_title">スタンダードモード</string>
++    <string name="live_display_color_profile_sony_standard_summary">トリルミナス®ディスプレイ for mobileの鮮やかな色域を使用します。色鮮やかに見たい人におすすめです。</string>
++    <string name="live_display_color_profile_sony_vivid_title">ダイナミックモード</string>
++    <string name="live_display_color_profile_sony_vivid_summary">スタンダードモードより強調された色彩を使用します。より鮮やかな画面を好む人におすすめです。</string>
+     <string name="live_display_color_profile_standard_title">標準</string>
+     <string name="live_display_color_profile_standard_summary">正確な色と明るい白に補正します</string>
+     <string name="live_display_color_profile_natural_title">自然</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">正確な DCI-P3 色空間に補正します</string>
+     <string name="live_display_reading_mode_title">読書モード</string>
+     <string name="live_display_reading_mode_summary">長期間読書するのに適した、グレースケールモードに変更します</string>
+-    <string name="color_calibration_title">色の調整</string>
+-    <string name="color_calibration_summary">画面の色を調整する</string>
++    <string name="color_calibration_title">ホワイトバランス</string>
++    <string name="color_calibration_summary">画面上のホワイトバランスを調整します</string>
+     <string name="color_red_title">赤</string>
+     <string name="color_green_title">緑</string>
+     <string name="color_blue_title">青</string>
+diff --git a/res/values-ka/strings.xml b/res/values-ka/strings.xml
+index f2a65b130..c0a551d08 100644
+--- a/res/values-ka/strings.xml
++++ b/res/values-ka/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">შუქდიოდის ნათება ჩართულია პარამეტრებიდან</string>
+     <string name="notification_light_add_apps_empty_summary">თითოეული აპის მიხედვით სამართავად აამოქმედეთ „%1$s“ და დააჭირეთ „დამატებას“</string>
+     <string name="live_display_summary">ეკრანის განათების შერჩევა, დღე-ღამისა და გარემო პირობების მიხედვით, კითხვადობის გასაუმჯობესებლად და თვალების გადაღლის შესამცირებლად</string>
+-    <string name="live_display_mode">ჩვენების რეჟიმი</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">ფერების ტემპერატურა</string>
+     <string name="live_display_color_temperature_summary">დღე: <xliff:g id="day_temperature">%1$d</xliff:g>K ღამე: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">მორგება ენერგიის უმცირესი მოხმარებისთვის, ჩვენების გაუარესების გარეშე.</string>
+     <string name="live_display_enhance_color_title">გაუმჯობესებული ფერები</string>
+     <string name="live_display_enhance_color_summary">გაუმჯობესებული შეფერილობა კანისთვის, ხედებისა და სხვა სახის სურათებისთვის</string>
+-    <string name="live_display_color_profile_title">ფერების პროფილი</string>
++    <string name="live_display_color_profile_title">ფერები და კონტრასტი</string>
++    <string name="live_display_color_profile_sony_professional_title">პროფესიული რეჟიმი</string>
++    <string name="live_display_color_profile_sony_professional_summary">გამოიყენეთ sRGB ფერთა გამა ავთენტური ფერების ეფექტისთვის</string>
++    <string name="live_display_color_profile_sony_standard_title">სტანდარტული რეჟიმი</string>
++    <string name="live_display_color_profile_sony_standard_summary">გამოიყენეთ TRILUMINOS™ Display for mobile-ის ბრწყინვალე ფერთა გამა კაშკაშა, ცოცხალი ფერების ეფექტისთვის</string>
++    <string name="live_display_color_profile_sony_vivid_title">სუპერ-დინამიური რეჟიმი</string>
++    <string name="live_display_color_profile_sony_vivid_summary">გამოიყენეთ ცოცხალ ფერთა გამა კაშკაშა ფერების ეფექტისთვის</string>
+     <string name="live_display_color_profile_standard_title">ჩვეულებრივი</string>
+     <string name="live_display_color_profile_standard_summary">ზუსტი ფერები და კაშკაშა სითეთრე</string>
+     <string name="live_display_color_profile_natural_title">ბუნებრივი</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">ფერები მიახლოებული DCI-P3 ფერების სივრცესთან</string>
+     <string name="live_display_reading_mode_title">საკითხავი რეჟიმი</string>
+     <string name="live_display_reading_mode_summary">მონაცრისფრო რეჟიმი დიდხანს კითხვისთვის</string>
+-    <string name="color_calibration_title">ფერების გასწორება</string>
+-    <string name="color_calibration_summary">ეკრანზე ფერების გასწორება</string>
++    <string name="color_calibration_title">თეთრის ბალანსი</string>
++    <string name="color_calibration_summary">თეთრის ბალანსის დარეგულირება თქვენს ეკრანზე</string>
+     <string name="color_red_title">წითელი</string>
+     <string name="color_green_title">მწვანე</string>
+     <string name="color_blue_title">ლურჯი</string>
+diff --git a/res/values-kab-rDZ/strings.xml b/res/values-kab-rDZ/strings.xml
+index d88d4c5ac..4072ff4f1 100644
+--- a/res/values-kab-rDZ/strings.xml
++++ b/res/values-kab-rDZ/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g></string>
+     <string name="live_display_day">Ass</string>
+     <string name="live_display_night">Iḍ</string>
+-    <string name="live_display_color_profile_title">Ini n umaɣnu</string>
++
+     <string name="live_display_color_profile_standard_title">Alugen</string>
+     <string name="live_display_color_profile_natural_title">Agaman</string>
+     <string name="live_display_color_profile_dynamic_title">Asmussan</string>
+@@ -322,4 +322,5 @@
+     <string name="trust_onboarding_done">Gziɣ</string>
+     <string name="sms_security_check_limit_title">Talast n yizen n SMS</string>
+     <string name="sms_security_check_limit_always_confirm">Sentem yal tikkelt</string>
++    <string name="live_display_mode">Assertive Display®</string>
+ </resources>
+diff --git a/res/values-kn/strings.xml b/res/values-kn/strings.xml
+index 73d6e76e0..4a1a40b94 100644
+--- a/res/values-kn/strings.xml
++++ b/res/values-kn/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="led_notification_title">ಬೆಳಕಿನ ಆಯ್ಕೆಗಳು</string>
+     <string name="led_notification_text">ಅಳವಡಿಕೆಯಿಂದ LED ಮಿಣುಕು ಸಶಕ್ತ</string>
+     <string name="live_display_summary">ದಿನದ ಸಮಯ ಮತ್ತು ಪರಿಸರದ ಪರಿಸ್ಥಿತಿ ಆಧಾರಿಸಿ ನಿಮ್ಮ ಪರದೆಯನ್ನು ಉತ್ತಮವಾಗಿಸಿ ವಾಚನೀಯತೆ ಉತ್ತಮಗೊಳಿಸಿ ಕಣ್ಣಿನ ಆಯಾಸ ಕಡಿಮೆ ಮಾಡು</string>
+-    <string name="live_display_mode">ಪ್ರದರ್ಶನ ರೀತಿ</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">ಬಣ್ಣದ ತಾಪಮಾನ</string>
+     <string name="live_display_color_temperature_summary">ಹಗಲು: <xliff:g id="day_temperature">%1$d</xliff:g>K  ರಾತ್ರಿ: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -92,7 +92,13 @@
+     <string name="live_display_low_power_title">ಶಕ್ತಿ ಬಳಕೆ ಕುಗ್ಗಿಸು</string>
+     <string name="live_display_enhance_color_title">ಬಣ್ಣಗಳನ್ನು ವರ್ಧಿಸು</string>
+     <string name="live_display_enhance_color_summary">ಚರ್ಮ ಛಾಯೆ, ದೃಶ್ಯಾವಳಿ, ಮತ್ತು ಇತರೆ ಚಿತ್ರಗಳ ಬಣ್ಣದ ಹೊಳಪನ್ನು ಉತ್ತಮಗೊಳಿಸು</string>
+-    <string name="live_display_color_profile_title">ಬಣ್ಣದ ರೇಖಾಕೃತಿ</string>
++    <string name="live_display_color_profile_title">ಬಣ್ಣ ವ್ಯಾಪ್ತಿ ಕಾಂ.</string>
++    <string name="live_display_color_profile_sony_professional_title">ವೃತ್ತಿಪರ ಮೋಡ್</string>
++    <string name="live_display_color_profile_sony_professional_summary">ದೃಢೀಕೃತ ಬಣ್ಣದ ನೋಟಕ್ಕೆ sRGB ಬಣ್ಣ ವ್ಯಾಪ್ತಿ ಬಳಸಿ</string>
++    <string name="live_display_color_profile_sony_standard_title">ಪ್ರಮಾಣಿತ ಮೋಡ್</string>
++    <string name="live_display_color_profile_sony_standard_summary">ಪ್ರಕಾಶಮಾನ, ಉಜ್ವಲ ಬಣ್ಣದ ಪರಿಣಾಮಗಳಿಗೆ TRILUMINOS™ Display for mobile ನ ಆಕರ್ಷಣ ಬಣ್ಣದ ವ್ಯಾಪ್ತಿ ಬಳಸಿ</string>
++    <string name="live_display_color_profile_sony_vivid_title">ಉತ್ತಮ-ಸ್ಫುಟವಾದ ಮೋಡ್</string>
++    <string name="live_display_color_profile_sony_vivid_summary">ಪ್ರಕಾಶಮಾನ ಬಣ್ಣದ ಪರಿಣಾಮಗಳ ನೋಟಕ್ಕೆ ಇನ್ನೂ ಹೆಚ್ಚಿನ ಉಜ್ವಲ ಬಣ್ಣದ ವ್ಯಾಪ್ತಿ ಬಳಸಿ</string>
+     <string name="live_display_color_profile_standard_title">ಪ್ರಮಾಣಿತ</string>
+     <string name="live_display_color_profile_standard_summary">ನಿಖರ ಬಣ್ಣಗಳು ಮತ್ತು ಪ್ರಖರ ಬಿಳಿಗಳು</string>
+     <string name="live_display_color_profile_natural_title">ನೈಸರ್ಗಿಕ</string>
+@@ -117,8 +123,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">ಬಣ್ಣಗಳು DCI-P3 ಬಣ್ಣ ಜಗತ್ತಿಗೆ ಅನುಗುಣವಾಗಿವೆ</string>
+     <string name="live_display_reading_mode_title">ಓದುವ ರೀತಿ</string>
+     <string name="live_display_reading_mode_summary">ದೀರ್ಘಾವಧಿಯ ವಾಚನಕ್ಕೆ ಬೂದುಪೊರೆ ರೀತಿ</string>
+-    <string name="color_calibration_title">ಬಣ್ಣ ಸರಿಹೊಂದಿಕೆ</string>
+-    <string name="color_calibration_summary">ಪರದೆಯ ಬಣ್ಣಗಳನ್ನು ಸರಿಹೊಂದಿಸು</string>
++    <string name="color_calibration_title">ವೈಟ್ ಬ್ಯಾಲೆನ್ಸ್</string>
++    <string name="color_calibration_summary">ನಿಮ್ಮ ಪ್ರದರ್ಶನದಲ್ಲಿ ವೈಟ್ ಬ್ಯಾಲೆನ್ಸ್ ಅನ್ನು ಸರಿಹೊಂದಿಸಿ</string>
+     <string name="color_red_title">ಕೆಂಪು</string>
+     <string name="color_green_title">ಹಸಿರು</string>
+     <string name="color_blue_title">ನೀಲಿ</string>
+diff --git a/res/values-ko/strings.xml b/res/values-ko/strings.xml
+index cee43b2b3..63cc484c7 100644
+--- a/res/values-ko/strings.xml
++++ b/res/values-ko/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">설정 앱이 LED 표시등을 활성화함</string>
+     <string name="notification_light_add_apps_empty_summary">앱 별 컨트롤을 추가하려면 \'%1$s\'을(를) 활성화하고 \'추가\'를 누르세요</string>
+     <string name="live_display_summary">가독성을 향상시키고 눈의 피로를 줄이기 위해 주변 환경과 시간에 따라 화면을 최적화</string>
+-    <string name="live_display_mode">화면 모드</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">색 온도</string>
+     <string name="live_display_color_temperature_summary">주간: <xliff:g id="day_temperature">%1$d</xliff:g>K  야간: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">열화 없는 한도 내에서 화면을 조정하여 전력 소모 감소</string>
+     <string name="live_display_enhance_color_title">색상 향상</string>
+     <string name="live_display_enhance_color_summary">피부 톤, 풍경 및 기타 이미지에서 색의 생동감을 향상</string>
+-    <string name="live_display_color_profile_title">색상 프로필</string>
++    <string name="live_display_color_profile_title">색 영역 및 대비</string>
++    <string name="live_display_color_profile_sony_professional_title">전문가 모드</string>
++    <string name="live_display_color_profile_sony_professional_summary">어센틱 색상 표현에 sRGB 색 영역을 사용함</string>
++    <string name="live_display_color_profile_sony_standard_title">표준 모드</string>
++    <string name="live_display_color_profile_sony_standard_summary">밝고 생생한 색상 표현 효과를 위해 TRILUMINOS™ Display for mobile의 찬란한 색 영역을 사용함</string>
++    <string name="live_display_color_profile_sony_vivid_title">최고로 생생한 모드</string>
++    <string name="live_display_color_profile_sony_vivid_summary">밝은 색상 표현 효과를 위해 훨씬 더 생생한 색 영역을 사용함</string>
+     <string name="live_display_color_profile_standard_title">표준</string>
+     <string name="live_display_color_profile_standard_summary">정확한 색상 및 밝은 흰색</string>
+     <string name="live_display_color_profile_natural_title">자연스러운</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">DCI-P3 색 공간에 적합한 색상</string>
+     <string name="live_display_reading_mode_title">독서 모드</string>
+     <string name="live_display_reading_mode_summary">긴 시간 독서에 유용한 흑백 모드</string>
+-    <string name="color_calibration_title">색상 보정</string>
+-    <string name="color_calibration_summary">화면의 색상을 보정</string>
++    <string name="color_calibration_title">화이트 밸런스</string>
++    <string name="color_calibration_summary">화면의 화이트 밸런스 조정</string>
+     <string name="color_red_title">빨강</string>
+     <string name="color_green_title">초록</string>
+     <string name="color_blue_title">파랑</string>
+diff --git a/res/values-mk/strings.xml b/res/values-mk/strings.xml
+index 3fc016a61..8d8b6ef90 100644
+--- a/res/values-mk/strings.xml
++++ b/res/values-mk/strings.xml
+@@ -77,7 +77,7 @@
+     <string name="led_notification_title">Поставки за светла</string>
+     <string name="led_notification_text">LED светло овозможено од поставките</string>
+     <string name="live_display_summary">Оптимизирајте го вашиот екран врз основа на време од денот и амбиентални услови за да се подобри читливоста и да се намали обемот на очите</string>
+-    <string name="live_display_mode">Режим на екранот</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Температура на бојата</string>
+     <string name="live_display_color_temperature_summary">Ден <xliff:g id="day_temperature">%1$d</xliff:g>K  Ноќ: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -89,7 +89,13 @@
+     <string name="live_display_low_power_summary">Прилагодете го екранот за најниска потрошувачка на енергија без деградација</string>
+     <string name="live_display_enhance_color_title">Подобрете ги боите</string>
+     <string name="live_display_enhance_color_summary">Подобрете ја динамиката на боите од тонови на месо, сцени и други слики</string>
+-    <string name="live_display_color_profile_title">Профил на боја</string>
++    <string name="live_display_color_profile_title">Спектар и контраст на бои</string>
++    <string name="live_display_color_profile_sony_professional_title">Професионален режим</string>
++    <string name="live_display_color_profile_sony_professional_summary">Користете го спектарот на бои sRGB за автентичен изглед на боите</string>
++    <string name="live_display_color_profile_sony_standard_title">Стандарден режим</string>
++    <string name="live_display_color_profile_sony_standard_summary">Користете го сјајниот спектар на бои TRILUMINOS™ Display for mobile за светли и живописни ефекти на боите</string>
++    <string name="live_display_color_profile_sony_vivid_title">Суперживописен режим</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Користете уште поживописен спектар на бои за светли ефекти на боите</string>
+     <string name="live_display_color_profile_standard_title">Стандардно</string>
+     <string name="live_display_color_profile_standard_summary">Точни бои и светли бели</string>
+     <string name="live_display_color_profile_natural_title">Природно</string>
+@@ -112,8 +118,8 @@
+     <string name="live_display_color_profile_srgb_summary">Бои прецизни во просторот за боја на sRGB</string>
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_color_profile_dci_p3_summary">Боиите се точни за просторот за боја DCI-P3</string>
+-    <string name="color_calibration_title">Калибрација на боја</string>
+-    <string name="color_calibration_summary">Калибрирај ги боите на екранот</string>
++    <string name="color_calibration_title">Баланс на белата боја</string>
++    <string name="color_calibration_summary">Регулирање на балансот на белата боја на екранот</string>
+     <string name="color_red_title">Црвено</string>
+     <string name="color_green_title">Зелено</string>
+     <string name="color_blue_title">Сино</string>
+diff --git a/res/values-nb/strings.xml b/res/values-nb/strings.xml
+index 2a8c86f9b..b12b6cf79 100644
+--- a/res/values-nb/strings.xml
++++ b/res/values-nb/strings.xml
+@@ -77,7 +77,7 @@
+     <string name="led_notification_title">Lysinnstillinger</string>
+     <string name="led_notification_text">LED-lys aktivert av innstillingene</string>
+     <string name="live_display_summary">Optimalisere skjermen basert på tidspunkt av dagen og omgivelsesforhold for å forbedre lesbarhet og redusere belastningen på øynene</string>
+-    <string name="live_display_mode">Visningsmodus</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Fargetemperatur</string>
+     <string name="live_display_color_temperature_summary">Dag: <xliff:g id="day_temperature">%1$d</xliff:g>K  Natt: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -89,7 +89,13 @@
+     <string name="live_display_low_power_summary">Justere visningen for laveste strømforbruk uten degradering</string>
+     <string name="live_display_enhance_color_title">Forbedre farger</string>
+     <string name="live_display_enhance_color_summary">Forbedre fargefullhet på hudfarger, natur og andre bilder</string>
+-    <string name="live_display_color_profile_title">Fargeprofil</string>
++    <string name="live_display_color_profile_title">Fargeskala og kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesjonell modus</string>
++    <string name="live_display_color_profile_sony_professional_summary">Bruk sRGB-fargeskala for autentisk visning av farger</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardmodus</string>
++    <string name="live_display_color_profile_sony_standard_summary">Bruk den strålende fargeskalaen TRILUMINOS™ Display for mobile for lyssterke, levende fargeeffekter</string>
++    <string name="live_display_color_profile_sony_vivid_title">Superlivlig-modus</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Bruk en enda mer levende fargeskala for visning av lyssterke fargeeffekter</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Nøyaktige farger og lyse hvitfarger</string>
+     <string name="live_display_color_profile_natural_title">Naturlig</string>
+@@ -112,8 +118,8 @@
+     <string name="live_display_color_profile_srgb_summary">Farger nøyaktige i forhold til fargerommet sRGB</string>
+     <string name="live_display_color_profile_dci_p3_title">DCI-P3</string>
+     <string name="live_display_color_profile_dci_p3_summary">Farger nøyaktige i forhold til fargerommet DCI-P3</string>
+-    <string name="color_calibration_title">Fargekalibrering</string>
+-    <string name="color_calibration_summary">Kalibrere skjermens farger</string>
++    <string name="color_calibration_title">Hvitbalanse</string>
++    <string name="color_calibration_summary">Juster hvitbalansen på skjermen</string>
+     <string name="color_red_title">Rød</string>
+     <string name="color_green_title">Grønn</string>
+     <string name="color_blue_title">Blå</string>
+diff --git a/res/values-nl/strings.xml b/res/values-nl/strings.xml
+index 80a803733..be0d53e0a 100644
+--- a/res/values-nl/strings.xml
++++ b/res/values-nl/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED-verlichting ingeschakeld door instellingen</string>
+     <string name="notification_light_add_apps_empty_summary">Om per-app beheer toe te voegen, activeer \'%1$s\' en klik op \'Toevoegen\'</string>
+     <string name="live_display_summary">Uw scherm optimaliseren aan de hand van tijdstip op de dag en lichtomstandigheden om de leesbaarheid te verbeteren en oogvermoeidheid te verminderen</string>
+-    <string name="live_display_mode">Weergavemodus</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Kleurtemperatuur</string>
+     <string name="live_display_color_temperature_summary">Overdag: <xliff:g id="day_temperature">%1$d</xliff:g> K, \'s nachts: <xliff:g id="night_temperature">%2$d</xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Scherm aanpassen voor laagst mogelijke energieverbruik zonder kwaliteitsverlies</string>
+     <string name="live_display_enhance_color_title">Kleuren verbeteren</string>
+     <string name="live_display_enhance_color_summary">Kleurlevendigheid verbeteren van huidtinten, landschappen en andere afbeeldingen</string>
+-    <string name="live_display_color_profile_title">Kleurprofiel</string>
++    <string name="live_display_color_profile_title">Kleurengamma en contrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professionele modus</string>
++    <string name="live_display_color_profile_sony_professional_summary">Gebruik een sRGB kleurengamma voor authentieke kleuren</string>
++    <string name="live_display_color_profile_sony_standard_title">Standaardmodus</string>
++    <string name="live_display_color_profile_sony_standard_summary">Gebruik het heldere kleurengamma van TRILUMINOS™ Display for mobile voor heldere, levendige kleureffecten</string>
++    <string name="live_display_color_profile_sony_vivid_title">Superlevendige modus</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Gebruik een nog levendiger kleurengamma voor heldere kleureffecten</string>
+     <string name="live_display_color_profile_standard_title">Standaard</string>
+     <string name="live_display_color_profile_standard_summary">Nauwkeurige kleuren en heldere witwaarden</string>
+     <string name="live_display_color_profile_natural_title">Natuurlijk</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Kleuren binnen het DCI-P3-kleurenpalet</string>
+     <string name="live_display_reading_mode_title">Leesmodus</string>
+     <string name="live_display_reading_mode_summary">Grijsschaalmodus voor langdurig lezen</string>
+-    <string name="color_calibration_title">Kleuren kalibreren</string>
+-    <string name="color_calibration_summary">Schermkleur kalibreren</string>
++    <string name="color_calibration_title">Witbalans</string>
++    <string name="color_calibration_summary">Pas de witbalans aan op uw beeldscherm</string>
+     <string name="color_red_title">Rood</string>
+     <string name="color_green_title">Groen</string>
+     <string name="color_blue_title">Blauw</string>
+diff --git a/res/values-pl/strings.xml b/res/values-pl/strings.xml
+index d3061715d..1a4bec5b5 100644
+--- a/res/values-pl/strings.xml
++++ b/res/values-pl/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Diody LED włączone przez ustawienia</string>
+     <string name="notification_light_add_apps_empty_summary">Aby ustawić indywidualnie dla danej aplikacji, aktywuj \'%1$s\', następnie dotknij \"Dodaj\"</string>
+     <string name="live_display_summary">Zoptymalizuj swój ekran w zależności od pory dnia, aby poprawić czytelność i zredukować zmęczenie oczu</string>
+-    <string name="live_display_mode">Tryb wyświetlania</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura barw</string>
+     <string name="live_display_color_temperature_summary">Dzień: <xliff:g id="day_temperature">%1$d</xliff:g>K Noc: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Dostosuj sposób wyświetlania do najniższego zużycia energii bez utraty jakości</string>
+     <string name="live_display_enhance_color_title">Wzmocnienie kolorów</string>
+     <string name="live_display_enhance_color_summary">Popraw odczucie kolorów skóry, scenerii oraz innych obrazów</string>
+-    <string name="live_display_color_profile_title">Profil kolorów</string>
++    <string name="live_display_color_profile_title">Gama kolorów i kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Tryb profesjonalny</string>
++    <string name="live_display_color_profile_sony_professional_summary">Użyj gamy kolorów sRGB, aby uzyskać autentyczne kolory</string>
++    <string name="live_display_color_profile_sony_standard_title">Tryb standardowy</string>
++    <string name="live_display_color_profile_sony_standard_summary">Użyj imponującej gamy kolorów aplikacji TRILUMINOS™ Display for mobile, aby uzyskać jasne, żywe kolory</string>
++    <string name="live_display_color_profile_sony_vivid_title">Tryb superżywych kolorów</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Użyj jeszcze żywszej gamy kolorów, aby uzyskać jasne kolory</string>
+     <string name="live_display_color_profile_standard_title">Standardowe</string>
+     <string name="live_display_color_profile_standard_summary">Dokładne odwzorowanie kolorów i jasności bieli</string>
+     <string name="live_display_color_profile_natural_title">Naturalne</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Kolory zgodne z paletą kolorów DCI-P3</string>
+     <string name="live_display_reading_mode_title">Tryb czytania</string>
+     <string name="live_display_reading_mode_summary">Tryb skali szarości dla długotrwałego czytania</string>
+-    <string name="color_calibration_title">Kalibracja kolorów</string>
+-    <string name="color_calibration_summary">Kalibruj kolory ekranu</string>
++    <string name="color_calibration_title">Balans bieli</string>
++    <string name="color_calibration_summary">Dostosuj balans bieli na wyświetlaczu</string>
+     <string name="color_red_title">Czerwony</string>
+     <string name="color_green_title">Zielony</string>
+     <string name="color_blue_title">Niebieski</string>
+diff --git a/res/values-pt-rBR/strings.xml b/res/values-pt-rBR/strings.xml
+index bb7b4f927..5409e4cf3 100644
+--- a/res/values-pt-rBR/strings.xml
++++ b/res/values-pt-rBR/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Luz do LED ativada pelas configurações</string>
+     <string name="notification_light_add_apps_empty_summary">Para adicionar controle por app, ative \'%1$s\' e pressione \'Adicionar\'</string>
+     <string name="live_display_summary">Otimize sua tela com base na hora do dia e condições do ambiente para melhorar a legibilidade e reduzir o cansaço visual</string>
+-    <string name="live_display_mode">Modo da tela</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura da cor</string>
+     <string name="live_display_color_temperature_summary">Dia: <xliff:g id="day_temperature">%1$d</xliff:g>K  Noite: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ajustar a tela para menor consumo de energia sem degradação</string>
+     <string name="live_display_enhance_color_title">Realçar cores</string>
+     <string name="live_display_enhance_color_summary">Melhorar a vivacidade das cores de tons de pele, cenário e outras imagens</string>
+-    <string name="live_display_color_profile_title">Perfil de cor</string>
++    <string name="live_display_color_profile_title">Gama de cores e contraste</string>
++    <string name="live_display_color_profile_sony_professional_title">Modo profissional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Use a gama de cores sRGB para uma aparência de cores autêntica</string>
++    <string name="live_display_color_profile_sony_standard_title">Modo padrão</string>
++    <string name="live_display_color_profile_sony_standard_summary">Use a magnífica gama de cores do TRILUMINOS™ Display for mobile para ter efeitos de cores intensos e vivos.</string>
++    <string name="live_display_color_profile_sony_vivid_title">Modo super-vívido</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Use uma gama de cores ainda mais viva para ter efeitos de cores intensos</string>
+     <string name="live_display_color_profile_standard_title">Padrão</string>
+     <string name="live_display_color_profile_standard_summary">Cores precisas e brancos brilhantes</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Cores correspondentes ao espaço de cores DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modo de leitura</string>
+     <string name="live_display_reading_mode_summary">Modo de tons de cinza para longos períodos de leitura</string>
+-    <string name="color_calibration_title">Calibração de cores</string>
+-    <string name="color_calibration_summary">Calibrar as cores da tela</string>
++    <string name="color_calibration_title">Equilíbrio de branco</string>
++    <string name="color_calibration_summary">Ajuste o equilíbrio de branco na tela</string>
+     <string name="color_red_title">Vermelho</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Azul</string>
+diff --git a/res/values-pt-rPT/strings.xml b/res/values-pt-rPT/strings.xml
+index 7d57b1f32..7c826b7d9 100644
+--- a/res/values-pt-rPT/strings.xml
++++ b/res/values-pt-rPT/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Luz do LED ativada pelas definições</string>
+     <string name="notification_light_add_apps_empty_summary">Para adicionar controlo por aplicação, ative \'%1$s\' e pressione \'Adicionar\'</string>
+     <string name="live_display_summary">Otimiza o ecrã com base na hora do dia e condições do ambiente para melhorar a legibilidade e reduzir a fadiga ocular</string>
+-    <string name="live_display_mode">Modo do ecrã</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura da cor</string>
+     <string name="live_display_color_temperature_summary">Dia: <xliff:g id="day_temperature">%1$d</xliff:g>K  Noite: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ajustar o ecrã para consumir menos energia, sem degradação</string>
+     <string name="live_display_enhance_color_title">Realçar cores</string>
+     <string name="live_display_enhance_color_summary">Melhorar a vivacidade da cor de tons de pele, cenário e outras imagens</string>
+-    <string name="live_display_color_profile_title">Perfil de cor</string>
++    <string name="live_display_color_profile_title">Gama de cores e contraste</string>
++    <string name="live_display_color_profile_sony_professional_title">Modo Profissional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Utilize a gama de cores sRGB para obter cores autênticas</string>
++    <string name="live_display_color_profile_sony_standard_title">Modo Padrão</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilize a gama magnífica de cores do TRILUMINOS™ Display for mobile para obter efeitos de cor brilhantes e vívidos</string>
++    <string name="live_display_color_profile_sony_vivid_title">Modo Super-vívido</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Utilize uma gama de cores ainda mais vívida para obter efeitos de cor brilhantes</string>
+     <string name="live_display_color_profile_standard_title">Padrão</string>
+     <string name="live_display_color_profile_standard_summary">Cores precisas e brancos brilhantes</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Cores precisas para o espaço de cor DCI-P3</string>
+     <string name="live_display_reading_mode_title">Modo de leitura</string>
+     <string name="live_display_reading_mode_summary">Modo em tons de cinzento para leituras por longos períodos</string>
+-    <string name="color_calibration_title">Calibração de cores</string>
+-    <string name="color_calibration_summary">Calibrar as cores do ecrã</string>
++    <string name="color_calibration_title">Equilíbrio de brancos</string>
++    <string name="color_calibration_summary">Ajustar o equilíbrio de brancos do visor</string>
+     <string name="color_red_title">Vermelho</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Azul</string>
+diff --git a/res/values-ro/strings.xml b/res/values-ro/strings.xml
+index fd257fda6..938ac1a20 100644
+--- a/res/values-ro/strings.xml
++++ b/res/values-ro/strings.xml
+@@ -99,8 +99,8 @@
+     <string name="led_notification_title">Setări lumină</string>
+     <string name="led_notification_text">Lumină LED activată de setări</string>
+     <string name="notification_light_add_apps_empty_summary">Pentru a adăuga control per aplicație, activați \'%1$s\' și apăsați \'Adăugați\'</string>
+-    <string name="live_display_summary">Optimizați ecranul bazat pe timpul zilei şi condiţiile mediului ambient pentru a îmbunătăţi lizibilitatea şi a reduce oboseala ochilor</string>
+-    <string name="live_display_mode">Mod de afișare</string>
++    <string name="live_display_summary">Optimizați ecranul în funcție de timpul zilei şi de condiţiile mediului ambiant pentru a îmbunătăţi lizibilitatea şi a reduce oboseala ochilor</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura culorii</string>
+     <string name="live_display_color_temperature_summary">Zi: <xliff:g id="day_temperature">%1$d</xliff:g>K Noapte: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Reglează afişajul pentru cel mai mic consum de energie fără degradare</string>
+     <string name="live_display_enhance_color_title">Sporește culorile</string>
+     <string name="live_display_enhance_color_summary">Îmbunătățește vibranța culorilor pentru tonuri, peisaje și alte imagini</string>
+-    <string name="live_display_color_profile_title">Profilul culorii</string>
++    <string name="live_display_color_profile_title">Gamă de culori şi contrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Mod profesional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Utilizaţi gama de culori sRGB pentru reproducerea autentică a culorilor</string>
++    <string name="live_display_color_profile_sony_standard_title">Mod standard</string>
++    <string name="live_display_color_profile_sony_standard_summary">Utilizaţi strălucitoarea gamă de culori TRILUMINOS™ Display for mobile pentru reproducerea unor culori luminoase şi vii</string>
++    <string name="live_display_color_profile_sony_vivid_title">Mod foarte intens</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Utilizaţi o gamă de culori şi mai vii pentru reproducerea unor culori strălucitoare</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Culori precise și alb luminos</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Culorile se calibrează după spațiul de culori DCI-P3</string>
+     <string name="live_display_reading_mode_title">Mod lectură</string>
+     <string name="live_display_reading_mode_summary">Mod cu tonuri gri pentru cititul pe termen lung</string>
+-    <string name="color_calibration_title">Calibrare culoare</string>
+-    <string name="color_calibration_summary">Calibrați culori pe ecran</string>
++    <string name="color_calibration_title">Compensare alb</string>
++    <string name="color_calibration_summary">Reglaţi compensarea de alb pe afişaj</string>
+     <string name="color_red_title">Roșu</string>
+     <string name="color_green_title">Verde</string>
+     <string name="color_blue_title">Albastru</string>
+diff --git a/res/values-ru/strings.xml b/res/values-ru/strings.xml
+index 660276a16..b70270f72 100644
+--- a/res/values-ru/strings.xml
++++ b/res/values-ru/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Светодиод включен в настройках</string>
+     <string name="notification_light_add_apps_empty_summary">Чтобы разрешить управление приложениями, включите \'%1$s\' и нажмите \'Добавить\'</string>
+     <string name="live_display_summary">Подстраивать экран на основе времени суток и освещения, чтобы повысить удобочитаемость и снизить нагрузку на глаза</string>
+-    <string name="live_display_mode">Режим</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Цветовая температура</string>
+     <string name="live_display_color_temperature_summary">День: <xliff:g id="day_temperature">%1$d </xliff:g>K Ночь: <xliff:g id="night_temperature">%2$d </xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Подстраивать экран для низкого энергопотребления без ухудшения качества</string>
+     <string name="live_display_enhance_color_title">Улучшение цветопередачи</string>
+     <string name="live_display_enhance_color_summary">Улучшить сочность оттенков кожи, пейзажей и других изображений</string>
+-    <string name="live_display_color_profile_title">Цветовой профиль</string>
++    <string name="live_display_color_profile_title">Цветовая гамма и контраст</string>
++    <string name="live_display_color_profile_sony_professional_title">Профессиональный режим</string>
++    <string name="live_display_color_profile_sony_professional_summary">Цветовая гамма sRGB для реалистичного отображения цветов</string>
++    <string name="live_display_color_profile_sony_standard_title">Стандартный режим</string>
++    <string name="live_display_color_profile_sony_standard_summary">Восхитительная цветовая гамма TRILUMINOS™ Display for mobile для передачи ярких, сочных цветов</string>
++    <string name="live_display_color_profile_sony_vivid_title">Режим предельной яркости</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Сочная цветовая гамма для ярких цветовых эффектов</string>
+     <string name="live_display_color_profile_standard_title">Стандартный</string>
+     <string name="live_display_color_profile_standard_summary">Точная цветопередача и яркие белые тона</string>
+     <string name="live_display_color_profile_natural_title">Естественный</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Цвета, соответствующие цветовому пространству DCI-P3</string>
+     <string name="live_display_reading_mode_title">Режим чтения</string>
+     <string name="live_display_reading_mode_summary">Режим оттенков серого для долговременного чтения</string>
+-    <string name="color_calibration_title">Цвет</string>
+-    <string name="color_calibration_summary">Настройка цветопередачи экрана</string>
++    <string name="color_calibration_title">Баланс белого</string>
++    <string name="color_calibration_summary">Настройте баланс белого для вашего дисплея</string>
+     <string name="color_red_title">Красный</string>
+     <string name="color_green_title">Зеленый</string>
+     <string name="color_blue_title">Синий</string>
+diff --git a/res/values-sc-rIT/strings.xml b/res/values-sc-rIT/strings.xml
+index f2a46a222..6500cff63 100644
+--- a/res/values-sc-rIT/strings.xml
++++ b/res/values-sc-rIT/strings.xml
+@@ -105,4 +105,5 @@
+     <string name="display_rotation_180_title">180 grados</string>
+     <string name="display_rotation_270_title">270 grados</string>
+     <string name="power_notifications_vibrate_title">Vibratzione</string>
++    <string name="live_display_mode">Assertive Display®</string>
+ </resources>
+diff --git a/res/values-si/strings.xml b/res/values-si/strings.xml
+index 5f006c82c..ca4804528 100644
+--- a/res/values-si/strings.xml
++++ b/res/values-si/strings.xml
+@@ -21,4 +21,5 @@
+     <string name="profiles_settings_enable_title">පැතිකඩ සබල කරන්න</string>
+     <string name="profiles_create_new">නව පැතිකඩ සාදන්න</string>
+     <string name="charging_sounds_enable_title">ආරෝපණ ශබ්ද සබල කරන්න</string>
++    <string name="live_display_mode">Assertive Display®</string>
+ </resources>
+diff --git a/res/values-sk/strings.xml b/res/values-sk/strings.xml
+index f58d5392b..7d2795b8a 100644
+--- a/res/values-sk/strings.xml
++++ b/res/values-sk/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">Nastavenia LED</string>
+     <string name="led_notification_text">LED svetlá zapnuté v nastaveniach</string>
+     <string name="live_display_summary">Optimalizovať vašu obrazovku na základe dennej doby a podmienok okolia na zlepšenie čitateľnosti a zníženia únavy očí</string>
+-    <string name="live_display_mode">Režim zobrazenia</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Teplota farieb</string>
+     <string name="live_display_color_temperature_summary">Deň: <xliff:g id="day_temperature">%1$d</xliff:g>K  Noc: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -96,7 +96,13 @@
+     <string name="live_display_low_power_summary">Nastaviť zobrazenie pre najnižšiu spotrebu energie bez zhoršenia čitateľnosti</string>
+     <string name="live_display_enhance_color_title">Vylepšiť farby</string>
+     <string name="live_display_enhance_color_summary">Zlepšiť živosť farieb pleťových odtieňov, scenérie a ďalších obrázkov</string>
+-    <string name="live_display_color_profile_title">Farebný profil</string>
++    <string name="live_display_color_profile_title">Farebná škála a kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionálny režim</string>
++    <string name="live_display_color_profile_sony_professional_summary">Využíva farebnú škálu sRGB na hodnoverné vykreslenie farieb</string>
++    <string name="live_display_color_profile_sony_standard_title">Štandardný režim</string>
++    <string name="live_display_color_profile_sony_standard_summary">Využíva brilantnú farebnú škálu TRILUMINOS™ Display for mobile na zobrazenie jasných, živých farebných efektov</string>
++    <string name="live_display_color_profile_sony_vivid_title">Režim superjasných obrázkov</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Využíva ešte živšiu farebnú škálu na zvýraznenie jasných farebných efektov</string>
+     <string name="live_display_color_profile_standard_title">Štandard</string>
+     <string name="live_display_color_profile_standard_summary">Presné farby a jasná biela</string>
+     <string name="live_display_color_profile_natural_title">Prirodzené</string>
+@@ -121,8 +127,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Farby sú identické s farebným priestorom DCI-P3</string>
+     <string name="live_display_reading_mode_title">Režim čítania</string>
+     <string name="live_display_reading_mode_summary">Režim odtieňov šedej pre dlhodobé čítanie</string>
+-    <string name="color_calibration_title">Kalibrácia farieb</string>
+-    <string name="color_calibration_summary">Kalibrovať farby na obrazovke</string>
++    <string name="color_calibration_title">Vyváženie bielej farby</string>
++    <string name="color_calibration_summary">Prispôsobte vyváženie bielej farby na displeji</string>
+     <string name="color_red_title">Červená</string>
+     <string name="color_green_title">Zelená</string>
+     <string name="color_blue_title">Modrá</string>
+diff --git a/res/values-sl/strings.xml b/res/values-sl/strings.xml
+index e3de01930..ea37f6254 100644
+--- a/res/values-sl/strings.xml
++++ b/res/values-sl/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Lučka LED omogočena v nastavitvah</string>
+     <string name="notification_light_add_apps_empty_summary">Za dodajanje nadzora za posamezno aplikacijo, omogočite »%1$s« in pritisnite »Dodaj«</string>
+     <string name="live_display_summary">Optimiziranje zaslona glede na čas dneva in pogojev okolice, da se izboljša berljivost in zmanjša obremenitev oči</string>
+-    <string name="live_display_mode">Način prikaza</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura barve</string>
+     <string name="live_display_color_temperature_summary">Dan: <xliff:g id="day_temperature">%1$d</xliff:g> K Noč: <xliff:g id="night_temperature">%2$d</xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Prilagodi zaslon za najmanjšo porabo energije brez poslabšanja</string>
+     <string name="live_display_enhance_color_title">Izboljšaj barve</string>
+     <string name="live_display_enhance_color_summary">Izboljšaj dinamičnost barv tonov kože, pokrajine in drugih slik</string>
+-    <string name="live_display_color_profile_title">Barvni profil</string>
++    <string name="live_display_color_profile_title">Barvna lestvica in kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionalni način</string>
++    <string name="live_display_color_profile_sony_professional_summary">Uporabite barvno lestvico sRGB za pristen videz barv</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardni način</string>
++    <string name="live_display_color_profile_sony_standard_summary">Uporabite sijajno barvno lestvico tehnologije TRILUMINOS™ Display for mobile, ki omogoča videz s svetlimi in živahnimi barvnimi učinki</string>
++    <string name="live_display_color_profile_sony_vivid_title">Izjemno živahen način</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Uporabite še bolj živahno barvno lestvico za videz svetlih barvnih učinkov</string>
+     <string name="live_display_color_profile_standard_title">Običajen</string>
+     <string name="live_display_color_profile_standard_summary">Natančne in svetlo bele barve</string>
+     <string name="live_display_color_profile_natural_title">Naraven</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Barve ustrezne DCI-P3 barvnemu prostoru</string>
+     <string name="live_display_reading_mode_title">Način za branje</string>
+     <string name="live_display_reading_mode_summary">Način sivine za dolgoročno branje</string>
+-    <string name="color_calibration_title">Umerjanje barv</string>
+-    <string name="color_calibration_summary">Umeri barve na zaslonu</string>
++    <string name="color_calibration_title">Ravnovesje beline</string>
++    <string name="color_calibration_summary">Prilagodite ravnovesje beline na zaslonu</string>
+     <string name="color_red_title">Rdeča</string>
+     <string name="color_green_title">Zelena</string>
+     <string name="color_blue_title">Modra</string>
+diff --git a/res/values-sq/strings.xml b/res/values-sq/strings.xml
+index 4bff6e911..3f5cc4e71 100644
+--- a/res/values-sq/strings.xml
++++ b/res/values-sq/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Drita LED e aktivizuar nga parametrat</string>
+     <string name="notification_light_add_apps_empty_summary">Për të shtuar kontrollin për aplikacion, aktivizoni \'%1$s\' dhe shtypni \'Shto\'</string>
+     <string name="live_display_summary">Optimizo ekranin në bazë të orës së ditës dhe konditave të mjedisit për të përmirësuar lexueshmërinë dhe për të reduktuar lodhjen e syve</string>
+-    <string name="live_display_mode">Profili i ekranit</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Temperatura e ngjyrave</string>
+     <string name="live_display_color_temperature_summary">Ditën: <xliff:g id="day_temperature">%1$d</xliff:g>K Natën: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Rregullo ekranin për të mundësuar konsumimin më të ulët të energjisë pa degradim</string>
+     <string name="live_display_enhance_color_title">Përmirëso ngjyrat</string>
+     <string name="live_display_enhance_color_summary">Përmirëso gjallërinë e ngjyrave të tonit të lëkurës, peizazheve, dhe imazheve të tjera</string>
+-    <string name="live_display_color_profile_title">Profili i ngjyrave</string>
++    <string name="live_display_color_profile_title">Spektri i ngjyr. dhe kontrasti</string>
++    <string name="live_display_color_profile_sony_professional_title">Regjimi profesional</string>
++    <string name="live_display_color_profile_sony_professional_summary">Përdorni spektrin e ngjyrave sRGB për një paraqitje të ngjyrave origjinale</string>
++    <string name="live_display_color_profile_sony_standard_title">Regjimi standard</string>
++    <string name="live_display_color_profile_sony_standard_summary">Përdorni spektrin e ndriçuar të ngjyrave të TRILUMINOS™ Display for mobile për paraqitjen e efekteve të ngjyrave të ndritshme dhe të gjalla</string>
++    <string name="live_display_color_profile_sony_vivid_title">Regjimi Plot jetë</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Përdorni një spektër ngjyrash edhe më të gjallë për paraqitjen e efekteve të ngjyrave të ndritshme</string>
+     <string name="live_display_color_profile_standard_title">Standart</string>
+     <string name="live_display_color_profile_standard_summary">Ngjyrat dhe ndriçimi i së bardhës janë të sakta</string>
+     <string name="live_display_color_profile_natural_title">Natyral</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Ngjyrat e përafërta me hapësirën e ngjyrave DCI-P3</string>
+     <string name="live_display_reading_mode_title">Mënyrë Leximi</string>
+     <string name="live_display_reading_mode_summary">Model Bardhë e Zi për lexim të gjatë</string>
+-    <string name="color_calibration_title">Kalibrimi i ngjyrave</string>
+-    <string name="color_calibration_summary">Kalibro ngjyrat në ekran</string>
++    <string name="color_calibration_title">Balancë e së bardhës</string>
++    <string name="color_calibration_summary">Rregulloni balancën e së bardhës në ekranin tuaj</string>
+     <string name="color_red_title">E kuqe</string>
+     <string name="color_green_title">E gjelbër</string>
+     <string name="color_blue_title">Blu</string>
+diff --git a/res/values-sr/strings.xml b/res/values-sr/strings.xml
+index da0365cd4..a9e8a37d2 100644
+--- a/res/values-sr/strings.xml
++++ b/res/values-sr/strings.xml
+@@ -81,7 +81,7 @@
+     <string name="led_notification_title">Подешавања индикатора</string>
+     <string name="led_notification_text">LED светло је омогућено у подешавањима</string>
+     <string name="live_display_summary">Прилагодите екран на основу доба дана и осветљености, како би се повећала читљивост и смањило напрезање очију.</string>
+-    <string name="live_display_mode">Режим приказа</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Температура боје</string>
+     <string name="live_display_color_temperature_summary">Дан: <xliff:g id="day_temperature">%1$d</xliff:g> K, ноћ: <xliff:g id="night_temperature">%2$d</xliff:g> K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g> K</string>
+@@ -93,7 +93,13 @@
+     <string name="live_display_low_power_summary">Прилагодите екран за најнижу потрошњу енергије без погоршања квалитета.</string>
+     <string name="live_display_enhance_color_title">Побољшање боја</string>
+     <string name="live_display_enhance_color_summary">Побољшајте живост боја за нијансе коже, пејзаже и друге слике.</string>
+-    <string name="live_display_color_profile_title">Профил боја</string>
++    <string name="live_display_color_profile_title">Opseg i kontrast boja</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesionalni režim</string>
++    <string name="live_display_color_profile_sony_professional_summary">Koristite sRGB opseg boja za autentični izgled boja</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardni režim</string>
++    <string name="live_display_color_profile_sony_standard_summary">Koristite sjajan opseg boja funkcije TRILUMINOS™ Display for mobile da biste postigli svetle i jarke efekte boja</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super-živi režim</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Koristite još živopisniji opseg boja kako biste postigli svetle efekte boja</string>
+     <string name="live_display_color_profile_standard_title">Стандардни</string>
+     <string name="live_display_color_profile_standard_summary">Тачне боје и високи контраст.</string>
+     <string name="live_display_color_profile_natural_title">Природни</string>
+@@ -118,8 +124,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Боје које одговарају простору боја DCI-P3.</string>
+     <string name="live_display_reading_mode_title">Режим читања</string>
+     <string name="live_display_reading_mode_summary">Режим сивих тонова за дуготрајно читање</string>
+-    <string name="color_calibration_title">Калибрација боја</string>
+-    <string name="color_calibration_summary">Калибрација боја екрана</string>
++    <string name="color_calibration_title">Balans belog</string>
++    <string name="color_calibration_summary">Prilagodite balans belog na vašem displeju</string>
+     <string name="color_red_title">Црвена</string>
+     <string name="color_green_title">Зелена</string>
+     <string name="color_blue_title">Плава</string>
+diff --git a/res/values-sv/strings.xml b/res/values-sv/strings.xml
+index 48a6c9ddf..edd07d5c9 100644
+--- a/res/values-sv/strings.xml
++++ b/res/values-sv/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED-ljus aktiverat av inställningarna</string>
+     <string name="notification_light_add_apps_empty_summary">Aktivera \'%1$s\' och tryck på \'Lägg till\' för att lägga till per app-kontroll</string>
+     <string name="live_display_summary">Optimera din skärm beroende på tidpunkt och omgivning för att förbättra läsbarheten och minska påfrestningen på ögonen</string>
+-    <string name="live_display_mode">Visningsläge</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Färgtemperatur</string>
+     <string name="live_display_color_temperature_summary">Dag: <xliff:g id="day_temperature">%1$d</xliff:g>K Natt: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Justera skärmen för lägsta möjliga energiförbrukning utan någon försämring</string>
+     <string name="live_display_enhance_color_title">Förbättra färger</string>
+     <string name="live_display_enhance_color_summary">Förbättra färglyster på hudtoner, landskap, och andra bilder</string>
+-    <string name="live_display_color_profile_title">Färgprofil</string>
++    <string name="live_display_color_profile_title">Färgomfång och kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professionellt läge</string>
++    <string name="live_display_color_profile_sony_professional_summary">Använd sRGB-färgomfång för verklighetstrogen färgåtergivning</string>
++    <string name="live_display_color_profile_sony_standard_title">Standardläge</string>
++    <string name="live_display_color_profile_sony_standard_summary">Använd det briljanta färgomfånget med TRILUMINOS™ Display for mobile för klara, starka färgeffekter</string>
++    <string name="live_display_color_profile_sony_vivid_title">Läget för extra livfulla</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Använd ett ännu starkare färgomfång för klara färgeffekter</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Korrekta färger och kritvitt</string>
+     <string name="live_display_color_profile_natural_title">Naturlig</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Färger överensstämmer med DCI-P3-färgrymden</string>
+     <string name="live_display_reading_mode_title">Läsläge</string>
+     <string name="live_display_reading_mode_summary">Gråskaleläge för långtidsläsning</string>
+-    <string name="color_calibration_title">Färgkalibrering</string>
+-    <string name="color_calibration_summary">Kalibrera skärmens färger</string>
++    <string name="color_calibration_title">Vitbalans</string>
++    <string name="color_calibration_summary">Justera vitbalansen på displayen</string>
+     <string name="color_red_title">Röd</string>
+     <string name="color_green_title">Grön</string>
+     <string name="color_blue_title">Blå</string>
+diff --git a/res/values-ta/strings.xml b/res/values-ta/strings.xml
+index 84fc83b1e..e4518418f 100644
+--- a/res/values-ta/strings.xml
++++ b/res/values-ta/strings.xml
+@@ -112,4 +112,14 @@
+     <string name="touchscreen_gesture_action_dialer">சுழற்றியைத் திறக்க</string>
+     <string name="trust_feature_selinux">SEலினக்சு</string>
+     <string name="sms_security_check_limit_always_confirm">எப்பொழுதும் உறுதி செய்க</string>
++    <string name="live_display_mode">Assertive Display®</string>
++    <string name="live_display_color_profile_title">நிற எல்லை மற். மாறுபா.</string>
++    <string name="live_display_color_profile_sony_professional_title">புரொஃபஷனல் பயன்முறை</string>
++    <string name="live_display_color_profile_sony_professional_summary">நம்பத்தகுந்த நிறத் தோற்றத்திற்கு sRGB நிற எல்லையைப் பயன்படுத்தவும்</string>
++    <string name="live_display_color_profile_sony_standard_title">நிலையான பயன்முறை</string>
++    <string name="live_display_color_profile_sony_standard_summary">பிரகாசமான, வண்ணமயமான நிற விளைவுகளுக்கு TRILUMINOS™ Display for mobile -இன் அட்டகாசமான நிற எல்லையைப் பயன்படுத்தவும்</string>
++    <string name="live_display_color_profile_sony_vivid_title">சூப்பர்-தெளிவு பயன்முறை</string>
++    <string name="live_display_color_profile_sony_vivid_summary">பிரகாசமான நிற விளைவுகளின் தோற்றத்திற்கு இன்னும் அதிக வண்ணமயமான நிற எல்லையைப் பயன்படுத்தவும்</string>
++    <string name="color_calibration_title">வெண்சமநிலை</string>
++    <string name="color_calibration_summary">உங்கள் டிஸ்பிளேயில் உள்ள வெண்சமநிலையை சரிசெய்யவும்</string>
+ </resources>
+diff --git a/res/values-th/strings.xml b/res/values-th/strings.xml
+index a1eccfee9..e3122ff65 100644
+--- a/res/values-th/strings.xml
++++ b/res/values-th/strings.xml
+@@ -82,7 +82,7 @@
+     <string name="led_notification_title">ตั้งค่าไฟแจ้งเตือน</string>
+     <string name="led_notification_text">เปิดใช้งาน LED จากการตั้งค่า</string>
+     <string name="live_display_summary">ปรับหน้าความสว่างหน้าจอตามเวลาและแสงโดยรอบเพื่อทำให้อ่านได้ง่ายขึ้นและลดอาการปวดตา</string>
+-    <string name="live_display_mode">โหมดการแสดงผล</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">อุณหภูมิสี</string>
+     <string name="live_display_color_temperature_summary">กลางวัน: <xliff:g id="day_temperature">%1$d</xliff:g>K  กลางคืน: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -95,7 +95,13 @@
+     <string name="live_display_low_power_summary">ปรับการแสดงผลให้ใช้พลังงานน้อยที่สุดโดยที่ไม่ลดประสิทธิภาพ</string>
+     <string name="live_display_enhance_color_title">เพิ่มประสิทธิภาพสี</string>
+     <string name="live_display_enhance_color_summary">ปรับปรุงความมีชีวิตชีวาของสีโดยเน้นโทนสี ภาพทิวทัศน์ และภาพอื่น ๆ</string>
+-    <string name="live_display_color_profile_title">โปรไฟล์สี</string>
++    <string name="live_display_color_profile_title">ขอบเขตสีและคอนทราสต์</string>
++    <string name="live_display_color_profile_sony_professional_title">โหมดมืออาชีพ</string>
++    <string name="live_display_color_profile_sony_professional_summary">ใช้ขอบเขตสี sRGB เพื่อให้ได้สีสมจริง</string>
++    <string name="live_display_color_profile_sony_standard_title">โหมดมาตรฐาน</string>
++    <string name="live_display_color_profile_sony_standard_summary">ใช้ขอบเขตสีสดของ TRILUMINOS™ Display for mobile เพื่อให้ได้เอฟเฟกต์สีสดสว่าง</string>
++    <string name="live_display_color_profile_sony_vivid_title">โหมดภาพสีสันจัดจ้าน</string>
++    <string name="live_display_color_profile_sony_vivid_summary">ใช้ขอบเขตสีที่สดกว่าเดิมเพื่อให้ได้เอฟเฟกต์สีสว่าง</string>
+     <string name="live_display_color_profile_standard_title">มาตรฐาน</string>
+     <string name="live_display_color_profile_standard_summary">สีที่ถูกต้องและขาวสว่าง</string>
+     <string name="live_display_color_profile_natural_title">ธรรมชาติ</string>
+@@ -120,8 +126,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">สีที่ถูกต้องกับระบบพื้นที่สีของ DCI-P3</string>
+     <string name="live_display_reading_mode_title">โหมดการอ่าน</string>
+     <string name="live_display_reading_mode_summary">โหมดสีเทาสำหรับการอ่านระยะยาว</string>
+-    <string name="color_calibration_title">การปรับเทียบสี</string>
+-    <string name="color_calibration_summary">ปรับเทียบสีบนจอ</string>
++    <string name="color_calibration_title">อุณหภูมิสี</string>
++    <string name="color_calibration_summary">ปรับอุณหภูมิสีของจอแสดงผล</string>
+     <string name="color_red_title">แดง</string>
+     <string name="color_green_title">เขียว</string>
+     <string name="color_blue_title">น้ำเงิน</string>
+diff --git a/res/values-tr/strings.xml b/res/values-tr/strings.xml
+index 1a0cec798..edf4b143a 100644
+--- a/res/values-tr/strings.xml
++++ b/res/values-tr/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED ışık ayarları tarafından etkinleştirilmiş</string>
+     <string name="notification_light_add_apps_empty_summary">Uygulama başına denetim eklemek için \'%1$s\' ögesini etkinleştirin ve \'Ekle\'ye basın</string>
+     <string name="live_display_summary">Ekranınızı, okunabilirliği artırmak ve göz yorgunluğunu azaltmak için günün saatine ve ortam koşullarına göre optimize edin</string>
+-    <string name="live_display_mode">Görüntü modu</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Renk sıcaklığı</string>
+     <string name="live_display_color_temperature_summary">Gündüz: <xliff:g id="day_temperature">%1$d</xliff:g>K Gece: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Ekranda bozulma olmadan en düşük güç tüketimi için ayarlar</string>
+     <string name="live_display_enhance_color_title">Renkleri geliştir</string>
+     <string name="live_display_enhance_color_summary">Ten tonları, sahne ve diğer görüntülerin renk titreşimini geliştirir</string>
+-    <string name="live_display_color_profile_title">Renk profili</string>
++    <string name="live_display_color_profile_title">Renk gamutu ve kontrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Profesyone mod</string>
++    <string name="live_display_color_profile_sony_professional_summary">Doğal renkler için sRGB renk gamutunu kullanın</string>
++    <string name="live_display_color_profile_sony_standard_title">Standart mod</string>
++    <string name="live_display_color_profile_sony_standard_summary">Parlak, canlı renk efektleri için TRILUMINOS™ Display for mobile parlak renk gamutunu kullanın</string>
++    <string name="live_display_color_profile_sony_vivid_title">Süper canlı mod</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Parlak renk efektlerinden oluşan bir görünüm için daha canlı renk gamutu kullanın</string>
+     <string name="live_display_color_profile_standard_title">Standart</string>
+     <string name="live_display_color_profile_standard_summary">Doğru renkler ve parlak beyazlar</string>
+     <string name="live_display_color_profile_natural_title">Doğal</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">DCI-P3 renk alanına uygun renkler</string>
+     <string name="live_display_reading_mode_title">Okuma modu</string>
+     <string name="live_display_reading_mode_summary">Uzun süreli okuma için gri tonlama modu</string>
+-    <string name="color_calibration_title">Renk kalibrasyonu</string>
+-    <string name="color_calibration_summary">Ekran renklerini kalibre edin</string>
++    <string name="color_calibration_title">Beyaz dengesi</string>
++    <string name="color_calibration_summary">Ekranınızdaki beyaz dengesini ayarlayın</string>
+     <string name="color_red_title">Kırmızı</string>
+     <string name="color_green_title">Yeşil</string>
+     <string name="color_blue_title">Mavi</string>
+diff --git a/res/values-uk/strings.xml b/res/values-uk/strings.xml
+index 0748b889d..d0c8ed36e 100644
+--- a/res/values-uk/strings.xml
++++ b/res/values-uk/strings.xml
+@@ -77,7 +77,7 @@
+     <string name="led_notification_title">Налаштування індикатора</string>
+     <string name="led_notification_text">LED-діод увімкнено в налаштуваннях</string>
+     <string name="live_display_summary">Налаштовувати екран залежно від часу доби і умов освітлення для підвищення зручності читання і зменшення втоми очей</string>
+-    <string name="live_display_mode">Режим екрану</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Колірна температура</string>
+     <string name="live_display_color_temperature_summary">День: <xliff:g id="day_temperature">%1$d </xliff:g> K, ніч: <xliff:g id="night_temperature">%2$d </xliff:g></string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -89,7 +89,13 @@
+     <string name="live_display_low_power_summary">Налаштування екрану для найнижчого енергоспоживання без погіршення зображення</string>
+     <string name="live_display_enhance_color_title">Покращити кольори</string>
+     <string name="live_display_enhance_color_summary">Поліпшити соковитість відтінків шкіри, пейзажів та інших зображень</string>
+-    <string name="live_display_color_profile_title">Колірний профіль</string>
++    <string name="live_display_color_profile_title">Колірна гама й контраст</string>
++    <string name="live_display_color_profile_sony_professional_title">Професійний режим</string>
++    <string name="live_display_color_profile_sony_professional_summary">Використовувати колірну гаму sRGB для реалістичної передачі кольорів</string>
++    <string name="live_display_color_profile_sony_standard_title">Стандартний режим</string>
++    <string name="live_display_color_profile_sony_standard_summary">Використовувати яскраву колірну гаму TRILUMINOS™ Display for mobile для передачі інтенсивних, виразних кольорів</string>
++    <string name="live_display_color_profile_sony_vivid_title">Суперяскравий режим</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Використовувати ще яскравішу колірну гаму для передачі дуже виразних колірних ефектів</string>
+     <string name="live_display_color_profile_standard_title">Стандартний</string>
+     <string name="live_display_color_profile_standard_summary">Точна передача кольору та яскраві білі кольори</string>
+     <string name="live_display_color_profile_natural_title">Природний</string>
+@@ -114,8 +120,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Кольори з точністю до колірного простору DCI-P3</string>
+     <string name="live_display_reading_mode_title">Режим читання</string>
+     <string name="live_display_reading_mode_summary">Знебарвлення для тривалого читання</string>
+-    <string name="color_calibration_title">Калібрування кольору</string>
+-    <string name="color_calibration_summary">Калібрування кольору на екрані</string>
++    <string name="color_calibration_title">Баланс білого</string>
++    <string name="color_calibration_summary">Регулювання балансу білого для екрана</string>
+     <string name="color_red_title">Червоний</string>
+     <string name="color_green_title">Зелений</string>
+     <string name="color_blue_title">Синій</string>
+diff --git a/res/values-vi/strings.xml b/res/values-vi/strings.xml
+index 3964f4ba6..5e78ec744 100644
+--- a/res/values-vi/strings.xml
++++ b/res/values-vi/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">Đèn LED đã bật theo cài đặt</string>
+     <string name="notification_light_add_apps_empty_summary">Để thêm điều khiển mỗi ứng dụng, hãy kích hoạt \'%1$s\' và nhấn \'Thêm\'</string>
+     <string name="live_display_summary">Tối ưu hóa màn hình dựa trên điều kiện môi trường và thời gian trong ngày để cải thiện khả năng đọc và giảm mỏi mắt</string>
+-    <string name="live_display_mode">Chế độ hiển thị</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Nhiệt độ màu</string>
+     <string name="live_display_color_temperature_summary">Ngày: <xliff:g id="day_temperature">%1$d</xliff:g>K  Đêm: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">Điều chỉnh hiển thị để tiêu thụ pin thấp nhất mà không làm giảm chất lượng</string>
+     <string name="live_display_enhance_color_title">Tăng cường màu sắc</string>
+     <string name="live_display_enhance_color_summary">Cải thiện độ rung màu sắc của màu da, cảnh quan và hình ảnh khác</string>
+-    <string name="live_display_color_profile_title">Cấu hình màu</string>
++    <string name="live_display_color_profile_title">Gam màu và độ tương phản</string>
++    <string name="live_display_color_profile_sony_professional_title">Chế độ chuyên nghiệp</string>
++    <string name="live_display_color_profile_sony_professional_summary">Sử dụng gam màu sRGB để có màu sắc chân thực</string>
++    <string name="live_display_color_profile_sony_standard_title">Chế độ tiêu chuẩn</string>
++    <string name="live_display_color_profile_sony_standard_summary">Sử dụng gam màu sáng TRILUMINOS™ Display for mobile để có giao diện hiệu ứng màu sáng, sống động</string>
++    <string name="live_display_color_profile_sony_vivid_title">Chế độ siêu sống động</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Sử dụng gam màu sống động hơn nữa để có hiệu ứng màu sáng</string>
+     <string name="live_display_color_profile_standard_title">Tiêu chuẩn</string>
+     <string name="live_display_color_profile_standard_summary">Màu sắc chính xác và màu trắng sáng</string>
+     <string name="live_display_color_profile_natural_title">Tự nhiên</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Màu sắc chính xác cho khoảng cách màu DCI-P3</string>
+     <string name="live_display_reading_mode_title">Chế độ đọc</string>
+     <string name="live_display_reading_mode_summary">Chế độ màu xám để đọc sách lâu dài</string>
+-    <string name="color_calibration_title">Hiệu chỉnh màu sắc</string>
+-    <string name="color_calibration_summary">Hiệu chỉnh màu sắc trên màn hình</string>
++    <string name="color_calibration_title">Cân bằng trắng</string>
++    <string name="color_calibration_summary">Điều chỉnh cân bằng trắng trên màn hình</string>
+     <string name="color_red_title">Đỏ</string>
+     <string name="color_green_title">Xanh lá</string>
+     <string name="color_blue_title">Xanh dương</string>
+diff --git a/res/values-zh-rCN/strings.xml b/res/values-zh-rCN/strings.xml
+index dc20bfde9..ca18f8cc2 100644
+--- a/res/values-zh-rCN/strings.xml
++++ b/res/values-zh-rCN/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">LED 灯被“设置”启用</string>
+     <string name="notification_light_add_apps_empty_summary">要添加对每个应用的控制，请先激活 \'%1$s\'，然后按 \'添加\'</string>
+     <string name="live_display_summary">基于当前时间和环境条件来优化您的屏幕以改善可读性和减少视疲劳</string>
+-    <string name="live_display_mode">显示模式</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">色温</string>
+     <string name="live_display_color_temperature_summary">白天：<xliff:g id="day_temperature">%1$d</xliff:g>K 夜晚：<xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">在不降低亮度的情况下调整屏幕使耗电最低</string>
+     <string name="live_display_enhance_color_title">增强色彩</string>
+     <string name="live_display_enhance_color_summary">为肤色、风景和其他图像提升色彩饱和度</string>
+-    <string name="live_display_color_profile_title">颜色配置文件</string>
++    <string name="live_display_color_profile_title">色域和对比度</string>
++    <string name="live_display_color_profile_sony_professional_title">专业模式</string>
++    <string name="live_display_color_profile_sony_professional_summary">使用sRGB色域以获得真实颜色外观</string>
++    <string name="live_display_color_profile_sony_standard_title">标准模式</string>
++    <string name="live_display_color_profile_sony_standard_summary">使用特丽魅彩移动显示技术的绚丽色域以获得明亮、鲜艳的色彩效果外观</string>
++    <string name="live_display_color_profile_sony_vivid_title">超逼真模式</string>
++    <string name="live_display_color_profile_sony_vivid_summary">使用更加鲜艳的色域以获得明亮的色彩效果外观</string>
+     <string name="live_display_color_profile_standard_title">标准</string>
+     <string name="live_display_color_profile_standard_summary">准确的颜色和明亮的白色</string>
+     <string name="live_display_color_profile_natural_title">自然</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">色彩精确到 DCI-P3 的色彩空间</string>
+     <string name="live_display_reading_mode_title">阅读模式</string>
+     <string name="live_display_reading_mode_summary">适合长时间阅读的灰度模式</string>
+-    <string name="color_calibration_title">颜色校准</string>
+-    <string name="color_calibration_summary">校准屏幕颜色</string>
++    <string name="color_calibration_title">白平衡</string>
++    <string name="color_calibration_summary">调整显示屏幕的白平衡</string>
+     <string name="color_red_title">红</string>
+     <string name="color_green_title">绿</string>
+     <string name="color_blue_title">蓝</string>
+diff --git a/res/values-zh-rTW/strings.xml b/res/values-zh-rTW/strings.xml
+index d8586f35e..e8a252f23 100644
+--- a/res/values-zh-rTW/strings.xml
++++ b/res/values-zh-rTW/strings.xml
+@@ -100,7 +100,7 @@
+     <string name="led_notification_text">已透過設定啟用 LED 指示燈</string>
+     <string name="notification_light_add_apps_empty_summary">若要自訂個別應用程式的指示燈，請先啟用「%1$s」然後按下「新增」按鈕。</string>
+     <string name="live_display_summary">根據日夜和環境條件調整您的螢幕色溫，即可改善可讀性和減少眼睛疲勞</string>
+-    <string name="live_display_mode">顯示模式</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">色溫</string>
+     <string name="live_display_color_temperature_summary">日間：<xliff:g id="day_temperature">%1$d</xliff:g>K 夜間：<xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -114,7 +114,13 @@
+     <string name="live_display_low_power_summary">在不降低亮度的情況下調整顯示即可降低耗電</string>
+     <string name="live_display_enhance_color_title">增強色彩</string>
+     <string name="live_display_enhance_color_summary">為色調、 風景和其他圖片提高色調</string>
+-    <string name="live_display_color_profile_title">色彩設定檔</string>
++    <string name="live_display_color_profile_title">色域和對比</string>
++    <string name="live_display_color_profile_sony_professional_title">專業模式</string>
++    <string name="live_display_color_profile_sony_professional_summary">使用sRGB色域呈現真實的顏色</string>
++    <string name="live_display_color_profile_sony_standard_title">標準模式</string>
++    <string name="live_display_color_profile_sony_standard_summary">使用色彩艷麗的TRILUMINOS™ Display for mobile色域呈現明亮、鮮豔的顏色</string>
++    <string name="live_display_color_profile_sony_vivid_title">超逼真模式</string>
++    <string name="live_display_color_profile_sony_vivid_summary">使用更鮮豔的色域呈現明亮的顏色</string>
+     <string name="live_display_color_profile_standard_title">標準</string>
+     <string name="live_display_color_profile_standard_summary">準確的色彩和明亮的白色</string>
+     <string name="live_display_color_profile_natural_title">自然</string>
+@@ -139,8 +145,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">顏色準確到 DCI-P3 色域</string>
+     <string name="live_display_reading_mode_title">閱讀模式</string>
+     <string name="live_display_reading_mode_summary">用於長期閱讀的灰度模式</string>
+-    <string name="color_calibration_title">顏色校準</string>
+-    <string name="color_calibration_summary">校準螢幕上的顏色</string>
++    <string name="color_calibration_title">白平衡</string>
++    <string name="color_calibration_summary">調整顯示螢幕上的白平衡</string>
+     <string name="color_red_title">紅色</string>
+     <string name="color_green_title">綠色</string>
+     <string name="color_blue_title">藍色</string>
+diff --git a/res/values/strings.xml b/res/values/strings.xml
+index a99b565e2..8c2e9c503 100644
+--- a/res/values/strings.xml
++++ b/res/values/strings.xml
+@@ -132,7 +132,7 @@
+ 
+     <!-- LiveDisplay -->
+     <string name="live_display_summary">Optimize your screen based on time of day and ambient conditions to improve readability and reduce eyestrain</string>
+-    <string name="live_display_mode">Display mode</string>
++    <string name="live_display_mode">Assertive Display®</string>
+     <string name="live_display_color_temperature_title">Color temperature</string>
+     <string name="live_display_color_temperature_summary">Day: <xliff:g id="day_temperature">%1$d</xliff:g>K  Night: <xliff:g id="night_temperature">%2$d</xliff:g>K</string>
+     <string name="live_display_color_temperature_label"><xliff:g id="degrees">%1$d</xliff:g>K</string>
+@@ -146,7 +146,13 @@
+     <string name="live_display_low_power_summary">Adjust display for lowest power consumption without degradation</string>
+     <string name="live_display_enhance_color_title">Enhance colors</string>
+     <string name="live_display_enhance_color_summary">Improve color vibrance of flesh tones, scenery, and other images</string>
+-    <string name="live_display_color_profile_title">Color profile</string>
++    <string name="live_display_color_profile_title">Color gamut and contrast</string>
++    <string name="live_display_color_profile_sony_professional_title">Professional mode</string>
++    <string name="live_display_color_profile_sony_professional_summary">Use sRGB color gamut for the authentic color appearance</string>
++    <string name="live_display_color_profile_sony_standard_title">Standard mode</string>
++    <string name="live_display_color_profile_sony_standard_summary">Use the brilliant color gamut of TRILUMINOS™ Display for mobile for the appearance of bright, vivid color effects</string>
++    <string name="live_display_color_profile_sony_vivid_title">Super-vivid mode</string>
++    <string name="live_display_color_profile_sony_vivid_summary">Use an even more vivid color gamut for the appearance of bright color effects</string>
+     <string name="live_display_color_profile_standard_title">Standard</string>
+     <string name="live_display_color_profile_standard_summary">Accurate colors and bright whites</string>
+     <string name="live_display_color_profile_natural_title">Natural</string>
+@@ -171,8 +177,8 @@
+     <string name="live_display_color_profile_dci_p3_summary">Colors accurate to the DCI-P3 color space</string>
+     <string name="live_display_reading_mode_title">Reading mode</string>
+     <string name="live_display_reading_mode_summary">Grayscale mode for long-term reading</string>
+-    <string name="color_calibration_title">Color calibration</string>
+-    <string name="color_calibration_summary">Calibrate on-screen colors</string>
++    <string name="color_calibration_title">White balance</string>
++    <string name="color_calibration_summary">Adjust the white balance on your display</string>
+     <string name="color_red_title">Red</string>
+     <string name="color_green_title">Green</string>
+     <string name="color_blue_title">Blue</string>
