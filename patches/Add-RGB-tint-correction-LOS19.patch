@@ -1,0 +1,611 @@
+From be2888a0ee67c8787ec7e580d08d4f5355903990 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 21:26:04 +0300
+Subject: [PATCH] Add RGB tint correction
+
+Change-Id: Ia2a2b5974c8a5266ee69574e037346890f2d3053
+---
+ sdm/Android.bp                                |   9 +
+ sdm/ColorEnhancement.cpp                      |  39 ++++
+ sdm/DisplayColorCalibration.cpp               | 215 ++++++++++++++++++
+ sdm/DisplayModes.cpp                          |  22 +-
+ sdm/SDMController.cpp                         |  22 ++
+ .../livedisplay/sdm/ColorEnhancement.h        |  34 +++
+ .../livedisplay/sdm/DisplayColorCalibration.h |  55 +++++
+ sdm/include/livedisplay/sdm/SDMController.h   |   3 +
+ sdm/service.cpp                               |  41 +++-
+ 9 files changed, 436 insertions(+), 4 deletions(-)
+ create mode 100644 sdm/ColorEnhancement.cpp
+ create mode 100644 sdm/DisplayColorCalibration.cpp
+ create mode 100644 sdm/include/livedisplay/sdm/ColorEnhancement.h
+ create mode 100644 sdm/include/livedisplay/sdm/DisplayColorCalibration.h
+
+diff --git a/sdm/Android.bp b/sdm/Android.bp
+index 041b41a..2f487a3 100644
+--- a/sdm/Android.bp
++++ b/sdm/Android.bp
+@@ -12,6 +12,14 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++filegroup {
++    name: "vendor.lineage.livedisplay@2.0-sdm-color",
++    srcs: [
++        "ColorEnhancement.cpp",
++        "DisplayColorCalibration.cpp",
++    ],
++}
++
+ filegroup {
+     name: "vendor.lineage.livedisplay@2.0-sdm-dm",
+     srcs: [
+@@ -45,6 +53,7 @@ cc_defaults {
+     defaults: ["hidl_defaults"],
+     relative_install_path: "hw",
+     srcs: [
++        ":vendor.lineage.livedisplay@2.0-sdm-color",
+         ":vendor.lineage.livedisplay@2.0-sdm-dm",
+         ":vendor.lineage.livedisplay@2.0-sdm-pa",
+         ":vendor.lineage.livedisplay@2.0-sdm-utils",
+diff --git a/sdm/ColorEnhancement.cpp b/sdm/ColorEnhancement.cpp
+new file mode 100644
+index 0000000..836e8ce
+--- /dev/null
++++ b/sdm/ColorEnhancement.cpp
+@@ -0,0 +1,39 @@
++#ifdef LIVES_IN_SYSTEM
++#define LOG_TAG "lineage.livedisplay@2.0-impl-sdm"
++#else
++#define LOG_TAG "vendor.lineage.livedisplay@2.0-impl-sdm"
++#endif
++
++#include "livedisplay/sdm/ColorEnhancement.h"
++
++#include <android/hidl/manager/1.0/IServiceManager.h>
++#include <hidl/ServiceManagement.h>
++
++namespace vendor {
++namespace lineage {
++namespace livedisplay {
++namespace V2_0 {
++namespace sdm {
++
++ColorEnhancement::ColorEnhancement(sp<DisplayColorCalibration> calibration)
++    : calibration_(calibration) {}
++
++bool ColorEnhancement::isSupported(const hidl_string& name) {
++    using ::android::hidl::manager::V1_0::IServiceManager;
++    auto sm = ::android::hardware::defaultServiceManager();
++    return sm->getTransport(descriptor, name) != IServiceManager::Transport::EMPTY;
++}
++
++Return<bool> ColorEnhancement::isEnabled() {
++    return calibration_->isFactoryCorrectionEnabled();
++}
++
++Return<bool> ColorEnhancement::setEnabled(bool enabled) {
++    return calibration_->setFactoryCorrectionEnabled(enabled);
++}
++
++}  // namespace sdm
++}  // namespace V2_0
++}  // namespace livedisplay
++}  // namespace lineage
++}  // namespace vendor
+diff --git a/sdm/DisplayColorCalibration.cpp b/sdm/DisplayColorCalibration.cpp
+new file mode 100644
+index 0000000..b336142
+--- /dev/null
++++ b/sdm/DisplayColorCalibration.cpp
+@@ -0,0 +1,215 @@
++#ifdef LIVES_IN_SYSTEM
++#define LOG_TAG "lineage.livedisplay@2.0-impl-sdm"
++#else
++#define LOG_TAG "vendor.lineage.livedisplay@2.0-impl-sdm"
++#endif
++
++#include "livedisplay/sdm/DisplayColorCalibration.h"
++
++#include <android-base/logging.h>
++#include <android/hidl/manager/1.0/IServiceManager.h>
++#include <hidl/ServiceManagement.h>
++
++#include <algorithm>
++#include <cstddef>
++#include <cstdint>
++#include <fstream>
++#include <sstream>
++#include <string>
++#include <utility>
++
++namespace {
++
++constexpr int32_t kProfessionalMode = 100;
++constexpr int32_t kStandardMode = 101;
++constexpr int32_t kVividMode = 102;
++
++const char* FactoryCorrectionPath(int32_t mode_id) {
++    switch (mode_id) {
++        case kProfessionalMode:
++            return "/sys/devices/mdss_dsi_panel/srgb_cc";
++        case kStandardMode:
++            return "/sys/devices/mdss_dsi_panel/cc";
++        case kVividMode:
++            return "/sys/devices/mdss_dsi_panel/vivid_cc";
++        default:
++            return nullptr;
++    }
++}
++
++double DecodeFactoryCoefficient(uint32_t raw) {
++    if (raw == 0) {
++        return 1.0;
++    }
++    return static_cast<double>(raw & 0x7fffU) / 32768.0 +
++           static_cast<double>((raw >> 15) & 0x3U);
++}
++
++bool ParseFactoryCorrection(const char* path, std::array<double, 3>* rgb) {
++    std::ifstream stream(path);
++    if (!stream.is_open()) {
++        PLOG(ERROR) << "Unable to open factory PCC source " << path;
++        return false;
++    }
++
++    std::string data;
++    std::getline(stream, data);
++    std::replace(data.begin(), data.end(), ',', ' ');
++    std::replace(data.begin(), data.end(), ';', ' ');
++    std::replace(data.begin(), data.end(), '/', ' ');
++
++    std::istringstream parser(data);
++    std::array<uint32_t, 3> raw{};
++    parser >> std::hex >> raw[0] >> raw[1] >> raw[2];
++    if (parser.fail()) {
++        LOG(ERROR) << "Unable to parse factory PCC source " << path << ": " << data;
++        return false;
++    }
++
++    for (size_t i = 0; i < raw.size(); i++) {
++        if (raw[i] > 0x1ffffU) {
++            LOG(ERROR) << "Factory PCC coefficient out of range in " << path;
++            return false;
++        }
++        (*rgb)[i] = DecodeFactoryCoefficient(raw[i]);
++    }
++
++    return true;
++}
++
++}  // anonymous namespace
++
++namespace vendor {
++namespace lineage {
++namespace livedisplay {
++namespace V2_0 {
++namespace sdm {
++
++using ::android::OK;
++using ::android::hardware::Void;
++
++DisplayColorCalibration::DisplayColorCalibration(std::shared_ptr<SDMController> controller,
++                                                 bool factory_correction_supported)
++    : controller_(std::move(controller)),
++      factory_correction_supported_(factory_correction_supported),
++      factory_correction_enabled_(factory_correction_supported) {}
++
++bool DisplayColorCalibration::isSupported(const hidl_string& name) {
++    using ::android::hidl::manager::V1_0::IServiceManager;
++    auto sm = ::android::hardware::defaultServiceManager();
++    return sm->getTransport(descriptor, name) != IServiceManager::Transport::EMPTY;
++}
++
++Return<int32_t> DisplayColorCalibration::getMaxValue() {
++    return kMaxValue;
++}
++
++Return<int32_t> DisplayColorCalibration::getMinValue() {
++    return kMinValue;
++}
++
++Return<void> DisplayColorCalibration::getCalibration(getCalibration_cb _hidl_cb) {
++    hidl_vec<int32_t> rgb;
++    rgb.resize(user_rgb_.size());
++
++    {
++        std::lock_guard<std::mutex> lock(mutex_);
++        std::copy(user_rgb_.begin(), user_rgb_.end(), rgb.begin());
++    }
++
++    _hidl_cb(rgb);
++    return Void();
++}
++
++Return<bool> DisplayColorCalibration::setCalibration(const hidl_vec<int32_t>& rgb) {
++    if (rgb.size() != user_rgb_.size()) {
++        return false;
++    }
++
++    for (auto value : rgb) {
++        if (value < kMinValue || value > kMaxValue) {
++            return false;
++        }
++    }
++
++    std::lock_guard<std::mutex> lock(mutex_);
++    const auto old_rgb = user_rgb_;
++    std::copy(rgb.begin(), rgb.end(), user_rgb_.begin());
++    if (!applyLocked()) {
++        user_rgb_ = old_rgb;
++        return false;
++    }
++    return true;
++}
++
++bool DisplayColorCalibration::isFactoryCorrectionEnabled() {
++    std::lock_guard<std::mutex> lock(mutex_);
++    return factory_correction_supported_ && factory_correction_enabled_;
++}
++
++bool DisplayColorCalibration::setFactoryCorrectionEnabled(bool enabled) {
++    std::lock_guard<std::mutex> lock(mutex_);
++    if (!factory_correction_supported_) {
++        return false;
++    }
++
++    const bool old_enabled = factory_correction_enabled_;
++    factory_correction_enabled_ = enabled;
++    if (!applyLocked()) {
++        factory_correction_enabled_ = old_enabled;
++        return false;
++    }
++    return true;
++}
++
++bool DisplayColorCalibration::reapply() {
++    std::lock_guard<std::mutex> lock(mutex_);
++    return applyLocked();
++}
++
++bool DisplayColorCalibration::readFactoryCorrectionLocked(std::array<double, 3>* rgb) {
++    int32_t mode_id = -1;
++    if (controller_->getActiveDisplayMode(&mode_id) != OK) {
++        LOG(ERROR) << "Unable to determine active display mode for factory PCC";
++        return false;
++    }
++
++    const char* path = FactoryCorrectionPath(mode_id);
++    if (path == nullptr) {
++        LOG(ERROR) << "No factory PCC source for display mode " << mode_id;
++        return false;
++    }
++
++    return ParseFactoryCorrection(path, rgb);
++}
++
++bool DisplayColorCalibration::applyLocked() {
++    std::array<double, 3> factory_rgb{{1.0, 1.0, 1.0}};
++    if (factory_correction_supported_ && factory_correction_enabled_ &&
++        !readFactoryCorrectionLocked(&factory_rgb)) {
++        return false;
++    }
++
++    std::array<double, 3> composed{};
++    for (size_t i = 0; i < composed.size(); i++) {
++        const double user = static_cast<double>(user_rgb_[i]) / kMaxValue;
++        composed[i] = user * factory_rgb[i];
++    }
++
++    if (controller_->setUserColorBalance(composed[0], composed[1], composed[2]) != OK) {
++        LOG(ERROR) << "Failed to apply composed PCC correction";
++        return false;
++    }
++
++    LOG(DEBUG) << "Applied PCC: factory="
++               << (factory_correction_supported_ && factory_correction_enabled_)
++               << " user=" << user_rgb_[0] << "," << user_rgb_[1] << "," << user_rgb_[2]
++               << " composed=" << composed[0] << "," << composed[1] << "," << composed[2];
++    return true;
++}
++
++}  // namespace sdm
++}  // namespace V2_0
++}  // namespace livedisplay
++}  // namespace lineage
++}  // namespace vendor
+diff --git a/sdm/DisplayModes.cpp b/sdm/DisplayModes.cpp
+index 1e2d09c..5ab51a6 100644
+--- a/sdm/DisplayModes.cpp
++++ b/sdm/DisplayModes.cpp
+@@ -37,6 +37,14 @@ namespace sdm {
+ using ::android::OK;
+ using ::android::hardware::Void;
+ 
++namespace {
++
++constexpr int32_t kSonyProfessionalMode = 100;
++constexpr int32_t kSonyStandardMode = 101;
++constexpr int32_t kSonyVividMode = 102;
++
++}  // anonymous namespace
++
+ DisplayModes::DisplayModes(std::shared_ptr<SDMController> controller)
+     : controller_(std::move(controller)) {
+     if (!isReady()) {
+@@ -96,7 +104,19 @@ std::vector<DisplayMode> DisplayModes::getDisplayModesInternal() {
+     std::vector<SdmDispMode> tmp_modes(count);
+     if (controller_->getDisplayModes(tmp_modes.data(), count) == OK) {
+         for (auto&& mode : tmp_modes) {
+-            modes.push_back({mode.id, mode.name});
++            switch (mode.id) {
++                case kSonyProfessionalMode:
++                    modes.push_back({mode.id, "sony_professional"});
++                    break;
++                case kSonyStandardMode:
++                    modes.push_back({mode.id, "sony_standard"});
++                    break;
++                case kSonyVividMode:
++                    modes.push_back({mode.id, "sony_vivid"});
++                    break;
++                default:
++                    break;
++            }
+         }
+     }
+ 
+diff --git a/sdm/SDMController.cpp b/sdm/SDMController.cpp
+index 6af25c1..a312732 100644
+--- a/sdm/SDMController.cpp
++++ b/sdm/SDMController.cpp
+@@ -25,6 +25,8 @@
+ #include <android-base/logging.h>
+ #include <dlfcn.h>
+ 
++#include <cstddef>
++#include <cstdint>
+ #include <memory>
+ 
+ #define LOAD_SDM_FUNCTION(name) \
+@@ -44,6 +46,7 @@
+     MACRO(get_global_pa_range)      \
+     MACRO(get_global_pa_config)     \
+     MACRO(set_global_pa_config)     \
++    MACRO(set_usr_color_balance_config) \
+     MACRO(get_feature_version)
+ 
+ #define CONTROLLER_CHECK(function, ...)      \
+@@ -68,6 +71,17 @@ constexpr const char* kSdmDispLibs[]{
+ 
+ constexpr const int kDisplayId = 0;
+ 
++struct UserColorBalanceConfig {
++    uint32_t flags = 0;
++    uint32_t reserved = 0;
++    double red = 1.0;
++    double green = 1.0;
++    double blue = 1.0;
++};
++
++static_assert(sizeof(UserColorBalanceConfig) == 32, "Unexpected color-balance ABI size");
++static_assert(offsetof(UserColorBalanceConfig, red) == 8, "Unexpected color-balance ABI layout");
++
+ void* LoadDispApisLib() {
+     void* handle = nullptr;
+ 
+@@ -177,6 +191,14 @@ status_t SDMController::setGlobalPaConfig(HsicConfig* cfg) {
+     CONTROLLER_CHECK(set_global_pa_config, hctx_, kDisplayId, 1 /* enable */, cfg);
+ }
+ 
++status_t SDMController::setUserColorBalance(double red, double green, double blue) {
++    UserColorBalanceConfig config;
++    config.red = red;
++    config.green = green;
++    config.blue = blue;
++    CONTROLLER_CHECK(set_usr_color_balance_config, hctx_, kDisplayId, &config);
++}
++
+ status_t SDMController::getFeatureVersion(uint32_t feature_id, SdmFeatureVersion* ver) {
+     uint32_t flags = 0;
+     CONTROLLER_CHECK(get_feature_version, hctx_, feature_id, ver, &flags);
+diff --git a/sdm/include/livedisplay/sdm/ColorEnhancement.h b/sdm/include/livedisplay/sdm/ColorEnhancement.h
+new file mode 100644
+index 0000000..737a73a
+--- /dev/null
++++ b/sdm/include/livedisplay/sdm/ColorEnhancement.h
+@@ -0,0 +1,34 @@
++#pragma once
++
++#include <vendor/lineage/livedisplay/2.0/IColorEnhancement.h>
++
++#include <livedisplay/sdm/DisplayColorCalibration.h>
++
++namespace vendor {
++namespace lineage {
++namespace livedisplay {
++namespace V2_0 {
++namespace sdm {
++
++using ::android::hardware::hidl_string;
++using ::android::hardware::Return;
++using ::android::sp;
++
++class ColorEnhancement : public IColorEnhancement {
++  public:
++    explicit ColorEnhancement(sp<DisplayColorCalibration> calibration);
++
++    static bool isSupported(const hidl_string& name = "default");
++
++    Return<bool> isEnabled() override;
++    Return<bool> setEnabled(bool enabled) override;
++
++  private:
++    sp<DisplayColorCalibration> calibration_;
++};
++
++}  // namespace sdm
++}  // namespace V2_0
++}  // namespace livedisplay
++}  // namespace lineage
++}  // namespace vendor
+diff --git a/sdm/include/livedisplay/sdm/DisplayColorCalibration.h b/sdm/include/livedisplay/sdm/DisplayColorCalibration.h
+new file mode 100644
+index 0000000..f4ea286
+--- /dev/null
++++ b/sdm/include/livedisplay/sdm/DisplayColorCalibration.h
+@@ -0,0 +1,55 @@
++#pragma once
++
++#include <vendor/lineage/livedisplay/2.0/IDisplayColorCalibration.h>
++
++#include <array>
++#include <memory>
++#include <mutex>
++
++#include "SDMController.h"
++
++namespace vendor {
++namespace lineage {
++namespace livedisplay {
++namespace V2_0 {
++namespace sdm {
++
++using ::android::hardware::hidl_string;
++using ::android::hardware::hidl_vec;
++using ::android::hardware::Return;
++
++class DisplayColorCalibration : public IDisplayColorCalibration {
++  public:
++    DisplayColorCalibration(std::shared_ptr<SDMController> controller,
++                            bool factory_correction_supported);
++
++    static bool isSupported(const hidl_string& name = "default");
++
++    Return<int32_t> getMaxValue() override;
++    Return<int32_t> getMinValue() override;
++    Return<void> getCalibration(getCalibration_cb _hidl_cb) override;
++    Return<bool> setCalibration(const hidl_vec<int32_t>& rgb) override;
++
++    bool isFactoryCorrectionEnabled();
++    bool setFactoryCorrectionEnabled(bool enabled);
++    bool reapply();
++
++  private:
++    static constexpr int32_t kMinValue = 0;
++    static constexpr int32_t kMaxValue = 255;
++
++    bool applyLocked();
++    bool readFactoryCorrectionLocked(std::array<double, 3>* rgb);
++
++    std::shared_ptr<SDMController> controller_;
++    std::mutex mutex_;
++    std::array<int32_t, 3> user_rgb_{{kMaxValue, kMaxValue, kMaxValue}};
++    const bool factory_correction_supported_;
++    bool factory_correction_enabled_;
++};
++
++}  // namespace sdm
++}  // namespace V2_0
++}  // namespace livedisplay
++}  // namespace lineage
++}  // namespace vendor
+diff --git a/sdm/include/livedisplay/sdm/SDMController.h b/sdm/include/livedisplay/sdm/SDMController.h
+index fd7e3ce..f45a2d1 100644
+--- a/sdm/include/livedisplay/sdm/SDMController.h
++++ b/sdm/include/livedisplay/sdm/SDMController.h
+@@ -110,6 +110,7 @@ class SDMController {
+     status_t getGlobalPaRange(HsicRanges* range);
+     status_t getGlobalPaConfig(HsicConfig* cfg);
+     status_t setGlobalPaConfig(HsicConfig* cfg);
++    status_t setUserColorBalance(double red, double green, double blue);
+     status_t getFeatureVersion(uint32_t feature_id, SdmFeatureVersion* ver);
+ 
+   private:
+@@ -130,6 +131,7 @@ class SDMController {
+     typedef int32_t (*disp_api_get_global_pa_range)(uint64_t, uint32_t, HsicRanges*);
+     typedef int32_t (*disp_api_get_global_pa_config)(uint64_t, uint32_t, uint32_t*, HsicConfig*);
+     typedef int32_t (*disp_api_set_global_pa_config)(uint64_t, uint32_t, uint32_t, HsicConfig*);
++    typedef int32_t (*disp_api_set_usr_color_balance_config)(uint64_t, uint32_t, const void*);
+     typedef int32_t (*disp_api_get_feature_version)(uint64_t, uint32_t, SdmFeatureVersion*,
+                                                     uint32_t*);
+ 
+@@ -147,6 +149,7 @@ class SDMController {
+     disp_api_get_global_pa_range fn_get_global_pa_range_;
+     disp_api_get_global_pa_config fn_get_global_pa_config_;
+     disp_api_set_global_pa_config fn_set_global_pa_config_;
++    disp_api_set_usr_color_balance_config fn_set_usr_color_balance_config_;
+     disp_api_get_feature_version fn_get_feature_version_;
+ 
+     DISALLOW_COPY_AND_ASSIGN(SDMController);
+diff --git a/sdm/service.cpp b/sdm/service.cpp
+index 78a63b6..766e61c 100644
+--- a/sdm/service.cpp
++++ b/sdm/service.cpp
+@@ -23,6 +23,8 @@
+ #include <android-base/logging.h>
+ #include <binder/ProcessState.h>
+ #include <hidl/HidlTransportSupport.h>
++#include <livedisplay/sdm/ColorEnhancement.h>
++#include <livedisplay/sdm/DisplayColorCalibration.h>
+ #include <livedisplay/sdm/DisplayModes.h>
+ #include <livedisplay/sdm/PictureAdjustment.h>
+ #include <livedisplay/sdm/SDMController.h>
+@@ -33,6 +35,8 @@ using ::android::status_t;
+ using ::android::hardware::configureRpcThreadpool;
+ using ::android::hardware::joinRpcThreadpool;
+ 
++using ::vendor::lineage::livedisplay::V2_0::sdm::ColorEnhancement;
++using ::vendor::lineage::livedisplay::V2_0::sdm::DisplayColorCalibration;
+ using ::vendor::lineage::livedisplay::V2_0::sdm::DisplayModes;
+ using ::vendor::lineage::livedisplay::V2_0::sdm::PictureAdjustment;
+ using ::vendor::lineage::livedisplay::V2_0::sdm::SDMController;
+@@ -49,6 +53,28 @@ status_t RegisterAsServices() {
+         return status;
+     }
+ 
++    sp<DisplayColorCalibration> calibration;
++    if (DisplayColorCalibration::isSupported()) {
++        const bool factory_correction_supported = ColorEnhancement::isSupported();
++        calibration = new DisplayColorCalibration(controller, factory_correction_supported);
++        status = calibration->registerAsService();
++        if (status != OK) {
++            LOG(ERROR) << "Could not register service for LiveDisplay HAL "
++                          "DisplayColorCalibration Iface (" << status << ")";
++            return status;
++        }
++
++        if (factory_correction_supported) {
++            sp<ColorEnhancement> enhancement = new ColorEnhancement(calibration);
++            status = enhancement->registerAsService();
++            if (status != OK) {
++                LOG(ERROR) << "Could not register service for LiveDisplay HAL ColorEnhancement "
++                              "Iface (" << status << ")";
++                return status;
++            }
++        }
++    }
++
+     if (DisplayModes::isSupported()) {
+         sp<DisplayModes> dm = new DisplayModes(controller);
+         status = dm->registerAsService();
+@@ -57,9 +83,18 @@ status_t RegisterAsServices() {
+                        << status << ")";
+             return status;
+         }
+-        // Update default PA on setDisplayMode
+-        dm->registerDisplayModeSetCallback(
+-                std::bind(&PictureAdjustment::updateDefaultPictureAdjustment, pa));
++        // Update PA defaults and re-compose user/factory PCC after profile changes.
++        dm->registerDisplayModeSetCallback([pa, calibration]() {
++            pa->updateDefaultPictureAdjustment();
++            if (calibration != nullptr && !calibration->reapply()) {
++                LOG(WARNING) << "Could not reapply composed PCC after display mode change";
++            }
++        });
++
++        // DisplayModes applies the default mode in its constructor before the callback above exists.
++        if (calibration != nullptr && !calibration->reapply()) {
++            LOG(WARNING) << "Could not apply initial composed PCC";
++        }
+     }
+ 
+     return OK;
