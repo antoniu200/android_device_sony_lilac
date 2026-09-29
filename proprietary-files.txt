@@ -39,8 +39,10 @@ framework/com.sonymobile.imageprocessor.bypasscamera_impl.jar:framework/com.sony
 # CAMERA
 bin/cacaoserver
 etc/init/cacaoserver.rc
+# Parcel object size patch
 lib/libcacao_client.so|d6a9c75eab481bdb4cd6fefe399766d84cbbf0d4
 lib/libcacao_pal.so
+# Parcel object size patch
 lib/libcacao_process_ctrl_gateway.so|952abcfe7ef88f482268f3ddea4b03d6b8000e23
 lib/libcacao_service.so
 lib/libimageprocessorjni.so|5c904eba44dc5090afee7892e444e75d5890d50e
@@ -50,6 +52,7 @@ lib/vendor.somc.hardware.camera.cacao@3.0.so
 lib/vendor.somc.hardware.camera.cacao@3.1.so
 lib/vendor.somc.hardware.camera.device@1.0.so
 lib/vendor.somc.hardware.camera.provider@1.0.so
+# Parcel object size patch
 lib64/libcacao_client.so|a848aefd648d9cad89136f29fb4ec5a88363cda9
 lib64/libcacao_pal.so
 lib64/libimageprocessorjni.so|e989c44f0cc42c923cbf3fd9213063930e04b779

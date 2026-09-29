@@ -938,6 +938,7 @@ vendor/lib/libgdtap.so
 vendor/lib/libgeofence.so
 vendor/lib/libgnss.so
 vendor/lib/libgnsspps.so
+# Parcel object size patch
 vendor/lib/libgps.utils.so|dcd4a3e9bb91e11904b068afc3581b5ef99a3731
 vendor/lib/libizat_client_api.so
 vendor/lib/libizat_core.so
@@ -974,6 +975,7 @@ vendor/lib64/libgdtap.so
 vendor/lib64/libgeofence.so
 vendor/lib64/libgnss.so
 vendor/lib64/libgnsspps.so
+# Parcel object size patch
 vendor/lib64/libgps.utils.so|9b2bfc1ca1a3ff570642bcc862d565d9d1a0509e
 vendor/lib64/libizat_client_api.so
 vendor/lib64/libizat_core.so
