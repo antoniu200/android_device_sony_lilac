@@ -1,0 +1,287 @@
+# PWD: frameworks/base
+
+From 449fead3135975f8d51be95fdcd37c58ce70c366 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 21 Aug 2026 18:45:25 +0300
+Subject: [PATCH 1/6] Backport Sony Proximity Brightness Filter
+
+Change-Id: Iefdaccf72a693efb08c1ed62fd14d4debe846d40
+---
+ .../AutomaticBrightnessController.java        | 51 ++++++++++++++++++-
+ 1 file changed, 49 insertions(+), 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/display/AutomaticBrightnessController.java b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+index 9922d939ad68e..f02d8a4f80990 100644
+--- a/services/core/java/com/android/server/display/AutomaticBrightnessController.java
++++ b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+@@ -72,10 +72,10 @@ class AutomaticBrightnessController {
+ 
+     // Length of the ambient light horizon used to calculate the long term estimate of ambient
+     // light.
+-    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
++    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 1000;
+ 
+     // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+-    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
++    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 1000;
+ 
+     // Callbacks for requesting updates to the display's power state
+     private final Callbacks mCallbacks;
+@@ -85,6 +85,19 @@ class AutomaticBrightnessController {
+ 
+     // The light sensor, or null if not available or needed.
+     private final Sensor mLightSensor;
++    
++    // Maximum distance, in centimeters, below which the proximity sensor is considered covered.
++    private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
++    
++    // The proximity sensor, or null if not available or needed.
++    private final Sensor mProximitySensor;
++    
++    // Maximum distance, in centimeters, below which the proximity sensor is considered covered.
++    // Limited by TYPICAL_PROXIMITY_THRESHOLD or the sensor's maximum range, whichever is smaller.
++    private final float mProximityThreshold;
++    
++    // True if sensor is currently considered covered.
++    private boolean mIsNear;
+ 
+     // The mapper to translate ambient lux to screen brightness in the range [0, 1.0].
+     private final BrightnessMappingStrategy mBrightnessMapper;
+@@ -246,6 +259,16 @@ class AutomaticBrightnessController {
+         mContext = context;
+         mCallbacks = callbacks;
+         mSensorManager = sensorManager;
++        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
++        
++        if (mProximitySensor != null) {
++            mProximityThreshold = Math.min(
++                    mProximitySensor.getMaximumRange(),
++                    TYPICAL_PROXIMITY_THRESHOLD);
++        } else {
++            mProximityThreshold = TYPICAL_PROXIMITY_THRESHOLD;
++        }
++        
+         mBrightnessMapper = mapper;
+         mScreenBrightnessRangeMinimum = brightnessMin;
+         mScreenBrightnessRangeMaximum = brightnessMax;
+@@ -506,6 +529,8 @@ private boolean setLightSensorEnabled(boolean enable) {
+                 registerForegroundAppUpdater();
+                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
+                         mCurrentLightSensorRate * 1000, mHandler);
++                mSensorManager.registerListener(mProximitySensorListener, mProximitySensor,
++                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+                 return true;
+             }
+         } else if (mLightSensorEnabled) {
+@@ -518,6 +543,9 @@ private boolean setLightSensorEnabled(boolean enable) {
+             mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
+             unregisterForegroundAppUpdater();
+             mSensorManager.unregisterListener(mLightSensorListener);
++            
++            mIsNear = false;
++            mSensorManager.unregisterListener(mProximitySensorListener);
+         }
+         return false;
+     }
+@@ -962,11 +990,30 @@ public void handleMessage(Message msg) {
+             }
+         }
+     }
++    
++    private final SensorEventListener mProximitySensorListener = new SensorEventListener() {
++        @Override
++        public void onSensorChanged(SensorEvent event) {
++            if (mLightSensorEnabled) {
++                final float distance = event.values[0];
++                mIsNear = distance >= 0.0f && distance < mProximityThreshold;
++            }
++        }
++
++        @Override
++        public void onAccuracyChanged(Sensor sensor, int accuracy) {
++            // Not used.
++        }
++    };
+ 
+     private final SensorEventListener mLightSensorListener = new SensorEventListener() {
+         @Override
+         public void onSensorChanged(SensorEvent event) {
+             if (mLightSensorEnabled) {
++                if (mAmbientLuxValid && mIsNear) {
++                    return;
++                }
++            
+                 final long time = SystemClock.uptimeMillis();
+                 final float lux = event.values[0];
+                 handleLightSensorEvent(time, lux);
+
+From e2d55b65d67f08ac69fc9d64d56bf6241d877e32 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Sat, 29 Aug 2026 19:06:03 +0300
+Subject: [PATCH 2/6] Backport Sony Charging Vibration
+
+Change-Id: Ib3359077a94a2154f75e4437a7e1f678368dd82d
+---
+ services/core/java/com/android/server/power/Notifier.java | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/services/core/java/com/android/server/power/Notifier.java b/services/core/java/com/android/server/power/Notifier.java
+index f62bea945f515..f2b7196d8e7c8 100644
+--- a/services/core/java/com/android/server/power/Notifier.java
++++ b/services/core/java/com/android/server/power/Notifier.java
+@@ -99,7 +99,7 @@ public class Notifier {
+     private static final int MSG_SCREEN_POLICY = 7;
+     private static final int MSG_WIRED_CHARGING_DISCONNECTED = 8;
+     private static final int MSG_WIRELESS_CHARGING_INTERRUPTED = 9;
+-
++    /*
+     private static final long[] CHARGING_VIBRATION_TIME = {
+             40, 40, 40, 40, 40, 40, 40, 40, 40, // ramp-up sampling rate = 40ms
+             40, 40, 40, 40, 40, 40, 40 // ramp-down sampling rate = 40ms
+@@ -107,10 +107,9 @@ public class Notifier {
+     private static final int[] CHARGING_VIBRATION_AMPLITUDE = {
+             1, 4, 11, 25, 44, 67, 91, 114, 123, // ramp-up amplitude (from 0 to 50%)
+             103, 79, 55, 34, 17, 7, 2 // ramp-up amplitude
+-    };
++    };*/
+     private static final VibrationEffect CHARGING_VIBRATION_EFFECT =
+-            VibrationEffect.createWaveform(CHARGING_VIBRATION_TIME, CHARGING_VIBRATION_AMPLITUDE,
+-                    -1);
++            VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
+     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+             .build();
+
+From f8b48617e994cc0c6dac012a59ce3f0dbfd309c1 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Thu, 3 Sep 2026 22:43:53 +0300
+Subject: [PATCH 3/6] Revert Sony brightness horizon to AOSP default
+
+Change-Id: Ic1319ec734ab85212dd95234e7aee2487303547f
+---
+ .../android/server/display/AutomaticBrightnessController.java | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/services/core/java/com/android/server/display/AutomaticBrightnessController.java b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+index f02d8a4f80990..8124f663ce63d 100644
+--- a/services/core/java/com/android/server/display/AutomaticBrightnessController.java
++++ b/services/core/java/com/android/server/display/AutomaticBrightnessController.java
+@@ -72,10 +72,10 @@ class AutomaticBrightnessController {
+ 
+     // Length of the ambient light horizon used to calculate the long term estimate of ambient
+     // light.
+-    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 1000;
++    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
+ 
+     // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+-    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 1000;
++    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
+ 
+     // Callbacks for requesting updates to the display's power state
+     private final Callbacks mCallbacks;
+
+From 90405590886769e38fa44785c55ba92166304d7d Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 11 Sep 2026 23:21:11 +0300
+Subject: [PATCH 4/6] Add SomcHook
+
+Change-Id: I011ad28a56140f33e33f80a759ecb40046208736
+---
+ .../java/android/telephony/CarrierConfigManager.java      | 8 ++++++++
+ .../java/com/android/internal/telephony/RILConstants.java | 2 ++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/telephony/java/android/telephony/CarrierConfigManager.java b/telephony/java/android/telephony/CarrierConfigManager.java
+index 1ca251d370ab9..b498d95240e95 100644
+--- a/telephony/java/android/telephony/CarrierConfigManager.java
++++ b/telephony/java/android/telephony/CarrierConfigManager.java
+@@ -633,6 +633,13 @@ public CarrierConfigManager(Context context) {
+      */
+     public static final String
+             KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
++            
++    /**
++     * Whether the Sony APN profile switch mechanism is enabled.
++     * @hide
++     */
++    public static final String
++            KEY_SOMC_ENABLE_APN_SWITCH_BOOL = "s_enable_apn_switch";
+ 
+     /**
+      * Flag specifying whether VoLTE should be available for carrier, independent of carrier
+@@ -5412,6 +5419,7 @@ private static PersistableBundle getDefaults() {
+         sDefaults.putBoolean(KEY_APN_EXPAND_BOOL, true);
+         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
+         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
++        sDefaults.putBoolean(KEY_SOMC_ENABLE_APN_SWITCH_BOOL, true);
+         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
+         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+         sDefaults.putInt(KEY_CARRIER_USSD_METHOD_INT, USSD_OVER_CS_PREFERRED);
+diff --git a/telephony/java/com/android/internal/telephony/RILConstants.java b/telephony/java/com/android/internal/telephony/RILConstants.java
+index fadc23b315d68..93877c822b111 100644
+--- a/telephony/java/com/android/internal/telephony/RILConstants.java
++++ b/telephony/java/com/android/internal/telephony/RILConstants.java
+@@ -530,6 +530,8 @@ call in class C */
+     int RIL_REQUEST_GET_SLICING_CONFIG = 224;
+     int RIL_REQUEST_ENABLE_VONR = 225;
+     int RIL_REQUEST_IS_VONR_ENABLED = 225;
++    
++    int RIL_REQUEST_SOMC_HOOK_RAW = 501;
+ 
+     /* Responses begin */
+     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
+
+From 8d83a45749e0de5c125c00e34cfb7d5d1d98d6fb Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 28 Sep 2026 00:44:36 +0300
+Subject: [PATCH 5/6] Shut up the log spam, the device does not have a nits map
+
+Change-Id: Ib9e1087e4dd504522a5e80f1bfb7b9bdb0e7b899
+---
+ .../java/com/android/server/display/DisplayDeviceConfig.java     | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/services/core/java/com/android/server/display/DisplayDeviceConfig.java b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
+index 255494f986673..1d0acfad3be6f 100644
+--- a/services/core/java/com/android/server/display/DisplayDeviceConfig.java
++++ b/services/core/java/com/android/server/display/DisplayDeviceConfig.java
+@@ -246,7 +246,6 @@ public float getBacklightFromBrightness(float brightness) {
+      */
+     public float getNitsFromBacklight(float backlight) {
+         if (mBacklightToNitsSpline == null) {
+-            Slog.wtf(TAG, "requesting nits when no mapping exists.");
+             return NITS_INVALID;
+         }
+         backlight = Math.max(backlight, mBacklightMinimum);
+
+From 0144d371d2bc3af73f15d9aebfce7ec970a67b81 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 20:58:00 +0300
+Subject: [PATCH 6/6] Allow Battery Optimizations for Default Apps
+
+Change-Id: I28c41309fa74e56d0b5f4bf88d59a7bf35cca06e
+---
+ .../settingslib/fuelgauge/PowerAllowlistBackend.java   | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
+
+diff --git a/packages/SettingsLib/src/com/android/settingslib/fuelgauge/PowerAllowlistBackend.java b/packages/SettingsLib/src/com/android/settingslib/fuelgauge/PowerAllowlistBackend.java
+index 2e8f368345842..84eec3e8b2a04 100644
+--- a/packages/SettingsLib/src/com/android/settingslib/fuelgauge/PowerAllowlistBackend.java
++++ b/packages/SettingsLib/src/com/android/settingslib/fuelgauge/PowerAllowlistBackend.java
+@@ -77,15 +77,7 @@ public boolean isSysAllowlisted(String pkg) {
+      * Check if target package is in allow list
+      */
+     public boolean isAllowlisted(String pkg) {
+-        if (mAllowlistedApps.contains(pkg)) {
+-            return true;
+-        }
+-
+-        if (isDefaultActiveApp(pkg)) {
+-            return true;
+-        }
+-
+-        return false;
++        return mAllowlistedApps.contains(pkg);
+     }
+ 
+     /**

@@ -1,8 +1,8 @@
-# PWD: frameworks/opt
+# PWD: frameworks/opt/telephony
 From 3c7d2a768ca9501cbea73bfbdd84099af6d0d60d Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Fri, 11 Sep 2026 23:25:45 +0300
-Subject: [PATCH] Add SomcHook
+Subject: [PATCH 1/5] Add SomcHook
 
 Change-Id: Ic2151f04dd5737de2f5451380e93489215153da8
 ---
@@ -2135,3 +2135,307 @@ index 00000000000..1d4339757bc
 +    }
 +}
 
+From 2a702530ab64ff02614624f35626c73ccf27b7f9 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Sun, 13 Sep 2026 21:20:03 +0300
+Subject: [PATCH 2/5] Resolve SMS over IMS issues
+
+Change-Id: I904c685635e52fcf59a28076270ddd659837052b
+---
+ .../internal/telephony/SMSDispatcher.java     | 18 +++++++++++++-
+ .../telephony/SmsDispatchersController.java   | 24 ++++++++++++++++++-
+ 2 files changed, 40 insertions(+), 2 deletions(-)
+
+diff --git a/src/java/com/android/internal/telephony/SMSDispatcher.java b/src/java/com/android/internal/telephony/SMSDispatcher.java
+index d60e357b735..595b673f499 100644
+--- a/src/java/com/android/internal/telephony/SMSDispatcher.java
++++ b/src/java/com/android/internal/telephony/SMSDispatcher.java
+@@ -945,10 +945,26 @@ protected void handleSendComplete(AsyncResult ar) {
+                 //       may or may not have the MR corresponding to this
+                 //       message, depending on the failure).  Also, in some
+                 //       implementations this retry is handled by the baseband.
++                
++                // The first retry after a legacy RIL IMS SMS failure is a fallback
++                // to the non-IMS SMS transport. Do not apply the normal retry delay.
++                boolean firstLegacyImsFallback =
++                        tracker.mImsRetry == 1
++                        && tracker.mRetryCount == 0
++                        && !tracker.mUsesImsServiceForIms;
++                        
+                 tracker.mRetryCount++;
+                 int errorCode = (smsResponse != null) ? smsResponse.mErrorCode : NO_ERROR_CODE;
+                 Message retryMsg = obtainMessage(EVENT_SEND_RETRY, tracker);
+-                sendMessageDelayed(retryMsg, SEND_RETRY_DELAY);
++                
++                if (firstLegacyImsFallback) {
++                    mSmsDispatchersController.disableLegacyImsSmsForSession();
++                    Rlog.d(TAG, "Immediate retry for legacy IMS SMS fallback");
++                    sendMessage(retryMsg);
++                } else {
++                    sendMessageDelayed(retryMsg, SEND_RETRY_DELAY);
++                }
++                
+                 mPhone.getSmsStats().onOutgoingSms(
+                         tracker.mImsRetry > 0 /* isOverIms */,
+                         SmsConstants.FORMAT_3GPP2.equals(getFormat()),
+diff --git a/src/java/com/android/internal/telephony/SmsDispatchersController.java b/src/java/com/android/internal/telephony/SmsDispatchersController.java
+index 53556ac9f72..f7e997f4f32 100644
+--- a/src/java/com/android/internal/telephony/SmsDispatchersController.java
++++ b/src/java/com/android/internal/telephony/SmsDispatchersController.java
+@@ -105,6 +105,8 @@ public class SmsDispatchersController extends Handler {
+ 
+     /** true if IMS is registered and sms is supported, false otherwise.*/
+     private boolean mIms = false;
++    /** true if IMS is registered and ims sms fails, false otherwise.*/
++    private boolean mLegacyImsSmsUnavailableForSession = false;
+     private String mImsSmsFormat = SmsConstants.FORMAT_UNKNOWN;
+ 
+     /** 3GPP format sent messages awaiting a delivery status report. */
+@@ -126,6 +128,13 @@ public void putDeliveryPendingTracker(SMSDispatcher.SmsTracker tracker) {
+             mDeliveryPendingMapFor3GPP.put(tracker.mMessageRef, tracker);
+         }
+     }
++    
++    void disableLegacyImsSmsForSession() {
++        if (!mLegacyImsSmsUnavailableForSession) {
++            Rlog.d(TAG, "Legacy IMS SMS disabled for current IMS registration session");
++            mLegacyImsSmsUnavailableForSession = true;
++        }
++    }
+ 
+     public SmsDispatchersController(Phone phone, SmsStorageMonitor storageMonitor,
+             SmsUsageMonitor usageMonitor) {
+@@ -201,6 +210,9 @@ public void handleMessage(Message msg) {
+ 
+         switch (msg.what) {
+             case EVENT_RADIO_ON:
++                mLegacyImsSmsUnavailableForSession = false;
++                mCi.getImsRegistrationState(this.obtainMessage(EVENT_IMS_STATE_DONE));
++                break;
+             case EVENT_IMS_STATE_CHANGED: // received unsol
+                 mCi.getImsRegistrationState(this.obtainMessage(EVENT_IMS_STATE_DONE));
+                 break;
+@@ -369,8 +381,18 @@ private void setImsSmsFormat(int format) {
+ 
+     private void updateImsInfo(AsyncResult ar) {
+         int[] responseArray = (int[]) ar.result;
++        boolean wasIms = mIms;
++               
+         setImsSmsFormat(responseArray[1]);
+         mIms = responseArray[0] == 1 && !SmsConstants.FORMAT_UNKNOWN.equals(mImsSmsFormat);
++        
++        if (wasIms && !mIms) {
++            if (mLegacyImsSmsUnavailableForSession) {
++                Rlog.d(TAG, "IMS SMS registration ended; clearing legacy IMS SMS suppression");
++            }
++            mLegacyImsSmsUnavailableForSession = false;
++        }
++        
+         Rlog.d(TAG, "IMS registration state: " + mIms + " format: " + mImsSmsFormat);
+     }
+ 
+@@ -550,7 +572,7 @@ public void sendRetrySms(SMSDispatcher.SmsTracker tracker) {
+      *         implementation. Otherwise, false.
+      */
+     public boolean isIms() {
+-        return mImsSmsDispatcher.isAvailable() ? true : mIms;
++        return mImsSmsDispatcher.isAvailable() ? true : (mIms && !mLegacyImsSmsUnavailableForSession);
+     }
+ 
+     /**
+
+From 8ac2ee82535ca09c2c15bb5a6bcfc6e37591abab Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Fri, 25 Sep 2026 02:25:22 +0300
+Subject: [PATCH 3/5] Add Sony SimDetect
+
+Change-Id: I57a32d5dd923c83402acde99a8e6df663a13157b
+---
+ .../telephony/uicc/UiccController.java        | 36 +++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/src/java/com/android/internal/telephony/uicc/UiccController.java b/src/java/com/android/internal/telephony/uicc/UiccController.java
+index 0fcaa0d53b3..11702c5fa84 100644
+--- a/src/java/com/android/internal/telephony/uicc/UiccController.java
++++ b/src/java/com/android/internal/telephony/uicc/UiccController.java
+@@ -33,6 +33,7 @@
+ import android.os.Message;
+ import android.os.Registrant;
+ import android.os.RegistrantList;
++import android.os.UEventObserver;
+ import android.os.storage.StorageManager;
+ import android.preference.PreferenceManager;
+ import android.sysprop.TelephonyProperties;
+@@ -53,6 +54,9 @@
+ import com.android.internal.telephony.RadioConfig;
+ import com.android.internal.telephony.SubscriptionInfoUpdater;
+ import com.android.internal.telephony.uicc.euicc.EuiccCard;
++import com.android.internal.telephony.uicc.IccCardStatus;
++import com.android.internal.telephony.uicc.UiccController;
++import com.android.internal.telephony.uicc.UiccSlot;
+ import com.android.internal.telephony.util.TelephonyUtils;
+ import com.android.telephony.Rlog;
+ 
+@@ -192,6 +196,9 @@ public class UiccController extends Handler {
+ 
+     private UiccStateChangedLauncher mLauncher;
+     private RadioConfig mRadioConfig;
++    
++    private static final String SONY_SIM_DETECT_MATCH =
++        "DEVPATH=/devices/virtual/switch/sim_detect";
+ 
+     /* The storage for the PIN codes. */
+     private final PinStorage mPinStorage;
+@@ -211,6 +218,32 @@ public static UiccController make(Context c) {
+             return mInstance;
+         }
+     }
++    
++    private final UEventObserver mSonySimDetectObserver = new UEventObserver() {
++        @Override
++        public void onUEvent(UEvent event) {
++            final String state = event.get("SWITCH_STATE");
++
++            if (!"1".equals(state) && !"2".equals(state)) {
++                return;
++            }
++
++            logWithLocalLog("Sony SIM detect: SWITCH_STATE=" + state);
++
++            post(() -> {
++                logWithLocalLog("Sony SIM detect: requesting ICC card status");
++                if ("1".equals(state)) {
++                    logWithLocalLog("Sony SIM detect: powering SIM down");
++                    mCis[0].setSimCardPower(
++                            TelephonyManager.CARD_POWER_DOWN, null, null);
++                } else if ("2".equals(state)) {
++                    logWithLocalLog("Sony SIM detect: powering SIM up");
++                    mCis[0].setSimCardPower(
++                            TelephonyManager.CARD_POWER_UP, null, null);
++                }
++            });
++        }
++    };
+ 
+     private UiccController(Context c) {
+         if (DBG) log("Creating UiccController");
+@@ -259,6 +292,9 @@ private UiccController(Context c) {
+                 this, EVENT_MULTI_SIM_CONFIG_CHANGED, null);
+ 
+         mPinStorage = new PinStorage(mContext);
++        
++        mSonySimDetectObserver.startObserving(SONY_SIM_DETECT_MATCH);
++        logWithLocalLog("Sony SIM detect observer started");
+     }
+ 
+     /**
+
+From 8c4a59164aaa38effb26cfd202148ae829cb85d2 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 21:24:04 +0300
+Subject: [PATCH 4/5] Add DataProfile translation layer for legacy radio.V1.0
+
+Change-Id: I18bd6c70e8b78540c89f06f1fe070f6f1bdfc5eb
+---
+ .../com/android/internal/telephony/RIL.java   | 43 ++++++++++++++++++-
+ 1 file changed, 42 insertions(+), 1 deletion(-)
+
+diff --git a/src/java/com/android/internal/telephony/RIL.java b/src/java/com/android/internal/telephony/RIL.java
+index e5d1647f95f..9cb9c37baa8 100644
+--- a/src/java/com/android/internal/telephony/RIL.java
++++ b/src/java/com/android/internal/telephony/RIL.java
+@@ -1856,6 +1856,47 @@ private static int convertToHalMvnoType(String mvnoType) {
+             default: return MvnoType.NONE;
+         }
+     }
++    
++    // Convert ProfileID to match older Android, as required by Radio 1.X
++    private static int convertToHalDataProfileId10(DataProfile dp) {
++        final int profileId = dp.getProfileId();
++
++        // Preserve explicitly supplied profile IDs.
++        if (profileId != DataProfileId.INVALID) {
++            return profileId;
++        }
++
++        final int apnTypes = dp.getSupportedApnTypesBitmask();
++        final int legacyProfileId;
++
++        // Android no longer supplies the legacy profile ID for ordinary
++        // non-persistent APNs. Reconstruct it for old radio HALs.
++        //
++        // Prefer DEFAULT for mixed default-capable APNs because RIL.java
++        // no longer knows which ApnContext caused the setup request.
++        if ((apnTypes & ApnSetting.TYPE_DEFAULT) != 0
++                || (apnTypes & ApnSetting.TYPE_IA) != 0) {
++            legacyProfileId = DataProfileId.DEFAULT;
++        } else if ((apnTypes & ApnSetting.TYPE_IMS) != 0) {
++            legacyProfileId = DataProfileId.IMS;
++        } else if ((apnTypes & ApnSetting.TYPE_FOTA) != 0) {
++            legacyProfileId = DataProfileId.FOTA;
++        } else if ((apnTypes & ApnSetting.TYPE_CBS) != 0) {
++            legacyProfileId = DataProfileId.CBS;
++        } else if ((apnTypes & ApnSetting.TYPE_DUN) != 0) {
++            legacyProfileId = DataProfileId.TETHERED;
++        } else {
++            legacyProfileId = DataProfileId.DEFAULT;
++        }
++
++        if (RILJ_LOGD) {
++            Rlog.d(RILJ_LOG_TAG, "convertToHalDataProfileId10: "
++                    + profileId + " -> " + legacyProfileId
++                    + ", apnTypes=0x" + Integer.toHexString(apnTypes));
++        }
++
++        return legacyProfileId;
++    }
+ 
+     /**
+      * Convert to DataProfileInfo defined in radio/1.0/types.hal
+@@ -1867,7 +1908,7 @@ private static android.hardware.radio.V1_0.DataProfileInfo convertToHalDataProfi
+         android.hardware.radio.V1_0.DataProfileInfo dpi =
+                 new android.hardware.radio.V1_0.DataProfileInfo();
+ 
+-        dpi.profileId = dp.getProfileId();
++        dpi.profileId = convertToHalDataProfileId10(dp);
+         dpi.apn = dp.getApn();
+         dpi.protocol = ApnSetting.getProtocolStringFromInt(dp.getProtocolType());
+         dpi.roamingProtocol = ApnSetting.getProtocolStringFromInt(dp.getRoamingProtocolType());
+
+From 38397946cf5643c90d063317bf6bc051b67f6073 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 21:24:22 +0300
+Subject: [PATCH 5/5] Add APN Setting translation layer for legacy SomcHook
+
+Change-Id: Iff41bfdae720f975caf3c6d661710fe74249354e
+---
+ .../internal/telephony/dataconnection/DcTracker.java  | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
+index a4759ded066..9a91a086476 100644
+--- a/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
++++ b/src/java/com/android/internal/telephony/dataconnection/DcTracker.java
+@@ -5616,12 +5616,21 @@ private void updateApnProfile(ApnSetting apnSetting) {
+                 CarrierConfigManager.KEY_SOMC_ENABLE_APN_SWITCH_BOOL);
+ 
+         if (isEnableApnSwitch && apnSetting != null) {
++            int apnAuthType = apnSetting.getAuthType();
++            int AUTH_TYPE_UNSPECIFIED = -1;
++            
++            if (apnAuthType == AUTH_TYPE_UNSPECIFIED) {
++                apnAuthType = TextUtils.isEmpty(apnSetting.getUser())
++                        ? ApnSetting.AUTH_TYPE_NONE
++                        : ApnSetting.AUTH_TYPE_PAP_OR_CHAP;
++            }
++            
+             apn.item = apnSetting.getApnName();
+             protocol.item = ApnSetting.getProtocolStringFromInt(
+                     apnSetting.getProtocol());
+             roamingProtocol.item = ApnSetting.getProtocolStringFromInt(
+                     apnSetting.getRoamingProtocol());
+-            authType.item = Integer.toString(apnSetting.getAuthType());
++            authType.item = Integer.toString(apnAuthType);
+             user.item = apnSetting.getUser();
+             password.item = apnSetting.getPassword();
+         }
