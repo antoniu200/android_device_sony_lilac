@@ -30,6 +30,8 @@ CLEAN_VENDOR=true
 KANG=
 SECTION=
 
+LILAC_DCM=false
+
 while [ "${#}" -gt 0 ]; do
     case "${1}" in
         -n | --no-cleanup )
@@ -42,6 +44,9 @@ while [ "${#}" -gt 0 ]; do
                 SECTION="${2}"; shift
                 CLEAN_VENDOR=false
                 ;;
+        -d | --dcm )
+                LILAC_DCM=true
+                ;;
         * )
                 SRC="${1}"
                 ;;
@@ -53,12 +58,86 @@ if [ -z "${SRC}" ]; then
     SRC="adb"
 fi
 
+filter_proprietary_file() {
+    local input="$1"
+    local output="$2"
+
+    awk -v lilac_dcm="${LILAC_DCM}" '
+        BEGIN {
+            depth = 0
+            active[0] = 1
+        }
+
+        /^[[:space:]]*#[[:space:]]*@if[[:space:]]+LILAC_DCM[[:space:]]*$/ {
+            depth++
+
+            parent[depth] = active[depth - 1]
+            condition[depth] = (lilac_dcm == "true")
+            seen_else[depth] = 0
+
+            active[depth] = parent[depth] && condition[depth]
+            next
+        }
+
+        /^[[:space:]]*#[[:space:]]*@else[[:space:]]*$/ {
+            if (depth == 0) {
+                print FILENAME ":" NR ": @else without @if" > "/dev/stderr"
+                exit 1
+            }
+
+            if (seen_else[depth]) {
+                print FILENAME ":" NR ": duplicate @else" > "/dev/stderr"
+                exit 1
+            }
+
+            seen_else[depth] = 1
+            active[depth] = parent[depth] && !condition[depth]
+            next
+        }
+
+        /^[[:space:]]*#[[:space:]]*@endif[[:space:]]*$/ {
+            if (depth == 0) {
+                print FILENAME ":" NR ": @endif without @if" > "/dev/stderr"
+                exit 1
+            }
+
+            depth--
+            next
+        }
+
+        active[depth] {
+            print
+        }
+
+        END {
+            if (depth != 0) {
+                print FILENAME ": unterminated @if" > "/dev/stderr"
+                exit 1
+            }
+        }
+    ' "${input}" > "${output}"
+}
+
 
 # Initialize the helper
-setup_vendor "${DEVICE}" "${VENDOR}" "${ANDROID_ROOT}" true "${CLEAN_VENDOR}"
+setup_vendor "${DEVICE}" "${VENDOR}" "${ANDROID_ROOT}" false "${CLEAN_VENDOR}"
 
-extract "${MY_DIR}/proprietary-files.txt" "${SRC}" "${KANG}" --section "${SECTION}"
-extract "${MY_DIR}/proprietary-files-vendor.txt" "${SRC}" "${KANG}" --section "${SECTION}"
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
+PROPRIETARY_FILES="${TMP_DIR}/proprietary-files.txt"
+PROPRIETARY_FILES_VENDOR="${TMP_DIR}/proprietary-files-vendor.txt"
+
+filter_proprietary_file \
+    "${MY_DIR}/proprietary-files.txt" \
+    "${PROPRIETARY_FILES}"
+
+filter_proprietary_file \
+    "${MY_DIR}/proprietary-files-vendor.txt" \
+    "${PROPRIETARY_FILES_VENDOR}"
+
+extract "${PROPRIETARY_FILES}" "${SRC}" "${KANG}" --section "${SECTION}"
+extract "${PROPRIETARY_FILES_VENDOR}" "${SRC}" "${KANG}" --section "${SECTION}"
 
 #
 # Blobs fixup start
@@ -73,7 +152,13 @@ sed -i '4 a\    restorecon /persist/wlan' "${DEVICE_ROOT}"/vendor/etc/init/taimp
 # Blobs fixup end
 #
 
-"${MY_DIR}"/setup-makefiles.sh
+# Generate makefiles from the same filtered lists used for extraction
+write_headers
+
+write_makefiles "${PROPRIETARY_FILES}" true
+write_makefiles "${PROPRIETARY_FILES_VENDOR}" true
+
+write_footers
 
 # --- Post-process Android.bp ---
 ANDROIDBP="${ANDROIDBP:-${MY_DIR:-$PWD}/Android.bp}"

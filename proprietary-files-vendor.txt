@@ -838,10 +838,23 @@ vendor/lib64/libvpplibrary.so
 vendor/bin/msm_irqbalance
 
 # NFC
+# @if LILAC_DCM
+# From lilac_dcm - 47.2.B.5.38
+vendor/bin/hw/android.hardware.nfc@1.1-service.cxd22xx|3910dc049f825a358a9c6e28336a7e18f5024ea2
+vendor/etc/init/android.hardware.nfc@1.1-service.cxd22xx.rc|e8ee640e3a0cf86d99e829fa1bf41366da208d0d
+vendor/etc/libnfc-cxd-224x02010010.conf|ad1c5a0804d9d48a25e312094b361c53fb5a46d8
+vendor/etc/libnfc-cxd-224x02310011.conf|1454b787adea3fe6f062eb55d165b314323f49aa
+vendor/etc/libnfc-cxd22xx.conf|09cc4f9e31e95413794f54dd601cb761ce6a2c3b
+vendor/etc/nfc_settings.conf|2e1fd79e26c8dd01044ff6b15f88f1bed48f858c
+vendor/firmware/cxd224x_firmware_ES1.0.bin|b18698ad122186d21cb0e32605415e94c99e83d7
+vendor/firmware/cxd224x_firmware_ES1.1.bin|7a8e2408dbffca1f060605c09c6058ca365801f4
+etc/libnfc-nci.conf|4312099192b895f9d05d7861f82108da0a780e04
+# @else
 vendor/etc/libnfc-nci.conf
 vendor/etc/libnfc-nxp-octopus.conf
 vendor/etc/libnfc-nxp.conf
 vendor/lib/libpn553_fw.so
+# @endif
 
 # PERIPHERAL_MANAGER
 vendor/bin/pm-proxy

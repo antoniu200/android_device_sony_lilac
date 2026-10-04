@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # NFC
+ifneq ($(TARGET_PRODUCT),lineage_lilac_dcm)
 PRODUCT_PACKAGES += \
     android.hardware.nfc@1.1-service
+endif
 
 TARGET_USE_YOSHINO_LIGHT_SERVICE := true
