@@ -1,0 +1,46 @@
+# PWD: system/nfc
+
+From 7d7c0323eb7b757da41c4d3a6756aee51101fd9e Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 00:53:36 +0300
+Subject: [PATCH] nfc: llcp: Fall back to GKI_BUF3_MAX when DYN_ALLOC has no
+ pools
+
+libnfc-nci is built with -DDYN_ALLOC=1, which sets
+GKI_NUM_FIXED_BUF_POOLS to 0. GKI_poolcount(LLCP_POOL_ID) then
+returns 0, so llcp_init() computes num_rx_buff, max_num_tx_buff and
+the link-layer limits as 0. Every outgoing LLCP data PDU is then
+treated as congested, and SNEP/handover replies never leave the
+device (PeerToPeer::send blocks until the link drops).
+
+If the pool count is 0 under DYN_ALLOC, use GKI_BUF3_MAX instead
+(9 rx / 21 tx buffers).
+
+Tested with Android Beam between two phones running this library:
+SNEP Put in both directions completes (SendTask result=true on the
+sender, onP2pReceiveComplete on the receiver). Handover (file/photo
+transfer) and large payloads were not tested.
+
+Change-Id: If865454c0ff7de54365c6dc49e6271846d46d32d
+---
+ src/nfc/llcp/llcp_main.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/nfc/llcp/llcp_main.cc b/src/nfc/llcp/llcp_main.cc
+index 1185e013..a1b31ab5 100644
+--- a/src/nfc/llcp/llcp_main.cc
++++ b/src/nfc/llcp/llcp_main.cc
+@@ -72,6 +72,12 @@ void llcp_init(void) {
+ 
+   /* total number of buffers for LLCP */
+   pool_count = GKI_poolcount(LLCP_POOL_ID);
++  
++#ifdef DYN_ALLOC
++  /* No fixed GKI pools with DYN_ALLOC: GKI_poolcount() is 0 and every LLCP
++   * tx/rx limit below collapses to 0. So use the size that pool 3 has otherwise. */
++  if (pool_count == 0) pool_count = GKI_BUF3_MAX;
++#endif
+ 
+   /* number of buffers for receiving data */
+   llcp_cb.num_rx_buff = (pool_count * LLCP_RX_BUFF_RATIO) / 100;
+
