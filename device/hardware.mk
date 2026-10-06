@@ -13,7 +13,11 @@
 # limitations under the License.
 
 # NFC
-ifneq ($(TARGET_PRODUCT),lineage_lilac_dcm)
+ifeq ($(TARGET_PRODUCT),lineage_lilac_dcm)
+PRODUCT_PACKAGES += \
+    android.hardware.nfc@1.0.vendor \
+    android.hardware.nfc@1.1.vendor
+else
 PRODUCT_PACKAGES += \
     android.hardware.nfc@1.1-service
 endif
