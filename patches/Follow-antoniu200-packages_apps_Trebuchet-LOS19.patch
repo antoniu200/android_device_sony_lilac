@@ -2,7 +2,7 @@
 From 3534321dfea541f5bbd59e12606f218d79f5aabb Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Tue, 29 Sep 2026 21:36:08 +0300
-Subject: [PATCH] Add QuickSwitch for button-based Recents
+Subject: [PATCH 1/2] Add QuickSwitch for button-based Recents
 
 Change-Id: I55acbf8fa3741e4866b85e05d301e5480c0104ca
 ---
@@ -481,3 +481,409 @@ index 82c7c081539..08f3069d8df 100644
          if (mLiveTileCleanUpHandler != null) {
              mLiveTileCleanUpHandler.run();
              mLiveTileCleanUpHandler = null;
+
+From 4d9939f1e4965e0b08db323aa34d9c25824f1649 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 5 Oct 2026 02:10:57 +0300
+Subject: [PATCH 2/2] Fix App to Home animation during multiple Home button
+ press
+
+Change-Id: Ia4fa91f9988ac2219d9bc751050c34429babc76a
+---
+ .../launcher3/BaseQuickstepLauncher.java      |  12 ++
+ .../launcher3/QuickstepTransitionManager.java |  71 +++++++++
+ .../quickstep/OverviewCommandHelper.java      |  10 ++
+ .../com/android/quickstep/views/TaskView.java | 144 +++++++++++-------
+ src/com/android/launcher3/Launcher.java       |  36 +++++
+ src/com/android/launcher3/PagedView.java      |   2 +-
+ 6 files changed, 217 insertions(+), 58 deletions(-)
+
+diff --git a/quickstep/src/com/android/launcher3/BaseQuickstepLauncher.java b/quickstep/src/com/android/launcher3/BaseQuickstepLauncher.java
+index 4ceb1957ad7..7b409eba161 100644
+--- a/quickstep/src/com/android/launcher3/BaseQuickstepLauncher.java
++++ b/quickstep/src/com/android/launcher3/BaseQuickstepLauncher.java
+@@ -177,6 +177,18 @@ protected void onNewIntent(Intent intent) {
+         }
+     }
+ 
++    @Override
++    protected boolean runAfterHomeCloseAnimation(Runnable task) {
++        return mAppTransitionManager != null
++                && mAppTransitionManager.runAfterHomeCloseAnimation(task);
++    }
++
++    @Override
++    protected boolean isHomeCloseAnimationTargetingHotseat() {
++        return mAppTransitionManager != null
++                && mAppTransitionManager.isHomeCloseAnimationTargetingHotseat();
++    }
++
+     public QuickstepTransitionManager getAppTransitionManager() {
+         return mAppTransitionManager;
+     }
+diff --git a/quickstep/src/com/android/launcher3/QuickstepTransitionManager.java b/quickstep/src/com/android/launcher3/QuickstepTransitionManager.java
+index 3b493bbd305..bdfa6aad280 100644
+--- a/quickstep/src/com/android/launcher3/QuickstepTransitionManager.java
++++ b/quickstep/src/com/android/launcher3/QuickstepTransitionManager.java
+@@ -82,6 +82,7 @@
+ import android.util.Size;
+ import android.view.SurfaceControl;
+ import android.view.View;
++import android.view.ViewParent;
+ import android.view.ViewRootImpl;
+ import android.view.ViewTreeObserver;
+ import android.view.animation.AnimationUtils;
+@@ -198,6 +199,13 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
+ 
+     final Handler mHandler;
+ 
++    /** True while the app-close-to-home (wallpaper open) animation is playing. */
++    private boolean mIsHomeCloseAnimationRunning;
++    /** True if the running close-to-home animation flies the app into a Hotseat icon. */
++    private boolean mHomeCloseAnimationTargetsHotseat;
++    /** Work queued by {@link #runAfterHomeCloseAnimation} to run after that animation ends. */
++    private Runnable mAfterHomeCloseAnimation;
++
+     private final float mContentScale;
+     private final float mClosingWindowTransY;
+     private final float mMaxShadowRadius;
+@@ -1576,6 +1584,7 @@ public void onCreateAnimation(int transit,
+             }
+ 
+             AnimatorSet anim = null;
++            boolean targetsHotseat = false;
+             RemoteAnimationProvider provider = mRemoteAnimationProvider;
+             if (provider != null) {
+                 anim = provider.createWindowAnimation(appTargets, wallpaperTargets);
+@@ -1603,6 +1612,7 @@ public void onCreateAnimation(int transit,
+                             .getDimension(R.dimen.unlock_staggered_velocity_dp_per_s);
+                     PointF velocity = new PointF(0, -velocityPxPerS);
+                     getClosingWindowAnimators(anim, appTargets, launcherView, velocity);
++                    targetsHotseat = isInHotseat(launcherView);
+                     if (!mLauncher.isInState(LauncherState.ALL_APPS)) {
+                         anim.play(new StaggeredWorkspaceAnim(mLauncher, velocity.y,
+                                 true /* animateOverviewScrim */, launcherView).getAnimators());
+@@ -1651,10 +1661,71 @@ public void onAnimationEnd(Animator animation) {
+             }
+ 
+             mLauncher.clearForceInvisibleFlag(INVISIBLE_ALL);
++            if (!mFromUnlock) {
++                final boolean closingToHotseat = targetsHotseat;
++                anim.addListener(new AnimatorListenerAdapter() {
++                    @Override
++                    public void onAnimationStart(Animator animation) {
++                        mIsHomeCloseAnimationRunning = true;
++                        mHomeCloseAnimationTargetsHotseat = closingToHotseat;
++                    }
++
++                    @Override
++                    public void onAnimationEnd(Animator animation) {
++                        onHomeCloseAnimationEnd();
++                    }
++                });
++            }
+             result.setAnimation(anim, mLauncher);
+         }
+     }
+ 
++    /**
++     * If the app-close-to-home animation is running, queues {@code task} to run once it has ended
++     * and returns true. Only the latest queued task is kept. Returns false (and does nothing)
++     * if no such animation is running.
++     */
++    public boolean runAfterHomeCloseAnimation(Runnable task) {
++        if (!mIsHomeCloseAnimationRunning) {
++            return false;
++        }
++        mAfterHomeCloseAnimation = task;
++        return true;
++    }
++
++    /**
++     * Returns true while a close-to-home animation is running whose target icon is in the Hotseat.
++     * The Hotseat is the same on every workspace page, so the workspace can change page under this
++     * animation without affecting it.
++     */
++    public boolean isHomeCloseAnimationTargetingHotseat() {
++        return mIsHomeCloseAnimationRunning && mHomeCloseAnimationTargetsHotseat;
++    }
++
++    private static boolean isInHotseat(@Nullable View view) {
++        if (view == null) {
++            return false;
++        }
++        for (ViewParent parent = view.getParent(); parent != null; parent = parent.getParent()) {
++            if (parent instanceof Hotseat) {
++                return true;
++            }
++        }
++        return false;
++    }
++
++    private void onHomeCloseAnimationEnd() {
++        mIsHomeCloseAnimationRunning = false;
++        mHomeCloseAnimationTargetsHotseat = false;
++        Runnable task = mAfterHomeCloseAnimation;
++        mAfterHomeCloseAnimation = null;
++        if (task != null) {
++            // Post so it runs after the remaining end listeners (including finishing the remote
++            // animation) have completed.
++            mHandler.post(task);
++        }
++    }
++
+     /**
+      * Remote animation runner for animation to launch an app.
+      */
+diff --git a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+index df3a9a7a1ee..32e65a02b18 100644
+--- a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
++++ b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+@@ -255,6 +255,16 @@ private <T extends StatefulActivity<?>> boolean executeCommand(CommandInfo cmd)
+                 }
+                 case TYPE_TOGGLE: {
+                     TaskView nextTask = getNextTask(recents);
++                    TaskView runningTask = recents.getRunningTaskView();
++                    if (nextTask != null && nextTask == runningTask) {
++                        nextTask.setEndQuickswitchCuj(true);
++                        RunnableList callbackList = nextTask.launchRunningTaskAnimated();
++                        if (callbackList != null) {
++                            callbackList.add(() -> scheduleNextTask(cmd));
++                            return false;
++                        }
++                    }
++
+                     int quickSwitchTaskId = -1;
+                     if (usingPreemptedRecents && nextTask != null && nextTask.getTask() != null) {
+                         quickSwitchTaskId = nextTask.getTask().key.id;
+diff --git a/quickstep/src/com/android/quickstep/views/TaskView.java b/quickstep/src/com/android/quickstep/views/TaskView.java
+index d046fefda8a..9b9a5f88297 100644
+--- a/quickstep/src/com/android/quickstep/views/TaskView.java
++++ b/quickstep/src/com/android/quickstep/views/TaskView.java
+@@ -608,71 +608,101 @@ private void onClick(View view) {
+         RecentsView recentsView = getRecentsView();
+         RemoteTargetHandle[] remoteTargetHandles = recentsView.mRemoteTargetHandles;
+         if (ENABLE_QUICKSTEP_LIVE_TILE.get() && isRunningTask() && remoteTargetHandles != null) {
+-            if (!mIsClickableAsLiveTile) {
++            if (!launchRunningTaskAnimated(null /* callbackList */)) {
+                 return;
+             }
++        } else {
++            launchTaskAnimated();
++        }
++        mActivity.getStatsLogManager().logger().withItemInfo(getItemInfo())
++                .log(LAUNCHER_TASK_LAUNCH_TAP);
++    }
+ 
+-            // Reset the minimized state since we force-toggled the minimized state when entering
+-            // overview, but never actually finished the recents animation
+-            SystemUiProxy p = SystemUiProxy.INSTANCE.getNoCreate();
+-            if (p != null) {
+-                p.setSplitScreenMinimized(false);
+-            }
++    /**
++     * Animates the currently running live tile back to the app without relaunching the task.
++     *
++     * @return a callback which completes after the recents animation is finished, or {@code null}
++     *         if the running live tile cannot be launched.
++     */
++    @Nullable
++    public RunnableList launchRunningTaskAnimated() {
++        RunnableList callbackList = new RunnableList();
++        return launchRunningTaskAnimated(callbackList) ? callbackList : null;
++    }
+ 
+-            mIsClickableAsLiveTile = false;
+-            RemoteAnimationTargets targets;
+-            if (remoteTargetHandles.length == 1) {
+-                targets = remoteTargetHandles[0].getTransformParams().getTargetSet();
+-            } else {
+-                TransformParams topLeftParams = remoteTargetHandles[0].getTransformParams();
+-                TransformParams rightBottomParams = remoteTargetHandles[1].getTransformParams();
+-                RemoteAnimationTargetCompat[] apps = Stream.concat(
+-                        Arrays.stream(topLeftParams.getTargetSet().apps),
+-                        Arrays.stream(rightBottomParams.getTargetSet().apps))
+-                        .toArray(RemoteAnimationTargetCompat[]::new);
+-                RemoteAnimationTargetCompat[] wallpapers = Stream.concat(
+-                        Arrays.stream(topLeftParams.getTargetSet().wallpapers),
+-                        Arrays.stream(rightBottomParams.getTargetSet().wallpapers))
+-                        .toArray(RemoteAnimationTargetCompat[]::new);
+-                targets = new RemoteAnimationTargets(apps, wallpapers,
+-                        topLeftParams.getTargetSet().nonApps,
+-                        topLeftParams.getTargetSet().targetMode);
+-            }
+-            if (targets == null) {
+-                // If the recents animation is cancelled somehow between the parent if block and
+-                // here, try to launch the task as a non live tile task.
+-                launchTaskAnimated();
+-                return;
+-            }
++    private boolean launchRunningTaskAnimated(@Nullable RunnableList callbackList) {
++        RecentsView recentsView = getRecentsView();
++        RemoteTargetHandle[] remoteTargetHandles = recentsView.mRemoteTargetHandles;
++        if (!ENABLE_QUICKSTEP_LIVE_TILE.get() || !isRunningTask()
++                || remoteTargetHandles == null || !mIsClickableAsLiveTile) {
++            return false;
++        }
+ 
+-            AnimatorSet anim = new AnimatorSet();
+-            TaskViewUtils.composeRecentsLaunchAnimator(
+-                    anim, this, targets.apps,
+-                    targets.wallpapers, targets.nonApps, true /* launcherClosing */,
+-                    mActivity.getStateManager(), recentsView,
+-                    recentsView.getDepthController());
+-            anim.addListener(new AnimatorListenerAdapter() {
+-                @Override
+-                public void onAnimationStart(Animator animation) {
+-                    recentsView.runActionOnRemoteHandles(
+-                            (Consumer<RemoteTargetHandle>) remoteTargetHandle ->
+-                                    remoteTargetHandle
+-                                            .getTaskViewSimulator()
+-                                            .setDrawsBelowRecents(false));
+-                }
++        // Reset the minimized state since we force-toggled the minimized state when entering
++        // overview, but never actually finished the recents animation.
++        SystemUiProxy p = SystemUiProxy.INSTANCE.getNoCreate();
++        if (p != null) {
++            p.setSplitScreenMinimized(false);
++        }
+ 
+-                @Override
+-                public void onAnimationEnd(Animator animator) {
+-                    mIsClickableAsLiveTile = true;
+-                }
+-            });
+-            anim.start();
+-            recentsView.onTaskLaunchedInLiveTileMode();
++        mIsClickableAsLiveTile = false;
++        RemoteAnimationTargets targets;
++        if (remoteTargetHandles.length == 1) {
++            targets = remoteTargetHandles[0].getTransformParams().getTargetSet();
+         } else {
+-            launchTaskAnimated();
++            TransformParams topLeftParams = remoteTargetHandles[0].getTransformParams();
++            TransformParams rightBottomParams = remoteTargetHandles[1].getTransformParams();
++            RemoteAnimationTargetCompat[] apps = Stream.concat(
++                    Arrays.stream(topLeftParams.getTargetSet().apps),
++                    Arrays.stream(rightBottomParams.getTargetSet().apps))
++                    .toArray(RemoteAnimationTargetCompat[]::new);
++            RemoteAnimationTargetCompat[] wallpapers = Stream.concat(
++                    Arrays.stream(topLeftParams.getTargetSet().wallpapers),
++                    Arrays.stream(rightBottomParams.getTargetSet().wallpapers))
++                    .toArray(RemoteAnimationTargetCompat[]::new);
++            targets = new RemoteAnimationTargets(apps, wallpapers,
++                    topLeftParams.getTargetSet().nonApps,
++                    topLeftParams.getTargetSet().targetMode);
+         }
+-        mActivity.getStatsLogManager().logger().withItemInfo(getItemInfo())
+-                .log(LAUNCHER_TASK_LAUNCH_TAP);
++        if (targets == null) {
++            // If the recents animation is cancelled somehow between the parent if block and here,
++            // try to launch the task as a non live tile task.
++            mIsClickableAsLiveTile = true;
++            RunnableList fallbackCallbackList = launchTaskAnimated();
++            if (callbackList != null && fallbackCallbackList != null) {
++                fallbackCallbackList.add(callbackList::executeAllAndDestroy);
++            }
++            return fallbackCallbackList != null;
++        }
++
++        if (callbackList != null) {
++            recentsView.addSideTaskLaunchCallback(callbackList);
++        }
++
++        AnimatorSet anim = new AnimatorSet();
++        TaskViewUtils.composeRecentsLaunchAnimator(
++                anim, this, targets.apps,
++                targets.wallpapers, targets.nonApps, true /* launcherClosing */,
++                mActivity.getStateManager(), recentsView,
++                recentsView.getDepthController());
++        anim.addListener(new AnimatorListenerAdapter() {
++            @Override
++            public void onAnimationStart(Animator animation) {
++                recentsView.runActionOnRemoteHandles(
++                        (Consumer<RemoteTargetHandle>) remoteTargetHandle ->
++                                remoteTargetHandle
++                                        .getTaskViewSimulator()
++                                        .setDrawsBelowRecents(false));
++            }
++
++            @Override
++            public void onAnimationEnd(Animator animator) {
++                mIsClickableAsLiveTile = true;
++            }
++        });
++        anim.start();
++        recentsView.onTaskLaunchedInLiveTileMode();
++        return true;
+     }
+ 
+     /**
+diff --git a/src/com/android/launcher3/Launcher.java b/src/com/android/launcher3/Launcher.java
+index 921665088dd..b329bd95311 100644
+--- a/src/com/android/launcher3/Launcher.java
++++ b/src/com/android/launcher3/Launcher.java
+@@ -1541,6 +1541,28 @@ protected void onNewIntent(Intent intent) {
+         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_NEW_INTENT_EVT);
+         super.onNewIntent(intent);
+ 
++        // A Home press that arrives while the app is still closing into its launcher icon must not
++        // touch the launcher yet: handling it now would close the floating-icon ListenerView, which
++        // fast-finishes the close animation (freezing the app window) and also makes
++        // shouldMoveToDefaultScreen false. Queue it until the animation is done and handle it then.
++        if (Intent.ACTION_MAIN.equals(intent.getAction())
++                && runAfterHomeCloseAnimation(() -> {
++                    if (!isDestroyed()) {
++                        onNewIntent(intent);
++                    }
++                })) {
++            // The Hotseat is the same on every page, so when the app is closing into a Hotseat icon
++            // the workspace can already go to the first page without touching the animation.
++            boolean broughtToFront = (intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
++                    == Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT;
++            if (!broughtToFront && isHomeCloseAnimationTargetingHotseat()
++                    && isInState(NORMAL) && !mWorkspace.isHandlingTouch()) {
++                mWorkspace.post(mWorkspace::moveToDefaultScreen);
++            }
++            TraceHelper.INSTANCE.endSection(traceToken);
++            return;
++        }
++
+         boolean alreadyOnHome = hasWindowFocus() && ((intent.getFlags() &
+                 Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+                 != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+@@ -1584,6 +1606,20 @@ protected void onNewIntent(Intent intent) {
+         TraceHelper.INSTANCE.endSection(traceToken);
+     }
+ 
++    /**
++     * If an app-close-to-home animation is currently running, remembers {@code task} (replacing any
++     * previously queued one, so only the latest Home press is kept), runs it once the animation has
++     * finished and returns true. Otherwise does nothing and returns false.
++     */
++    protected boolean runAfterHomeCloseAnimation(Runnable task) {
++        return false;
++    }
++
++    /** Whether a running app-close-to-home animation is flying into a Hotseat icon. */
++    protected boolean isHomeCloseAnimationTargetingHotseat() {
++        return false;
++    }
++
+     protected void showAllAppsFromIntent(boolean alreadyOnHome) {
+         AbstractFloatingView.closeAllOpenViews(this);
+         getStateManager().goToState(ALL_APPS, alreadyOnHome);
+diff --git a/src/com/android/launcher3/PagedView.java b/src/com/android/launcher3/PagedView.java
+index 2c14f077798..66c1b8167aa 100644
+--- a/src/com/android/launcher3/PagedView.java
++++ b/src/com/android/launcher3/PagedView.java
+@@ -78,7 +78,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
+     public static final int INVALID_PAGE = -1;
+     protected static final ComputePageScrollsLogic SIMPLE_SCROLL_LOGIC = (v) -> v.getVisibility() != GONE;
+ 
+-    public static final int PAGE_SNAP_ANIMATION_DURATION = 750;
++    public static final int PAGE_SNAP_ANIMATION_DURATION = 500;
+ 
+     private static final float RETURN_TO_ORIGINAL_PAGE_THRESHOLD = 0.33f;
+     // The page is moved more than halfway, automatically move to the next page on touch up.
+
