@@ -2,6 +2,8 @@
 $(call inherit-product, device/sony/yoshino-common/platform.mk)
 ### PROPRIETARY VENDOR FILES
 $(call inherit-product, vendor/sony/lilac/lilac-vendor.mk)
+### LiteGApps / OpenGApps
+$(call inherit-product-if-exists, vendor/gms/gms.mk)
 
 DEVICE_PATH := device/sony/lilac
 
