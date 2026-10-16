@@ -1243,7 +1243,7 @@ vendor/bin/hw/vendor.semc.hardware.thermal@1.0-service
 vendor/bin/thermal-engine
 vendor/etc/init/vendor.semc.hardware.thermal@1.0-service.rc
 vendor/etc/change.cfg
-vendor/etc/thermal-engine.conf
+vendor/etc/thermal-engine.conf|f33538a1378e165283500e225bb51e47714d4830
 vendor/lib64/hw/thermal.somc.so
 vendor/lib64/libthermal_engine.so
 vendor/lib64/libthermalclient.so
