@@ -2,7 +2,7 @@
 From 3534321dfea541f5bbd59e12606f218d79f5aabb Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Tue, 29 Sep 2026 21:36:08 +0300
-Subject: [PATCH 1/2] Add QuickSwitch for button-based Recents
+Subject: [PATCH 1/4] Add QuickSwitch for button-based Recents
 
 Change-Id: I55acbf8fa3741e4866b85e05d301e5480c0104ca
 ---
@@ -485,7 +485,7 @@ index 82c7c081539..08f3069d8df 100644
 From 4d9939f1e4965e0b08db323aa34d9c25824f1649 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Mon, 5 Oct 2026 02:10:57 +0300
-Subject: [PATCH 2/2] Fix App to Home animation during multiple Home button
+Subject: [PATCH 2/4] Fix App to Home animation during multiple Home button
  press
 
 Change-Id: Ia4fa91f9988ac2219d9bc751050c34429babc76a
@@ -886,4 +886,64 @@ index 2c14f077798..66c1b8167aa 100644
  
      private static final float RETURN_TO_ORIGINAL_PAGE_THRESHOLD = 0.33f;
      // The page is moved more than halfway, automatically move to the next page on touch up.
+
+From 1e30e946856524baea0436dac9d17f3bde23de3d Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 23:37:09 +0300
+Subject: [PATCH 3/4] QuickStep: Fix RecentsView page snap
+
+Change-Id: Ia001e687190349edd3dc24b515fdb7e480e06392
+---
+ .../src/com/android/quickstep/AbsSwipeUpHandler.java      | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java b/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
+index c08c646cc9a..1887824d18a 100644
+--- a/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
++++ b/quickstep/src/com/android/quickstep/AbsSwipeUpHandler.java
+@@ -1144,7 +1144,13 @@ private void handleNormalGestureEnd(float endVelocity, boolean isFling, PointF v
+             if (mRecentsView != null) {
+                 int nearestPage = mRecentsView.getDestinationPage();
+                 boolean isScrolling = false;
+-                if (mRecentsView.getNextPage() != nearestPage) {
++                // A command from the nav bar buttons (e.g. the 3-button Recents key) ends the
++                // gesture right when the recents animation starts, with no finger drag, so there
++                // is no user scroll to settle. The scroll position can still be stale at that
++                // moment (the task list was just rebuilt and RecentsView has not been laid out
++                // yet), and snapping to the page it points at would land on the wrong card.
++                if (!mGestureState.isHandlingAtomicEvent()
++                        && mRecentsView.getNextPage() != nearestPage) {
+                     // We shouldn't really scroll to the next page when swiping up to recents.
+                     // Only allow settling on the next page if it's nearest to the center.
+                     mRecentsView.snapToPage(nearestPage, Math.toIntExact(duration));
+
+From 856efbc0d9f9667bd94ce035fd13d1d08926e99e Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 23:38:22 +0300
+Subject: [PATCH 4/4] QuickStep: Filter overlapping Recents taps
+
+Change-Id: I02672a3fe35685c7fe464de9be04099be51b029c
+---
+ .../src/com/android/quickstep/OverviewCommandHelper.java  | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+index 32e65a02b18..109f16e23ba 100644
+--- a/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
++++ b/quickstep/src/com/android/quickstep/OverviewCommandHelper.java
+@@ -101,6 +101,14 @@ private void addCommand(CommandInfo cmd) {
+             return;
+         }
+ 
++        if (cmd.type == TYPE_TOGGLE && !mPendingCommands.isEmpty()) {
++            // A Recents-button press that can't preempt the running transition is dropped rather
++            // than queued. Each queued toggle flips Overview open/closed once the previous
++            // transition ends, so mis-pressed presses would otherwise fire late, e.g. bringing
++            // Overview back after the user has already returned to the app.
++            return;
++        }
++
+         boolean wasEmpty = mPendingCommands.isEmpty();
+         mPendingCommands.add(cmd);
+         if (wasEmpty) {
 
