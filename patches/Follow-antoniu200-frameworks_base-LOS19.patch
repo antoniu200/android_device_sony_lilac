@@ -3,7 +3,7 @@
 From 449fead3135975f8d51be95fdcd37c58ce70c366 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Fri, 21 Aug 2026 18:45:25 +0300
-Subject: [PATCH 1/6] Backport Sony Proximity Brightness Filter
+Subject: [PATCH 1/8] Backport Sony Proximity Brightness Filter
 
 Change-Id: Iefdaccf72a693efb08c1ed62fd14d4debe846d40
 ---
@@ -118,7 +118,7 @@ index 9922d939ad68e..f02d8a4f80990 100644
 From e2d55b65d67f08ac69fc9d64d56bf6241d877e32 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Sat, 29 Aug 2026 19:06:03 +0300
-Subject: [PATCH 2/6] Backport Sony Charging Vibration
+Subject: [PATCH 2/8] Backport Sony Charging Vibration
 
 Change-Id: Ib3359077a94a2154f75e4437a7e1f678368dd82d
 ---
@@ -155,7 +155,7 @@ index f62bea945f515..f2b7196d8e7c8 100644
 From f8b48617e994cc0c6dac012a59ce3f0dbfd309c1 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Thu, 3 Sep 2026 22:43:53 +0300
-Subject: [PATCH 3/6] Revert Sony brightness horizon to AOSP default
+Subject: [PATCH 3/8] Revert Sony brightness horizon to AOSP default
 
 Change-Id: Ic1319ec734ab85212dd95234e7aee2487303547f
 ---
@@ -183,7 +183,7 @@ index f02d8a4f80990..8124f663ce63d 100644
 From 90405590886769e38fa44785c55ba92166304d7d Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Fri, 11 Sep 2026 23:21:11 +0300
-Subject: [PATCH 4/6] Add SomcHook
+Subject: [PATCH 4/8] Add SomcHook
 
 Change-Id: I011ad28a56140f33e33f80a759ecb40046208736
 ---
@@ -234,7 +234,7 @@ index fadc23b315d68..93877c822b111 100644
 From 8d83a45749e0de5c125c00e34cfb7d5d1d98d6fb Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Mon, 28 Sep 2026 00:44:36 +0300
-Subject: [PATCH 5/6] Shut up the log spam, the device does not have a nits map
+Subject: [PATCH 5/8] Shut up the log spam, the device does not have a nits map
 
 Change-Id: Ib9e1087e4dd504522a5e80f1bfb7b9bdb0e7b899
 ---
@@ -257,7 +257,7 @@ index 255494f986673..1d0acfad3be6f 100644
 From 0144d371d2bc3af73f15d9aebfce7ec970a67b81 Mon Sep 17 00:00:00 2001
 From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
 Date: Wed, 30 Sep 2026 20:58:00 +0300
-Subject: [PATCH 6/6] Allow Battery Optimizations for Default Apps
+Subject: [PATCH 6/8] Allow Battery Optimizations for Default Apps
 
 Change-Id: I28c41309fa74e56d0b5f4bf88d59a7bf35cca06e
 ---
@@ -285,3 +285,63 @@ index 2e8f368345842..84eec3e8b2a04 100644
      }
  
      /**
+
+From cbdb05da2a7624ba6fc31f481f34f3f9795f7f3b Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 23:39:49 +0300
+Subject: [PATCH 7/8] SystemUI: Fix Lock screen black zone on first boot
+
+Change-Id: I22f16f0b74741d719e39b8b4e37774e85c79f04c
+---
+ .../statusbar/phone/NotificationPanelViewController.java  | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelViewController.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelViewController.java
+index c2149192714a7..39c9c4c42aa22 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelViewController.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelViewController.java
+@@ -4618,6 +4618,14 @@ public void onViewAttachedToWindow(View v) {
+             mFragmentService.getFragmentHostManager(mView)
+                             .addTagListener(QS.TAG, mFragmentListener);
+             mStatusBarStateController.addCallback(mStatusBarStateListener);
++            // The state controller does not replay its current state to new listeners. If the
++            // status bar state changed before this view attached (e.g. KEYGUARD right after boot),
++            // mBarState is stale (SHADE by default) and the lock screen would be laid out as the
++            // shade: no clock, no keyguard status bar, QS clip at the header height. Catch up.
++            final int currentBarState = mStatusBarStateController.getState();
++            if (mBarState != currentBarState) {
++                mStatusBarStateListener.onStateChanged(currentBarState);
++            }
+             mConfigurationController.addCallback(mConfigurationListener);
+             mTunerService.addTunable(this, STATUS_BAR_QUICK_QS_PULLDOWN);
+             mTunerService.addTunable(this, DOUBLE_TAP_SLEEP_GESTURE);
+
+From 08122fc8ff9a54da52f95ba593443eccbae98b16 Mon Sep 17 00:00:00 2001
+From: antoniu200 <33966771+antoniu200@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 23:43:01 +0300
+Subject: [PATCH 8/8] MediaPlayer: Report session ID to Playback Monitor
+
+Will help fix AudioFX
+
+Change-Id: Ibaa2ba997ead3a53d472eacd16be402dfb02e7a7
+---
+ media/java/android/media/MediaPlayer.java | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/media/java/android/media/MediaPlayer.java b/media/java/android/media/MediaPlayer.java
+index 26eb2a9dc109f..229410274c1b8 100644
+--- a/media/java/android/media/MediaPlayer.java
++++ b/media/java/android/media/MediaPlayer.java
+@@ -697,7 +697,11 @@ private MediaPlayer(int sessionId) {
+             native_setup(new WeakReference<MediaPlayer>(this), attributionSourceState.getParcel());
+         }
+ 
+-        baseRegisterPlayer(sessionId);
++        // The native player allocates its own audio session in its constructor. Report that one to
++        // the playback monitor instead of the AUDIO_SESSION_ALLOCATE placeholder, so that
++        // privileged listeners can associate this player with its audio effects session.
++        baseRegisterPlayer(sessionId == AudioSystem.AUDIO_SESSION_ALLOCATE
++                ? getAudioSessionId() : sessionId);
+     }
+ 
+     /*
