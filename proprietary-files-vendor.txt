@@ -159,7 +159,7 @@ vendor/lib/libznr.so
 # AUDIO_CONFIGS
 vendor/etc/a2dp_audio_policy_configuration.xml
 vendor/etc/audio_effects.xml
-vendor/etc/audio_platform_info.xml
+vendor/etc/audio_platform_info.xml|92be7a325fdf6fba346b3a47b3ff46cf4665cef5
 vendor/etc/audio_policy_volumes.xml
 vendor/etc/audio_tuning_mixer.txt
 vendor/etc/audio_tuning_mixer_tavil.txt
@@ -168,7 +168,7 @@ vendor/etc/graphite_ipc_platform_info.xml
 vendor/etc/listen_platform_info.xml
 vendor/etc/mixer_paths.xml
 # From G8441_Customized DE_47.2.A.11.228-R3C, increase headset volume, allow separate RX and TX on stereo call recording
-vendor/etc/mixer_paths_tasha.xml|8508b0c187594a3f9921c6466c089e3ac228ee94
+vendor/etc/mixer_paths_tasha.xml|622fcc4e1ee46b0b1f9c6e06da901129ee6d7eeb
 vendor/etc/sound_trigger_mixer_paths.xml
 vendor/etc/sound_trigger_platform_info.xml
 vendor/etc/usb_audio_policy_configuration.xml
