@@ -26,7 +26,4 @@ PRODUCT_AAPT_PREF_CONFIG := xhdpi
 DEVICE_PACKAGE_OVERLAYS += \
     $(DEVICE_PATH)/overlay
 
-### POWER
-TARGET_USE_CUSTOM_POWERHINT := true
-
 include $(DEVICE_PATH)/device/*.mk

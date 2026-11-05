@@ -84,10 +84,6 @@ PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/config/modem/928/modem.conf:$(TARGET_COPY_OUT_SYSTEM)/etc/customization/modem/928/modem.conf \
     $(DEVICE_PATH)/config/modem/929/modem.conf:$(TARGET_COPY_OUT_SYSTEM)/etc/customization/modem/929/modem.conf
 
-### POWER
-PRODUCT_COPY_FILES += \
-    $(DEVICE_PATH)/config/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
-
 ### PIF
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/config/pif.json:$(TARGET_COPY_OUT_VENDOR)/etc/pif.json
